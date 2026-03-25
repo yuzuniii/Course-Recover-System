@@ -32,7 +32,8 @@ public class LoginBean implements Serializable {
     public void logout() throws IOException {
         FacesContext context = FacesContext.getCurrentInstance();
         context.getExternalContext().invalidateSession();
-        context.getExternalContext().redirect(context.getExternalContext().getRequestContextPath() + "/pages/login.xhtml");
+        currentUser = null;
+        context.getExternalContext().redirect(context.getExternalContext().getRequestContextPath() + "/login.xhtml");
     }
 
     public String getUsername() { return username; }

@@ -1,27 +1,140 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html">
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
 <h:head>
+    <f:facet name="first">
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    </f:facet>
     <title>CRS Login</title>
-    <link rel="stylesheet" type="text/css" href="#{request.contextPath}/css/styles.css" />
+    <style>
+        /* Base Page Styles mimicking Instagram */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #fafafa; /* Instagram's light gray background */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 350px;
+        }
+
+        /* The Main White Card */
+        .login-box {
+            background-color: #ffffff;
+            border: 1px solid #dbdbdb;
+            border-radius: 1px;
+            padding: 40px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        /* Stylized App Title */
+        .brand-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 35px;
+            color: #262626;
+            letter-spacing: 1px;
+        }
+
+        .field {
+            margin-bottom: 8px;
+            width: 100%;
+        }
+
+        /* Override PrimeFaces Default Input Styles */
+        body .ui-inputfield {
+            width: 100%;
+            box-sizing: border-box;
+            background-color: #fafafa;
+            border: 1px solid #dbdbdb;
+            border-radius: 3px;
+            padding: 9px 8px 7px 8px;
+            font-size: 12px;
+            color: #262626;
+            box-shadow: none !important;
+        }
+
+        body .ui-inputfield:focus {
+            border-color: #a8a8a8;
+        }
+
+        /* Override PrimeFaces Button Styles */
+        body .ui-button.btn-login {
+            width: 100%;
+            background-color: #0095f6; /* Instagram Blue */
+            border: 1px solid transparent;
+            border-radius: 4px;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 5px 0;
+            margin-top: 15px;
+            text-shadow: none;
+            box-shadow: none;
+        }
+
+        body .ui-button.btn-login:hover {
+            background-color: #1877f2; /* Slightly darker blue on hover */
+        }
+
+        /* Links and text formatting */
+        .forgot-password {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #00376b;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        body .ui-messages {
+            font-size: 12px;
+            text-align: left;
+            margin-bottom: 15px;
+        }
+    </style>
 </h:head>
 <h:body>
-    <div class="form-panel">
-        <h2>Course Recovery System</h2>
-        <p class="subtle">Sign in as Course Administrator or Academic Officer.</p>
-        <h:form>
-            <h:messages globalOnly="true" style="color:#b91c1c;"/>
-            <div>
-                <label>Username</label>
-                <h:inputText value="#{loginBean.username}" style="width:100%;margin:8px 0 16px;padding:10px;"/>
-            </div>
-            <div>
-                <label>Password</label>
-                <h:inputSecret value="#{loginBean.password}" style="width:100%;margin:8px 0 16px;padding:10px;"/>
-            </div>
-            <h:commandButton value="Login" action="#{loginBean.login}" styleClass="button"/>
-        </h:form>
-        <p class="subtle">Demo accounts: admin/admin123 and officer/officer123</p>
+    <div class="login-wrapper">
+        <div class="login-box">
+            
+            <div class="brand-title">Course Recovery</div>
+            
+            <h:form id="loginForm">
+                <p:messages id="messages" showDetail="true" closable="true">
+                    <p:autoUpdate/>
+                </p:messages>
+                
+                <div class="field">
+                    <p:inputText id="username" value="#{loginBean.username}" required="true" 
+                                 placeholder="Username" requiredMessage="Username is required."/>
+                </div>
+                
+                <div class="field">
+                    <p:password id="password" value="#{loginBean.password}" required="true" 
+                                placeholder="Password" toggleMask="true" requiredMessage="Password is required."/>
+                </div>
+                
+                <p:commandButton value="Log In" action="#{loginBean.login}" styleClass="btn-login" update="messages"/>
+                
+                <div>
+                    <a href="#" class="forgot-password">Forgot password?</a>
+                </div>
+            </h:form>
+        </div>
     </div>
 </h:body>
 </html>

@@ -9,7 +9,7 @@ CLAUDE.md
 node_modules/
 
 # Java / Maven
-target/
+# target/
 
 # Logs
 *.log

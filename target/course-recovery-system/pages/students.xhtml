@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+    <title>Students</title>
+    <link rel="stylesheet" type="text/css" href="#{request.contextPath}/css/styles.css" />
+</h:head>
+<h:body>
+    <div class="layout">
+        <div class="header">
+            <div class="title">Students</div>
+            <div class="nav"><a href="#{request.contextPath}/pages/dashboard.xhtml">Dashboard</a></div>
+        </div>
+        <div class="table-wrapper">
+            <h:dataTable value="#{studentBean.students}" var="student" styleClass="table">
+                <h:column><f:facet name="header">Student No</f:facet>#{student.studentNumber}</h:column>
+                <h:column><f:facet name="header">Name</f:facet>#{student.fullName}</h:column>
+                <h:column><f:facet name="header">Program</f:facet>#{student.programName}</h:column>
+                <h:column><f:facet name="header">Semester</f:facet>#{student.semester}</h:column>
+                <h:column><f:facet name="header">CGPA</f:facet>#{student.cgpa}</h:column>
+                <h:column><f:facet name="header">Failed Courses</f:facet>#{student.failedCourseCount}</h:column>
+            </h:dataTable>
+        </div>
+    </div>
+</h:body>
+</html>

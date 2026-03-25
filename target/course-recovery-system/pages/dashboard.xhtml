@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+<h:head>
+    <title>Dashboard</title>
+    <link rel="stylesheet" type="text/css" href="#{request.contextPath}/css/styles.css" />
+</h:head>
+<h:body>
+    <div class="layout">
+        <div class="header">
+            <div class="title">Dashboard Analytics</div>
+            <div class="nav">
+                <a href="#{request.contextPath}/pages/users.xhtml">Users</a>
+                <a href="#{request.contextPath}/pages/students.xhtml">Students</a>
+                <a href="#{request.contextPath}/pages/eligibility.xhtml">Eligibility</a>
+                <a href="#{request.contextPath}/pages/recovery.xhtml">Recovery</a>
+                <a href="#{request.contextPath}/pages/reports.xhtml">Reports</a>
+                <a href="#{request.contextPath}/pages/audit-log.xhtml">Audit Log</a>
+            </div>
+        </div>
+        <div class="card-grid">
+            <div class="card"><div class="subtle">Students Under Recovery</div><div class="metric">#{dashboardBean.analytics.studentsUnderRecovery}</div></div>
+            <div class="card"><div class="subtle">Eligible Students</div><div class="metric">#{dashboardBean.analytics.eligibleStudents}</div></div>
+            <div class="card"><div class="subtle">Active Plans</div><div class="metric">#{dashboardBean.analytics.activePlans}</div></div>
+            <div class="card"><div class="subtle">Overdue Milestones</div><div class="metric">#{dashboardBean.analytics.overdueMilestones}</div></div>
+        </div>
+        <div class="card">
+            <h3>Eligibility Breakdown</h3>
+            <p>Eligible: #{dashboardBean.analytics.eligibleStudents} | Not eligible: #{dashboardBean.analytics.nonEligibleStudents}</p>
+        </div>
+    </div>
+</h:body>
+</html>

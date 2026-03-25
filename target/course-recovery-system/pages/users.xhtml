@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+    <title>Users</title>
+    <link rel="stylesheet" type="text/css" href="#{request.contextPath}/css/styles.css" />
+</h:head>
+<h:body>
+    <div class="layout">
+        <div class="header">
+            <div class="title">User Management</div>
+            <div class="nav"><a href="#{request.contextPath}/pages/dashboard.xhtml">Dashboard</a></div>
+        </div>
+        <div class="table-wrapper">
+            <h:dataTable value="#{userBean.users}" var="user" styleClass="table">
+                <h:column><f:facet name="header">Username</f:facet>#{user.username}</h:column>
+                <h:column><f:facet name="header">Full Name</f:facet>#{user.fullName}</h:column>
+                <h:column><f:facet name="header">Email</f:facet>#{user.email}</h:column>
+                <h:column><f:facet name="header">Role</f:facet>#{user.role}</h:column>
+                <h:column><f:facet name="header">Status</f:facet>#{user.accountStatus}</h:column>
+            </h:dataTable>
+        </div>
+    </div>
+</h:body>
+</html>

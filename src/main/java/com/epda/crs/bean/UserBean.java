@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.List;
 import jakarta.annotation.PostConstruct;
 import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
@@ -16,7 +17,10 @@ import org.primefaces.PrimeFaces;
 @Named
 @ViewScoped
 public class UserBean implements Serializable {
-    private final UserService userService = new UserService();
+    
+    // FIX 1: Use @Inject instead of 'new UserService()'
+    @Inject
+    private UserService userService;
     
     private List<User> users;
     private User selectedUser;
@@ -24,6 +28,13 @@ public class UserBean implements Serializable {
     @PostConstruct
     public void init() {
         users = userService.getUsers();
+    }
+
+    // FIX 2: Helper method to retrieve the logged-in user's username from the session
+    private String getCurrentUsername() {
+        User currentUser = (User) FacesContext.getCurrentInstance()
+                .getExternalContext().getSessionMap().get("currentUser");
+        return currentUser != null ? currentUser.getUsername() : "System";
     }
 
     // Prepare a blank user for the "Add New User" dialog
@@ -35,7 +46,10 @@ public class UserBean implements Serializable {
     // Save or Update user
     public void saveUser() {
         try {
-            userService.saveUser(selectedUser);
+            // FIX 3: Fetch the username and pass it to saveUser
+            String actorUsername = getCurrentUsername();
+            userService.saveUser(selectedUser, actorUsername);
+            
             FacesContext.getCurrentInstance().addMessage(null, 
                 new FacesMessage("User Saved Successfully"));
             
@@ -52,7 +66,11 @@ public class UserBean implements Serializable {
     // Deactivate or Activate user
     public void toggleStatus(User user) {
         boolean activate = user.getStatus() != AccountStatus.ACTIVE;
-        userService.toggleUserStatus(user.getId(), activate);
+        
+        // FIX 4: Fetch the username and pass it to toggleUserStatus
+        String actorUsername = getCurrentUsername();
+        userService.toggleUserStatus(user.getId(), activate, actorUsername);
+        
         users = userService.getUsers(); // Refresh data
         FacesContext.getCurrentInstance().addMessage(null, 
             new FacesMessage("User status updated."));

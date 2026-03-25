@@ -29,6 +29,7 @@ com\epda\crs\dto\AcademicReportDTO$CourseResultRow.class
 com\epda\crs\bean\StudentBean.class
 com\epda\crs\bean\RecoveryBean.class
 com\epda\crs\util\CGPACalculator$StudentResult.class
+com\epda\crs\bean\ForgotPasswordBean.class
 com\epda\crs\bean\UserBean.class
 com\epda\crs\bean\MilestoneBean.class
 com\epda\crs\dao\RecoveryRecommendationDAO.class

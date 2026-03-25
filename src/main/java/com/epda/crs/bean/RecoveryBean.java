@@ -1,10 +1,16 @@
 package com.epda.crs.bean;
 
+import com.epda.crs.dao.CourseDAO;
+import com.epda.crs.dao.ResultDAO;
+import com.epda.crs.dao.StudentDAO;
 import com.epda.crs.enums.RecoveryStatus;
 import com.epda.crs.exception.ValidationException;
+import com.epda.crs.model.Course;
 import com.epda.crs.model.RecoveryPlan;
 import com.epda.crs.model.RecoveryRecommendation;
+import com.epda.crs.model.Student;
 import com.epda.crs.service.RecoveryService;
+import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
@@ -25,8 +31,49 @@ public class RecoveryBean implements Serializable {
     private RecoveryPlan selectedPlan;
     private int selectedStudentId;
     private int selectedCourseId;
+    private List<Student> students;
+    private List<Course> courses;
+    private List<Course> failedCourses;
     private RecoveryRecommendation newRecommendation = new RecoveryRecommendation();
     private List<RecoveryRecommendation> recommendations = new ArrayList<>();
+
+    // -----------------------------------------------------------------------
+    // Lifecycle
+    // -----------------------------------------------------------------------
+
+    @PostConstruct
+    public void init() {
+        try {
+            students = new StudentDAO().findAll();
+        } catch (Exception e) {
+            students = new ArrayList<>();
+        }
+        try {
+            courses = new CourseDAO().findAll();
+        } catch (Exception e) {
+            courses = new ArrayList<>();
+        }
+        // Default: show all courses before a student is selected
+        failedCourses = courses;
+
+        // If arriving from eligibility page with a pre-selected student,
+        // set the dropdown value and load that student's plans automatically.
+        String studentParam = FacesContext.getCurrentInstance()
+                .getExternalContext()
+                .getRequestParameterMap()
+                .get("studentId");
+        if (studentParam != null && !studentParam.isEmpty()) {
+            try {
+                selectedStudentId = Integer.parseInt(studentParam);
+            } catch (NumberFormatException ignored) {}
+        }
+
+        if (selectedStudentId > 0) {
+            loadPlansByStudent();
+        } else {
+            loadAllPlans();
+        }
+    }
 
     // -----------------------------------------------------------------------
     // Actions
@@ -104,10 +151,56 @@ public class RecoveryBean implements Serializable {
         }
     }
 
+    /** Called by p:ajax when the student dropdown changes. */
+    public void onStudentChange() {
+        loadFailedCourses(selectedStudentId);
+        selectedCourseId = 0;
+    }
+
+    /**
+     * Loads failed courses for the given student from ResultDAO + CourseDAO.
+     * Falls back to all courses when studentId is 0 or no failures are found.
+     */
+    public void loadFailedCourses(int studentId) {
+        if (studentId <= 0) {
+            failedCourses = courses;
+            return;
+        }
+        try {
+            CourseDAO courseDAO = new CourseDAO();
+            List<Integer> ids = new ResultDAO().findFailedCourseIds(studentId);
+            List<Course> failed = new ArrayList<>();
+            for (int id : ids) {
+                courseDAO.findById((long) id).ifPresent(failed::add);
+            }
+            failedCourses = failed.isEmpty() ? courses : failed;
+        } catch (Exception e) {
+            failedCourses = courses;
+        }
+    }
+
     public void prepareNewPlan() {
         selectedStudentId = 0;
         selectedCourseId  = 0;
         newRecommendation = new RecoveryRecommendation();
+    }
+
+    /**
+     * Called from the eligibility result panel via f:param studentId.
+     * Carries the student ID into the redirect URL so init() can pre-select it.
+     */
+    public String prepareFromEligibility() {
+        String param = FacesContext.getCurrentInstance()
+                .getExternalContext()
+                .getRequestParameterMap()
+                .get("studentId");
+        if (param != null && !param.isEmpty()) {
+            try {
+                selectedStudentId = Integer.parseInt(param);
+            } catch (NumberFormatException ignored) {}
+            return "/pages/recovery.xhtml?faces-redirect=true&studentId=" + param;
+        }
+        return "/pages/recovery.xhtml?faces-redirect=true";
     }
 
     // -----------------------------------------------------------------------
@@ -128,6 +221,15 @@ public class RecoveryBean implements Serializable {
 
     public int getSelectedCourseId() { return selectedCourseId; }
     public void setSelectedCourseId(int selectedCourseId) { this.selectedCourseId = selectedCourseId; }
+
+    public List<Student> getStudents() { return students; }
+    public void setStudents(List<Student> students) { this.students = students; }
+
+    public List<Course> getCourses() { return courses; }
+    public void setCourses(List<Course> courses) { this.courses = courses; }
+
+    public List<Course> getFailedCourses() { return failedCourses; }
+    public void setFailedCourses(List<Course> failedCourses) { this.failedCourses = failedCourses; }
 
     public RecoveryRecommendation getNewRecommendation() { return newRecommendation; }
     public void setNewRecommendation(RecoveryRecommendation newRecommendation) { this.newRecommendation = newRecommendation; }

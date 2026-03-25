@@ -53,6 +53,7 @@ public class RecoveryDAO {
 
         RecoveryPlan plan = new RecoveryPlan();
         plan.setId((long) rs.getInt("plan_id"));
+        plan.setAttemptNumber(rs.getInt("attempt_number"));
         plan.setStudent(student);
         plan.setCourse(course);
         plan.setStatus(status);

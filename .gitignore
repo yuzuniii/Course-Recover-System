@@ -1,5 +1,6 @@
 # Ignore Claude notes
 CLAUDE.md
+.claude/
 
 # Environment
 .env

@@ -54,6 +54,12 @@ public class AcademicReportDTO {
     public List<CourseResultRow> getResults() { return results; }
     public void setResults(List<CourseResultRow> results) { this.results = results; }
 
+    /** Computed: number of F grades in results. Used by reports.xhtml summary. */
+    public long getFailedCount() {
+        if (results == null) return 0;
+        return results.stream().filter(r -> "F".equals(r.getGrade())).count();
+    }
+
     // One row per student_course_results entry (joined with courses)
     public static class CourseResultRow {
 

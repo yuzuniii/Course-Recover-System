@@ -40,17 +40,33 @@ public class EligibilityService {
     public EligibilityDTO checkEligibility(int studentId, int semester, int yearOfStudy) {
         if (studentId <= 0) throw new ValidationException("Invalid student ID");
 
+        // Always compute — this is what the UI needs to display
         EligibilityDTO dto = calculateEligibility(studentId, semester, yearOfStudy);
-        persistEligibility(dto);
-        enrolIfEligible(dto);
 
-        if (auditLogService != null) {
-            auditLogService.logAction(
-                    dto.getStudentCode(),
-                    "CHECK_ELIGIBILITY",
-                    "ELIGIBILITY_RECORD",
-                    (long) studentId,
-                    "Eligibility checked for student " + studentId + ": " + dto.getReason());
+        // Persistence is a side-effect; do not let DB errors prevent the result being returned
+        try {
+            persistEligibility(dto);
+        } catch (Exception e) {
+            // non-fatal: result is still returned to the caller
+        }
+
+        try {
+            enrolIfEligible(dto);
+        } catch (Exception e) {
+            // non-fatal: enrollment failure does not block the eligibility result
+        }
+
+        try {
+            if (auditLogService != null) {
+                auditLogService.logAction(
+                        dto.getStudentCode(),
+                        "CHECK_ELIGIBILITY",
+                        "ELIGIBILITY_RECORD",
+                        (long) studentId,
+                        "Eligibility checked for student " + studentId + ": " + dto.getReason());
+            }
+        } catch (Exception e) {
+            // non-fatal
         }
 
         return dto;
@@ -61,13 +77,18 @@ public class EligibilityService {
      */
     public List<Student> getIneligibleStudents() {
         return studentDAO.findAll().stream()
-                .filter(s -> {
+                .map(s -> {
+                    // Compute live values and stamp them onto the Student so the
+                    // UI displays accurate figures, not whatever is stored in the DB.
                     List<CGPACalculator.StudentResult> res =
                             resultDAO.findByStudentId(s.getId().intValue());
                     double cgpa   = CGPACalculator.calculate(res);
                     int    failed = resultDAO.countFailedCourses(s.getId().intValue());
-                    return !(cgpa >= 2.0 && failed <= 3);
+                    s.setCgpa(cgpa);
+                    s.setFailedCourseCount(failed);
+                    return s;
                 })
+                .filter(s -> !(s.getCgpa() >= 2.0 && s.getFailedCourseCount() <= 3))
                 .collect(Collectors.toList());
     }
 

@@ -4,6 +4,7 @@ import com.epda.crs.dto.EligibilityDTO;
 import com.epda.crs.exception.ValidationException;
 import com.epda.crs.model.Student;
 import com.epda.crs.service.EligibilityService;
+import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
@@ -24,7 +25,22 @@ public class EligibilityBean implements Serializable {
     private int selectedYear;
     private EligibilityDTO eligibilityResult;
     private List<Student> ineligibleStudents;
+    private List<EligibilityDTO> allStudentDtos;
     private String enrollmentMessage;
+
+    // -----------------------------------------------------------------------
+    // Lifecycle
+    // -----------------------------------------------------------------------
+
+    @PostConstruct
+    public void init() {
+        try {
+            allStudentDtos = eligibilityService.getEligibilityBreakdown();
+        } catch (Exception e) {
+            // non-fatal: dropdown will be empty
+        }
+        loadIneligibleStudents();
+    }
 
     // -----------------------------------------------------------------------
     // Actions
@@ -81,6 +97,9 @@ public class EligibilityBean implements Serializable {
 
     public List<Student> getIneligibleStudents() { return ineligibleStudents; }
     public void setIneligibleStudents(List<Student> ineligibleStudents) { this.ineligibleStudents = ineligibleStudents; }
+
+    public List<EligibilityDTO> getAllStudentDtos() { return allStudentDtos; }
+    public void setAllStudentDtos(List<EligibilityDTO> allStudentDtos) { this.allStudentDtos = allStudentDtos; }
 
     public String getEnrollmentMessage() { return enrollmentMessage; }
     public void setEnrollmentMessage(String enrollmentMessage) { this.enrollmentMessage = enrollmentMessage; }

@@ -44,6 +44,9 @@ public class ReportBean implements Serializable {
         try {
             currentReport = reportService.generateReport(
                     selectedStudentId, selectedSemester, selectedYear);
+            // Store in HTTP session so report-view.jsp can read it
+            FacesContext.getCurrentInstance().getExternalContext()
+                    .getSessionMap().put("currentReport", currentReport);
             addInfo("Report", "Report generated successfully");
         } catch (ValidationException e) {
             addError("Report", e.getMessage());

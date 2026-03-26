@@ -1,6 +1,6 @@
 param(
-    [string]$StudentCsv = "C:\Users\user\Downloads\student_information.csv",
-    [string]$CourseCsv = "C:\Users\user\Downloads\course_information-APU-LP-0650.csv",
+    [string]$StudentCsv = "C:\Users\ling5\Downloads\student_information.csv",
+    [string]$CourseCsv = "C:\Users\ling5\Downloads\course_information-APU-LP-0650.csv",
     [string]$MySqlExe = "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe",
     [string]$Database = "crs_system",
     [string]$Username = "root",

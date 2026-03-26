@@ -17,10 +17,10 @@ VALUES ('ADMIN'), ('ACADEMIC_OFFICER');
 INSERT IGNORE INTO users (user_id, username, password, full_name, email, status)
 VALUES
 (1, 'admin',
-    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
+    'Admin@123',
     'Course Administrator', 'admin@crs.local',   'ACTIVE'),
 (2, 'officer',
-    '$2a$10$8K1p/a0dR1xqM4K3e5v2AeqkBvY8.nMj5g1t2OeP3s7u0yHmKlXQi',
+    'Officer@123',
     'Academic Officer',    'officer@crs.local',  'ACTIVE');
 
 INSERT IGNORE INTO user_roles (user_id, role_id)

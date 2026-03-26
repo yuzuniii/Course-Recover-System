@@ -18,24 +18,30 @@
         </div>
         <div class="nav-section">
             <div class="nav-label">Main</div>
-            <a href="#{request.contextPath}/pages/dashboard.xhtml" class="nav-item">■ Dashboard</a>
-            <a href="#{request.contextPath}/pages/students.xhtml" class="nav-item">■ Students</a>
+            <a href="#{request.contextPath}/pages/dashboard.xhtml" class="nav-item">&#9632; Dashboard</a>
+            <a href="#{request.contextPath}/pages/directory.xhtml" class="nav-item">&#9632; Directory</a>
             <div class="nav-label" style="margin-top:12px;">Academic</div>
             <a href="#{request.contextPath}/pages/eligibility.xhtml" class="nav-item">✓ Eligibility</a>
             <a href="#{request.contextPath}/pages/recovery.xhtml" class="nav-item">■ Recovery</a>
             <a href="#{request.contextPath}/pages/reports.xhtml" class="nav-item">■ Reports</a>
-            <div class="nav-label" style="margin-top:12px;">System</div>
-            <a href="#{request.contextPath}/pages/users.xhtml" class="nav-item">■ Users</a>
-            <a href="#{request.contextPath}/pages/audit-log.xhtml" class="nav-item active">■ Audit Log</a>
+            <h:panelGroup rendered="#{loginBean.currentUser.role == 'ADMIN'}">
+                <div class="nav-label" style="margin-top:12px;">System</div>
+                <a href="#{request.contextPath}/pages/audit-log.xhtml" class="nav-item active">&#9632; Audit Log</a>
+            </h:panelGroup>
         </div>
         <div class="sidebar-footer">
-            <div class="user-pill">
-                <div class="avatar">#{loginBean.currentUser != null ? loginBean.currentUser.fullName.substring(0,2).toUpperCase() : 'US'}</div>
-                <div>
-                    <div class="user-name">#{loginBean.currentUser != null ? loginBean.currentUser.fullName : 'User'}</div>
-                    <div class="user-role">#{loginBean.currentUser != null ? loginBean.currentUser.role : ''}</div>
+            <h:form id="logoutForm">
+                <div class="user-pill" style="margin-bottom: 12px;">
+                    <div class="avatar">#{loginBean.currentUser != null ? loginBean.currentUser.fullName.substring(0,2).toUpperCase() : 'US'}</div>
+                    <div>
+                        <div class="user-name">#{loginBean.currentUser != null ? loginBean.currentUser.fullName : 'User'}</div>
+                        <div class="user-role">#{loginBean.currentUser != null ? loginBean.currentUser.role : ''}</div>
+                    </div>
                 </div>
-            </div>
+                <p:commandLink action="#{loginBean.logout}" styleClass="logout-link">
+                    <i class="pi pi-sign-out" style="margin-right:8px;"></i>Sign Out
+                </p:commandLink>
+            </h:form>
         </div>
     </nav>
 
@@ -50,10 +56,11 @@
             </div>
             <div class="topbar-actions">
                 <h:form id="topbarForm">
-                    <p:commandButton value="Export Excel" icon="pi pi-file-excel" styleClass="btn btn-outline" style="margin-right:10px">
+                    <p:commandButton value="Export Excel" icon="pi pi-file-excel" styleClass="btn btn-outline" style="margin-right:10px" ajax="false">
                         <p:dataExporter type="xls" target=":form:dt-logs" fileName="audit-logs" />
                     </p:commandButton>
-                    <p:commandButton value="Export PDF" icon="pi pi-file-pdf" styleClass="btn btn-outline">
+                    
+                    <p:commandButton value="Export PDF" icon="pi pi-file-pdf" styleClass="btn btn-outline" ajax="false">
                         <p:dataExporter type="pdf" target=":form:dt-logs" fileName="audit-logs" />
                     </p:commandButton>
                 </h:form>

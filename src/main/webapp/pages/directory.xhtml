@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <title>People Directory - CRS</title>
+    <link rel="stylesheet" type="text/css" href="#{request.contextPath}/css/styles.css" />
+</h:head>
+<h:body>
+<div class="layout-shell">
+
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-title">CRS</div>
+            <div class="logo-sub">Course Recovery System</div>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-label">Main</div>
+            <a href="#{request.contextPath}/pages/dashboard.xhtml" class="nav-item">
+                &#9632; Dashboard
+            </a>
+            <a href="#{request.contextPath}/pages/directory.xhtml" class="nav-item active">
+                &#9632; Directory
+            </a>
+
+            <div class="nav-label" style="margin-top:12px;">Academic</div>
+            <a href="#{request.contextPath}/pages/eligibility.xhtml" class="nav-item">
+                &#10003; Eligibility
+            </a>
+            <a href="#{request.contextPath}/pages/recovery.xhtml" class="nav-item">
+                &#9632; Recovery
+            </a>
+            <a href="#{request.contextPath}/pages/reports.xhtml" class="nav-item">
+                &#9632; Reports
+            </a>
+            
+            <h:panelGroup rendered="#{loginBean.currentUser.role == 'ADMIN'}">
+                <div class="nav-label" style="margin-top:12px;">System</div>
+                <a href="#{request.contextPath}/pages/audit-log.xhtml" class="nav-item">
+                    &#9632; Audit Log
+                </a>
+            </h:panelGroup>
+        </div>
+
+        <div class="sidebar-footer">
+            <h:form id="logoutForm">
+                <div class="user-pill" style="margin-bottom: 12px;">
+                    <div class="avatar">
+                        #{loginBean.currentUser != null ? loginBean.currentUser.fullName.substring(0,2).toUpperCase() : 'US'}
+                    </div>
+                    <div>
+                        <div class="user-name">
+                            #{loginBean.currentUser != null ? loginBean.currentUser.fullName : 'User'}
+                        </div>
+                        <div class="user-role">
+                            #{loginBean.currentUser != null ? loginBean.currentUser.role : ''}
+                        </div>
+                    </div>
+                </div>
+                <p:commandLink action="#{loginBean.logout}" styleClass="logout-link">
+                    <i class="pi pi-sign-out" style="margin-right:8px;"></i>Sign Out
+                </p:commandLink>
+            </h:form>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="topbar">
+            <div class="topbar-left">
+                <div class="page-title">People Directory</div>
+                <div class="breadcrumb">Main / Directory</div>
+            </div>
+            <div class="topbar-actions">
+                <h:form id="directoryToggleForm">
+                    <p:selectOneButton value="#{directoryBean.viewType}" rendered="#{loginBean.currentUser.role == 'ADMIN'}">
+                        <f:selectItem itemLabel="Enrolled Students" itemValue="STUDENTS" />
+                        <f:selectItem itemLabel="System Users" itemValue="USERS" />
+                        <p:ajax update=":directoryContent :topbarActionsForm" />
+                    </p:selectOneButton>
+                </h:form>
+                <h:form id="topbarActionsForm">
+                    <p:commandButton value="+ Add New User"
+                                     rendered="#{directoryBean.viewType == 'USERS' and loginBean.currentUser.role == 'ADMIN'}"
+                                     actionListener="#{userBean.prepareNewUser}"
+                                     update=":userDialogForm:user-detail"
+                                     oncomplete="PF('userDialog').show()"
+                                     styleClass="btn btn-primary" />
+                    
+                    <p:commandButton value="+ Add New Student"
+                                     rendered="#{directoryBean.viewType == 'STUDENTS'}"
+                                     actionListener="#{studentBean.prepareNewStudent}"
+                                     update=":studentDialogForm:student-detail"
+                                     oncomplete="PF('studentDialog').show()"
+                                     styleClass="btn btn-primary" />
+                </h:form>
+            </div>
+        </div>
+
+        <div class="page-content">
+            <p:growl id="globalMessages" showDetail="true" />
+
+            <h:panelGroup id="directoryContent" layout="block">
+                
+                <h:panelGroup rendered="#{directoryBean.viewType == 'USERS' and loginBean.currentUser.role == 'ADMIN'}" layout="block" styleClass="card">
+                    <h:form id="userForm">
+                        <p:dataTable id="dt-users" widgetVar="dtUsers" var="user" value="#{userBean.users}"
+                                     reflow="true" styleClass="modern-table"
+                                     paginator="true" rows="10" paginatorPosition="bottom"
+                                     emptyMessage="No users found.">
+
+                            <p:column headerText="User" sortBy="#{user.fullName}">
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <div class="avatar" style="width:32px; height:32px; font-size:10px;">
+                                        #{user.fullName.substring(0,2).toUpperCase()}
+                                    </div>
+                                    <div style="display:flex; flex-direction:column;">
+                                        <span style="font-weight:600; color:var(--text-primary);">#{user.fullName}</span>
+                                        <span style="font-size:12px; color:var(--text-muted);">#{user.email}</span>
+                                    </div>
+                                </div>
+                            </p:column>
+
+                            <p:column headerText="Username" sortBy="#{user.username}">
+                                <span style="font-family:monospace; color:var(--sidebar-accent);">@#{user.username}</span>
+                            </p:column>
+
+                            <p:column headerText="Role">
+                                <span class="role-badge">#{user.role}</span>
+                            </p:column>
+
+                            <p:column headerText="Status">
+                                <span class="status-badge status-#{user.status.name().toLowerCase()}">
+                                    #{user.status}
+                                </span>
+                            </p:column>
+
+                            <p:column headerText="Actions" style="width:80px; text-align:center;">
+                                <p:commandButton icon="pi pi-user-edit"
+                                                 actionListener="#{userBean.prepareEditUser(user)}"
+                                                 update=":userDialogForm:user-detail"
+                                                 oncomplete="PF('userDialog').show()"
+                                                 styleClass="ui-button-rounded ui-button-text ui-button-plain"
+                                                 title="Edit User" />
+                            </p:column>
+                        </p:dataTable>
+                    </h:form>
+                </h:panelGroup>
+
+                <h:panelGroup rendered="#{directoryBean.viewType == 'STUDENTS'}" layout="block" styleClass="card">
+                    <h:form id="studentForm">
+                        <p:dataTable id="dt-students" widgetVar="dtStudents" var="student" value="#{studentBean.students}"
+                                     reflow="true" styleClass="modern-table"
+                                     paginator="true" rows="10" paginatorPosition="bottom"
+                                     emptyMessage="No students found."
+                                     rowKey="#{student.studentNumber}">
+
+                            <p:column style="width:2rem">
+                                <p:rowToggler />
+                            </p:column>
+
+                            <p:column headerText="Student ID" sortBy="#{student.studentNumber}">
+                                <span style="font-weight:600; color:var(--sidebar-accent);">#{student.studentNumber}</span>
+                            </p:column>
+
+                            <p:column headerText="Name" sortBy="#{student.fullName}">
+                                #{student.fullName}
+                            </p:column>
+
+                            <p:column headerText="Program" filterBy="#{student.programName}" filterMatchMode="exact">
+                                <f:facet name="filter">
+                                    <p:selectOneMenu onchange="PF('dtStudents').filter()" styleClass="ui-custom-filter">
+                                        <f:selectItem itemLabel="All Programs" itemValue="#{null}" noSelectionOption="true" />
+                                        <f:selectItem itemLabel="Computer Science" itemValue="Computer Science" />
+                                        <f:selectItem itemLabel="Literature" itemValue="Literature" />
+                                        <f:selectItem itemLabel="Mathematics" itemValue="Mathematics" />
+                                        <f:selectItem itemLabel="Philosophy" itemValue="Philosophy" />
+                                        <f:selectItem itemLabel="Statistics" itemValue="Statistics" />
+                                        <f:selectItem itemLabel="Engineering" itemValue="Engineering" />
+                                        <f:selectItem itemLabel="Physics" itemValue="Physics" />
+                                        <f:selectItem itemLabel="Economics" itemValue="Economics" />
+                                        <f:selectItem itemLabel="History" itemValue="History" />
+                                        <f:selectItem itemLabel="Biology" itemValue="Biology" />
+                                        <f:selectItem itemLabel="Chemistry" itemValue="Chemistry" />
+                                    </p:selectOneMenu>
+                                </f:facet>
+                                <span class="role-badge">#{student.programName}</span>
+                            </p:column>
+
+                            <p:column headerText="Year / Sem">
+                                Year #{student.yearOfStudy} / Sem #{student.semester}
+                            </p:column>
+
+                            <p:column headerText="CGPA" sortBy="#{student.cgpa}">
+                                <span style="font-weight:700; color:#{student.cgpa ge 2.0 ? 'var(--green)' : 'var(--red)'}">
+                                    #{student.cgpa}
+                                </span>
+                            </p:column>
+
+                            <p:column headerText="Actions" style="width:80px; text-align:center;">
+                                <p:commandButton icon="pi pi-user-edit"
+                                                 actionListener="#{studentBean.prepareEditStudent(student)}"
+                                                 update=":studentDialogForm:student-detail"
+                                                 oncomplete="PF('studentDialog').show()"
+                                                 styleClass="ui-button-rounded ui-button-text ui-button-plain"
+                                                 title="Edit Student" />
+                            </p:column>
+
+                            <p:rowExpansion>
+                                <div class="nested-table">
+                                    <div class="nested-table-header">
+                                        <span class="nested-table-title">Failed Academic Components</span>
+                                        <p:commandButton value="Add Component" 
+                                                         icon="pi pi-plus"
+                                                         actionListener="#{studentBean.prepareAddComponent(student)}"
+                                                         update=":failedComponentDialogForm"
+                                                         oncomplete="PF('failedComponentDialog').show()"
+                                                         styleClass="ui-button-sm ui-button-outlined" />
+                                    </div>
+                                    <p:dataTable var="comp" value="#{student.failedComponents}" styleClass="ui-datatable-sm" rowKey="#{comp.componentId}">
+                                        <p:column headerText="Fail Component">
+                                            #{comp.componentName}
+                                        </p:column>
+                                        <p:column headerText="Score">
+                                            #{comp.componentScore}
+                                        </p:column>
+                                        <p:column headerText="Required Score to Pass">
+                                            #{comp.passRequired}
+                                        </p:column>
+                                        <p:column headerText="Course Name / Result">
+                                            <h:outputText value="#{dashboardBean.getCourseName(comp.resultId)}" />
+                                        </p:column>
+                                        <p:column headerText="Action" style="width:100px; text-align:center;">
+                                            <p:commandButton icon="pi pi-pencil" 
+                                                             actionListener="#{studentBean.editComponent(comp)}"
+                                                             update=":failedComponentDialogForm"
+                                                             oncomplete="PF('failedComponentDialog').show()"
+                                                             styleClass="ui-button-rounded ui-button-text" />
+                                            <p:commandButton icon="pi pi-trash" 
+                                                             actionListener="#{studentBean.deleteComponent(comp)}"
+                                                             update=":directoryContent :globalMessages"
+                                                             styleClass="ui-button-rounded ui-button-text ui-button-danger">
+                                                <p:confirm header="Confirmation" message="Delete this component?" icon="pi pi-exclamation-triangle" />
+                                            </p:commandButton>
+                                        </p:column>
+                                    </p:dataTable>
+                                </div>
+                            </p:rowExpansion>
+                        </p:dataTable>
+                    </h:form>
+                </h:panelGroup>
+
+            </h:panelGroup>
+        </div>
+    </div>
+</div>
+
+<p:dialog header="User Details" widgetVar="userDialog" modal="true"
+          width="500" responsive="true" showEffect="fade" hideEffect="fade"
+          draggable="false" resizable="false" closable="true" styleClass="modern-dialog">
+    <h:form id="userDialogForm">
+        <p:outputPanel id="user-detail" styleClass="dialog-content">
+            <h:panelGroup rendered="#{not empty userBean.selectedUser}">
+                <div class="form-section">
+                    <div class="form-section-header">Personal Details</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <p:outputLabel for="fullName" value="Full Name" styleClass="form-label" />
+                            <p:inputText id="fullName" value="#{userBean.selectedUser.fullName}"
+                                         required="true" styleClass="form-input" placeholder="e.g. John Doe" />
+                        </div>
+                        <div class="form-group">
+                            <p:outputLabel for="email" value="Email Address" styleClass="form-label" />
+                            <p:inputText id="email" value="#{userBean.selectedUser.email}"
+                                         required="true" styleClass="form-input" placeholder="john@example.com" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <div class="form-section-header">Account Settings</div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <p:outputLabel for="username" value="Username" styleClass="form-label" />
+                            <p:inputText id="username" value="#{userBean.selectedUser.username}"
+                                         required="true" styleClass="form-input" />
+                        </div>
+                        <div class="form-group">
+                            <p:outputLabel for="password" value="Password" styleClass="form-label" />
+                            <p:password id="password" value="#{userBean.selectedUser.password}"
+                                        styleClass="form-input" feedback="true" toggleMask="true" redisplay="true" />
+                        </div>
+                        <div class="form-group">
+                            <p:outputLabel for="role" value="Role" styleClass="form-label" />
+                            <p:selectOneMenu id="role" value="#{userBean.selectedUser.role}" styleClass="form-input">
+                                <f:selectItems value="#{userBean.roles}" />
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="form-group">
+                            <p:outputLabel for="status" value="Status" styleClass="form-label" />
+                            <p:selectOneMenu id="status" value="#{userBean.selectedUser.status}" styleClass="form-input">
+                                <f:selectItems value="#{userBean.statuses}" />
+                            </p:selectOneMenu>
+                        </div>
+                    </div>
+                </div>
+                <h:panelGroup rendered="#{not empty userBean.selectedUser.id and userBean.selectedUser.id ne 0}" styleClass="metadata-box">
+                    <div class="metadata-text">
+                        Created:
+                        <h:outputText value="#{userBean.selectedUser.createdAt}">
+                            <f:convertDateTime pattern="MMM dd, yyyy HH:mm" type="localDateTime" />
+                        </h:outputText>
+                    </div>
+                    <h:panelGroup rendered="#{not empty userBean.selectedUser.lastLogin}" layout="block" styleClass="metadata-text">
+                        Last Login:
+                        <h:outputText value="#{userBean.selectedUser.lastLogin}">
+                            <f:convertDateTime pattern="MMM dd, yyyy HH:mm" type="localDateTime" />
+                        </h:outputText>
+                    </h:panelGroup>
+                </h:panelGroup>
+                <div class="dialog-footer">
+                    <p:commandButton value="Delete User" icon="pi pi-trash"
+                                     rendered="#{not empty userBean.selectedUser.id and userBean.selectedUser.id ne 0}"
+                                     oncomplete="PF('confirmDelete').show()"
+                                     styleClass="btn btn-danger" />
+                    <p:commandButton value="Cancel" icon="pi pi-times"
+                                     onclick="PF('userDialog').hide()"
+                                     type="button"
+                                     styleClass="btn btn-outline" />
+                    <p:commandButton value="Save Changes" icon="pi pi-check"
+                                     actionListener="#{userBean.saveUser}"
+                                     update="user-detail :directoryContent :globalMessages"
+                                     styleClass="btn btn-primary" />
+                </div>
+            </h:panelGroup>
+        </p:outputPanel>
+    </h:form>
+</p:dialog>
+
+<p:dialog header="Student Details" widgetVar="studentDialog" modal="true"
+          width="500" responsive="true" showEffect="fade" hideEffect="fade"
+          draggable="false" resizable="false" closable="true" styleClass="modern-dialog">
+    <h:form id="studentDialogForm">
+        <p:outputPanel id="student-detail" styleClass="dialog-content">
+            <h:panelGroup rendered="#{not empty studentBean.selectedStudent}">
+                <div class="form-section">
+                    <div class="form-section-header">Academic Details</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <p:outputLabel for="studentCode" value="Student Number" styleClass="form-label" />
+                            <p:inputText id="studentCode" value="#{studentBean.selectedStudent.studentNumber}"
+                                         required="true" styleClass="form-input" placeholder="e.g. S12345" />
+                        </div>
+                        <div class="form-group">
+                            <p:outputLabel for="fullName" value="Full Name" styleClass="form-label" />
+                            <p:inputText id="fullName" value="#{studentBean.selectedStudent.fullName}"
+                                         required="true" styleClass="form-input" placeholder="e.g. John Doe" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <div class="form-section-header">Program &amp; Progress</div>
+                    <div class="form-grid-2">
+                        <div class="form-group" style="grid-column: span 2;">
+                            <p:outputLabel for="program" value="Program Name" styleClass="form-label" />
+                            <p:selectOneMenu id="program" value="#{studentBean.selectedStudent.programName}"
+                                             required="true" styleClass="form-input">
+                                <f:selectItem itemLabel="Select Program" itemValue="" noSelectionOption="true" />
+                                <f:selectItem itemLabel="Computer Science" itemValue="Computer Science" />
+                                <f:selectItem itemLabel="Literature" itemValue="Literature" />
+                                <f:selectItem itemLabel="Mathematics" itemValue="Mathematics" />
+                                <f:selectItem itemLabel="Philosophy" itemValue="Philosophy" />
+                                <f:selectItem itemLabel="Statistics" itemValue="Statistics" />
+                                <f:selectItem itemLabel="Engineering" itemValue="Engineering" />
+                                <f:selectItem itemLabel="Physics" itemValue="Physics" />
+                                <f:selectItem itemLabel="Economics" itemValue="Economics" />
+                                <f:selectItem itemLabel="History" itemValue="History" />
+                                <f:selectItem itemLabel="Biology" itemValue="Biology" />
+                                <f:selectItem itemLabel="Chemistry" itemValue="Chemistry" />
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="form-group">
+                            <p:outputLabel for="year" value="Year of Study" styleClass="form-label" />
+                            <p:inputNumber id="year" value="#{studentBean.selectedStudent.yearOfStudy}"
+                                           minValue="1" maxValue="6" decimalPlaces="0" styleClass="form-input" />
+                        </div>
+                        <div class="form-group">
+                            <p:outputLabel for="semester" value="Current Semester" styleClass="form-label" />
+                            <p:inputNumber id="semester" value="#{studentBean.selectedStudent.semester}"
+                                           minValue="1" maxValue="2" decimalPlaces="0" styleClass="form-input" />
+                        </div>
+                        <div class="form-group">
+                            <p:outputLabel for="cgpa" value="CGPA" styleClass="form-label" />
+                            <p:inputNumber id="cgpa" value="#{studentBean.selectedStudent.cgpa}"
+                                           minValue="0" maxValue="4" decimalSeparator="." styleClass="form-input" />
+                        </div>
+                    </div>
+                </div>
+                <div class="dialog-footer">
+                    <p:commandButton value="Cancel" icon="pi pi-times"
+                                     onclick="PF('studentDialog').hide()"
+                                     type="button"
+                                     styleClass="btn btn-outline" />
+                    <p:commandButton value="Save Changes" icon="pi pi-check"
+                                     actionListener="#{studentBean.saveStudent}"
+                                     update="student-detail :directoryContent :globalMessages"
+                                     styleClass="btn btn-primary" />
+                </div>
+            </h:panelGroup>
+        </p:outputPanel>
+    </h:form>
+</p:dialog>
+
+<p:confirmDialog widgetVar="confirmDelete" showEffect="fade" width="300"
+                 message="Are you sure you want to permanently delete this user?"
+                 header="Confirm Deletion" severity="warn">
+    <h:form id="deleteConfirmForm">
+        <p:commandButton value="Yes, Delete" icon="pi pi-check"
+                         actionListener="#{userBean.deleteUser}"
+                         update=":directoryContent :globalMessages"
+                         oncomplete="PF('confirmDelete').hide(); PF('userDialog').hide()"
+                         styleClass="btn btn-danger" />
+        <p:commandButton value="No, Keep" type="button"
+                         styleClass="btn btn-outline"
+                         onclick="PF('confirmDelete').hide()" />
+    </h:form>
+</p:confirmDialog>
+
+<p:dialog header="Failed Component Details" widgetVar="failedComponentDialog" modal="true"
+          width="400" responsive="true" showEffect="fade" hideEffect="fade"
+          draggable="false" resizable="false" closable="true" styleClass="modern-dialog">
+    <h:form id="failedComponentDialogForm">
+        <p:outputPanel id="component-detail" styleClass="dialog-content">
+            <h:panelGroup rendered="#{not empty studentBean.selectedComponent}">
+                <div class="form-section">
+                    <div class="form-section-header">Component Information</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <p:outputLabel for="compName" value="Fail Component" styleClass="form-label" />
+                            <p:selectOneMenu id="compName" value="#{studentBean.selectedComponent.componentName}"
+                                             required="true" styleClass="form-input">
+                                <f:selectItem itemLabel="Select Component" itemValue="" noSelectionOption="true" />
+                                <f:selectItem itemLabel="Assignment" itemValue="Assignment"/>
+                                <f:selectItem itemLabel="Mid-Term" itemValue="Mid-Term"/>
+                                <f:selectItem itemLabel="Final Exam" itemValue="Final Exam"/>
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="form-group">
+                            <p:outputLabel for="compScore" value="Score" styleClass="form-label" />
+                            <p:inputNumber id="compScore" value="#{studentBean.selectedComponent.componentScore}"
+                                           minValue="0" maxValue="100" decimalPlaces="2" styleClass="form-input" />
+                        </div>
+                        <div class="form-group">
+                            <p:outputLabel for="reqScore" value="Required Score to Pass" styleClass="form-label" />
+                            <p:inputNumber id="reqScore" value="#{studentBean.selectedComponent.passRequired}"
+                                           minValue="0" maxValue="100" decimalPlaces="2" styleClass="form-input" />
+                        </div>
+                        <div class="form-group">
+                            <p:outputLabel for="resultId" value="Course Result ID" styleClass="form-label" />
+                            <p:inputNumber id="resultId" value="#{studentBean.selectedComponent.resultId}"
+                                           minValue="1" decimalPlaces="0" styleClass="form-input" />
+                        </div>
+                    </div>
+                </div>
+                <div class="dialog-footer">
+                    <p:commandButton value="Cancel" icon="pi pi-times"
+                                     onclick="PF('failedComponentDialog').hide()"
+                                     type="button"
+                                     styleClass="btn btn-outline" />
+                    <p:commandButton value="Save Component" icon="pi pi-check"
+                                     actionListener="#{studentBean.saveComponent}"
+                                     update=":directoryContent :globalMessages"
+                                     styleClass="btn btn-primary" />
+                </div>
+            </h:panelGroup>
+        </p:outputPanel>
+    </h:form>
+</p:dialog>
+
+</h:body>
+</html>

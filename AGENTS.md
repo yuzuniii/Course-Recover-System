@@ -181,7 +181,7 @@ createPlan() in RecoveryService MUST call:
 
 ### Role-Based Access (AuthFilter)
 
-- COURSE_ADMINISTRATOR → access to all pages
+- ADMIN → access to all pages
 - ACADEMIC_OFFICER → blocked from:
     - /pages/users.xhtml
     - /pages/audit-log.xhtml
@@ -277,7 +277,7 @@ src/main/java/com/epda/crs/
 │   ├── AcademicReportDTO.java
 │   └── DashboardAnalyticsDTO.java
 ├── enums/
-│   ├── UserRole.java               COURSE_ADMINISTRATOR, ACADEMIC_OFFICER
+│   ├── UserRole.java               ADMIN, ACADEMIC_OFFICER
 │   ├── AccountStatus.java          ACTIVE, INACTIVE
 │   ├── RecoveryStatus.java         ACTIVE, COMPLETED, FAILED
 │   └── MilestoneStatus.java        PENDING, DONE, COMPLETED, OVERDUE
@@ -392,7 +392,7 @@ database/
 
 | Username | Password   | Role                  |
 |----------|------------|-----------------------|
-| admin    | admin123   | COURSE_ADMINISTRATOR  |
+| admin    | admin123   | ADMIN                 |
 | officer  | officer123 | ACADEMIC_OFFICER      |
 
 ## Tests

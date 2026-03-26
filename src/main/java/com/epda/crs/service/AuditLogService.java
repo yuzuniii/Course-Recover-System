@@ -18,4 +18,14 @@ public class AuditLogService {
     public void logAction(String actorUsername, String actionType, String entityName, Long entityId, String details) {
         auditLogDAO.save(new AuditLog(COUNTER.incrementAndGet(), actorUsername, actionType, entityName, entityId, details, LocalDateTime.now()));
     }
+
+    public void logAction(Long actorUserId, String actionType, String entityName, Long entityId, String details) {
+        AuditLog log = new AuditLog();
+        log.setActionType(actionType);
+        log.setEntityName(entityName);
+        log.setEntityId(entityId);
+        log.setDetails(details);
+        log.setCreatedAt(LocalDateTime.now());
+        auditLogDAO.saveWithUserId(actorUserId, log);
+    }
 }

@@ -20,10 +20,10 @@ public class UserDAO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    // roles table stores 'ADMIN' for COURSE_ADMINISTRATOR
+    // roles table stores 'ADMIN' for UserRole.ADMIN
     private UserRole mapRole(String roleName) {
         if (roleName == null) return null;
-        if (roleName.equalsIgnoreCase("ADMIN")) return UserRole.COURSE_ADMINISTRATOR;
+        if (roleName.equalsIgnoreCase("ADMIN")) return UserRole.ADMIN;
         if (roleName.equalsIgnoreCase("ACADEMIC_OFFICER")) return UserRole.ACADEMIC_OFFICER;
         try { return UserRole.valueOf(roleName); } catch (IllegalArgumentException e) { return null; }
     }
@@ -163,7 +163,7 @@ public class UserDAO implements Serializable {
 
     private void insertUserRole(Connection conn, long userId, UserRole role) throws SQLException {
         // Map enum back to the role_name stored in the roles table
-        String roleName = (role == UserRole.COURSE_ADMINISTRATOR) ? "ADMIN" : role.name();
+        String roleName = role.name();
         String findRole = "SELECT role_id FROM roles WHERE role_name = ?";
         try (PreparedStatement ps = conn.prepareStatement(findRole)) {
             ps.setString(1, roleName);

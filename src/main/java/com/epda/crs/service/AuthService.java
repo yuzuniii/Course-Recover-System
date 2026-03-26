@@ -5,6 +5,7 @@ import com.epda.crs.exception.AuthenticationException;
 import com.epda.crs.model.User;
 import com.epda.crs.enums.AccountStatus;
 import java.util.Optional;
+import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import java.security.MessageDigest;
@@ -13,11 +14,11 @@ import java.util.Base64;
 
 @Stateless
 public class AuthService {
-    
+
     @Inject
     private UserDAO userDAO;
 
-    @Inject
+    @EJB
     private AuditLogService auditLogService;
 
     public User login(String username, String password) {

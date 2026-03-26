@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpSession;
 
 @WebFilter("/pages/*")
 public class AuthFilter implements Filter {
+    private static final boolean AUTH_DISABLED = true;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

@@ -7,8 +7,8 @@ import com.epda.crs.enums.AccountStatus;
 import java.io.Serializable;
 import java.util.List;
 import jakarta.annotation.PostConstruct;
+import jakarta.ejb.EJB;
 import jakarta.faces.view.ViewScoped;
-import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
@@ -18,8 +18,7 @@ import org.primefaces.PrimeFaces;
 @ViewScoped
 public class UserBean implements Serializable {
     
-    // FIX 1: Use @Inject instead of 'new UserService()'
-    @Inject
+    @EJB
     private UserService userService;
     
     private List<User> users;

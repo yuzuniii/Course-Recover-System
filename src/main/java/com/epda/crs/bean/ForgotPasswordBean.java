@@ -7,17 +7,17 @@ import com.epda.crs.util.EmailUtil;
 import java.io.Serializable;
 import java.util.Optional;
 import java.util.UUID;
+import jakarta.ejb.EJB;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
-import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 @Named
 @ViewScoped
 public class ForgotPasswordBean implements Serializable {
 
-    @Inject
+    @EJB
     private UserService userService;
 
     private String email;

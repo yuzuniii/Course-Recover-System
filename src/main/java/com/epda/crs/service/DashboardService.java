@@ -9,6 +9,7 @@ import com.epda.crs.dao.UserDAO;
 import com.epda.crs.dto.DashboardAnalyticsDTO;
 import com.epda.crs.model.AuditLog;
 import com.epda.crs.model.RecoveryPlan;
+import jakarta.ejb.EJB;
 import java.util.List;
 import java.util.Map;
 import jakarta.ejb.Stateless;

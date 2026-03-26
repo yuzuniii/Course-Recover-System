@@ -5,6 +5,7 @@ import com.epda.crs.config.DBConnection;
 import com.epda.crs.enums.AccountStatus;
 import com.epda.crs.enums.UserRole;
 import com.epda.crs.model.User;
+import jakarta.enterprise.context.Dependent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

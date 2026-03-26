@@ -2,6 +2,7 @@ package com.epda.crs.dao;
 
 import com.epda.crs.config.DBConnection;
 import com.epda.crs.dto.EligibilityDTO;
+import jakarta.enterprise.context.Dependent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

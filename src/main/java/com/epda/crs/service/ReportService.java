@@ -9,6 +9,7 @@ import com.epda.crs.util.CGPACalculator;
 import com.epda.crs.util.EmailUtil;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
 

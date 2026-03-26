@@ -3,6 +3,7 @@ package com.epda.crs.dao;
 import com.epda.crs.config.DBConnection;
 import com.epda.crs.enums.MilestoneStatus;
 import com.epda.crs.model.Milestone;
+import jakarta.enterprise.context.Dependent;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;

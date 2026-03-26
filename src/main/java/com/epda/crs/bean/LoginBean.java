@@ -6,17 +6,17 @@ import com.epda.crs.enums.UserRole;
 import com.epda.crs.service.AuthService;
 import java.io.IOException;
 import java.io.Serializable;
+import jakarta.ejb.EJB;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
-import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 @Named
 @SessionScoped
 public class LoginBean implements Serializable {
     
-    @Inject
+    @EJB
     private AuthService authService;
     
     private String username;

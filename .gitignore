@@ -1,6 +1,7 @@
 # Ignore Claude notes
 CLAUDE.md
 .claude/
+AGENT.md
 
 # Environment
 .env
@@ -10,6 +11,7 @@ node_modules/
 
 # Java / Maven
 # target/
+target/
 
 # Logs
 *.log

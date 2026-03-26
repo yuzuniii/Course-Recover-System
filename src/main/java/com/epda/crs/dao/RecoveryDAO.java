@@ -5,6 +5,7 @@ import com.epda.crs.enums.RecoveryStatus;
 import com.epda.crs.model.Course;
 import com.epda.crs.model.RecoveryPlan;
 import com.epda.crs.model.Student;
+import jakarta.enterprise.context.Dependent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

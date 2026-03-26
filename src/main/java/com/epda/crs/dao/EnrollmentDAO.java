@@ -1,6 +1,7 @@
 package com.epda.crs.dao;
 
 import com.epda.crs.config.DBConnection;
+import jakarta.enterprise.context.Dependent;
 import com.epda.crs.model.Course;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

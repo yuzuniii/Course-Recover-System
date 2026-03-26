@@ -289,9 +289,9 @@
             </div>
 
             <!-- Eligibility Result Panel -->
-            <h:panelGroup id="resultOuter" rendered="#{eligibilityBean.eligibilityResult ne null}">
+            <h:panelGroup id="resultOuter" layout="block">
 
-                <h:panelGroup id="resultPanel">
+                <h:panelGroup id="resultPanel" layout="block" rendered="#{eligibilityBean.eligibilityResult ne null}">
                 <div class="result-panel #{eligibilityBean.eligibilityResult.eligible ? 'eligible' : 'not-eligible'}">
 
                     <!-- [3] Verdict banner -->

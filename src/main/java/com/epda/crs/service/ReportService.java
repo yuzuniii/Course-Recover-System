@@ -13,16 +13,15 @@ import jakarta.inject.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import jakarta.inject.Inject;
+
 @Stateless
 public class ReportService {
 
-    @Inject
-    private StudentDAO studentDAO;
+    @Inject private StudentDAO studentDAO;
+    @Inject private ResultDAO  resultDAO;
 
     @Inject
-    private ResultDAO resultDAO;
-
-    @EJB
     private AuditLogService auditLogService;
 
     // -----------------------------------------------------------------------

@@ -8,7 +8,6 @@ import com.epda.crs.dto.EligibilityDTO;
 import com.epda.crs.exception.ValidationException;
 import com.epda.crs.model.Student;
 import com.epda.crs.util.CGPACalculator;
-import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import java.util.List;
@@ -17,19 +16,12 @@ import java.util.stream.Collectors;
 @Stateless
 public class EligibilityService {
 
-    @Inject
-    private StudentDAO studentDAO;
+    @Inject private StudentDAO     studentDAO;
+    @Inject private ResultDAO      resultDAO;
+    @Inject private EligibilityDAO eligibilityDAO;
+    @Inject private EnrollmentDAO  enrollmentDAO;
 
     @Inject
-    private ResultDAO resultDAO;
-
-    @Inject
-    private EligibilityDAO eligibilityDAO;
-
-    @Inject
-    private EnrollmentDAO enrollmentDAO;
-
-    @EJB
     private AuditLogService auditLogService;
 
     // -----------------------------------------------------------------------
@@ -45,7 +37,7 @@ public class EligibilityService {
      *
      * @throws ValidationException if studentId is invalid or the student is not found
      */
-    public EligibilityDTO checkEligibility(int studentId, int semester, int yearOfStudy) {
+    public EligibilityDTO checkEligibility(int studentId, int semester, int yearOfStudy, String actorUsername) {
         if (studentId <= 0) throw new ValidationException("Invalid student ID");
 
         // Always compute — this is what the UI needs to display
@@ -67,7 +59,7 @@ public class EligibilityService {
         try {
             if (auditLogService != null) {
                 auditLogService.logAction(
-                        dto.getStudentCode(),
+                        actorUsername,
                         "CHECK_ELIGIBILITY",
                         "ELIGIBILITY_RECORD",
                         (long) studentId,

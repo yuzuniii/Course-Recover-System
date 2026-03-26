@@ -298,6 +298,290 @@ textarea.ui-inputtextarea:focus {
     font-size: 13px !important;
 }
 
+/* ── Dashboard Specific ────────────────────────────────── */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.dashboard-widget {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.widget-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+}
+
+.widget-value {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.widget-chart {
+    height: 250px;
+}
+
+.activity-log {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.activity-indicator.success { background-color: var(--green); }
+.activity-indicator.failure { background-color: var(--red); }
+.activity-indicator.update { background-color: var(--blue); }
+
+.activity-details {
+    flex-grow: 1;
+}
+
+.activity-action {
+    font-weight: 600;
+}
+
+.activity-user {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.activity-time {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.topbar-clock {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.topbar-user .user-name {
+    font-weight: 600;
+}
+
+.logout-button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 18px;
+}
+
+/* ── Modern Dialog & Form Styling ────────────────────────── */
+.dialog-content { padding: 10px 5px; }
+
+.form-section { margin-bottom: 24px; }
+
+.form-section-header {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--sidebar-accent);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+}
+
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.form-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.form-input {
+    width: 100% !important;
+    padding: 10px 12px !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+    font-size: 13px !important;
+    background: #fcfcfc !important;
+    transition: all .2s ease !important;
+}
+
+.form-input:focus {
+    border-color: var(--sidebar-accent) !important;
+    background: #fff !important;
+    box-shadow: 0 0 0 3px rgba(79, 142, 247, 0.1) !important;
+    outline: none !important;
+}
+
+.metadata-box {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.metadata-text {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.dialog-footer {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.btn {
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all .2s;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: var(--sidebar-accent) !important;
+    color: #fff !important;
+    border: none !important;
+}
+
+.btn-primary:hover {
+    background: #3b7ddd !important;
+    transform: translateY(-1px);
+}
+
+.btn-danger {
+    background: #fff !important;
+    color: var(--red) !important;
+    border: 1px solid var(--red) !important;
+}
+
+.btn-danger:hover {
+    background: var(--red) !important;
+    color: #fff !important;
+}
+
+.btn-outline {
+    background: #fff !important;
+    color: var(--text-secondary) !important;
+    border: 1px solid var(--border) !important;
+}
+
+.btn-outline:hover {
+    background: var(--bg-page) !important;
+    border-color: var(--text-muted) !important;
+}
+
+/* ── DataTable Tweaks ────────────────────────────────────── */
+.ui-datatable { border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border); }
+.ui-datatable-header { background: #fff !important; border: none !important; padding: 15px 20px !important; }
+.ui-datatable thead th { background: #f9fafb !important; color: var(--text-secondary) !important; font-weight: 600 !important; font-size: 12px !important; text-transform: uppercase !important; letter-spacing: .02em !important; padding: 12px 20px !important; border: none !important; border-bottom: 1px solid var(--border) !important; }
+.ui-datatable tbody td { padding: 14px 20px !important; border: none !important; border-bottom: 1px solid var(--border) !important; font-size: 13px !important; }
+.ui-datatable tbody tr:last-child td { border-bottom: none !important; }
+.ui-datatable tr.ui-widget-content { background: #fff !important; }
+.ui-datatable tr.ui-widget-content:hover { background: #f8fafc !important; }
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+}
+
+.status-active { background: var(--green-bg); color: var(--green); }
+.status-inactive { background: var(--red-bg); color: var(--red); }
+.status-locked { background: var(--amber-bg); color: var(--amber); }
+
+.role-badge {
+    padding: 3px 8px;
+    background: #eef2ff;
+    color: #4338ca;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* ── Badges ────────────────────────────────────────────── */
+.badge {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    display: inline-block;
+}
+
+.badge-success { background: var(--green-bg); color: var(--green); }
+.badge-danger { background: var(--red-bg); color: var(--red); }
+.badge-info { background: #e0f2fe; color: #0369a1; }
+.badge-warning { background: var(--amber-bg); color: var(--amber); }
+
+/* ── DataTable Filter Overrides ────────────────────────── */
+.ui-custom-filter {
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.ui-datatable .ui-column-filter {
+    margin-top: 8px !important;
+}
+
 .ui-selectonemenu .ui-selectonemenu-label {
     padding: 7px 12px !important;
     color: var(--text-primary) !important;

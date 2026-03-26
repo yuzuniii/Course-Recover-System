@@ -2,7 +2,9 @@ package com.epda.crs.dao;
 
 import com.epda.crs.config.DBConnection;
 import com.epda.crs.model.AuditLog;
-import jakarta.enterprise.context.Dependent;
+
+import jakarta.ejb.Stateless;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,6 +17,7 @@ import java.util.List;
 /**
  * DAO for audit_logs (log_id, user_id, action, entity_type, entity_id, description, logged_at).
  */
+@Stateless
 public class AuditLogDAO {
 
     /** Looks up user_id for the given username. Returns null if not found. */
@@ -83,6 +86,45 @@ public class AuditLogDAO {
             throw new RuntimeException("AuditLogDAO.findAll failed", e);
         }
         return list;
+    }
+
+    public List<AuditLog> findRecentActivity(int limit) {
+        String sql = BASE_SELECT + "ORDER BY al.logged_at DESC LIMIT ?";
+        List<AuditLog> list = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("AuditLogDAO.findRecentActivity failed", e);
+        }
+        return list;
+    }
+
+    /**
+     * Fetches activity counts for the last 7 days.
+     * Returns a map of Day (e.g., "Mon") -> Count.
+     */
+    public java.util.Map<String, Integer> getUsageTrend() {
+        String sql = "SELECT DATE_FORMAT(logged_at, '%a') as day_name, COUNT(*) as count " +
+                     "FROM audit_logs " +
+                     "WHERE logged_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) " +
+                     "GROUP BY DATE(logged_at), day_name " +
+                     "ORDER BY DATE(logged_at) ASC";
+        
+        java.util.Map<String, Integer> trend = new java.util.LinkedHashMap<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                trend.put(rs.getString("day_name"), rs.getInt("count"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("AuditLogDAO.getUsageTrend failed", e);
+        }
+        return trend;
     }
 
     public List<AuditLog> findByUserId(int userId) {

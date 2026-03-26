@@ -33,10 +33,8 @@ public class LoginBean implements Serializable {
             
             // 2. Role-Based Redirect
             if (currentUser.getRole() == UserRole.COURSE_ADMINISTRATOR) {
-                // Course Administrators typically manage users and global settings
                 return "/pages/users.xhtml?faces-redirect=true";
             } else if (currentUser.getRole() == UserRole.ACADEMIC_OFFICER) {
-                // Academic Officers typically view analytics, reports, and student recovery
                 return "/pages/dashboard.xhtml?faces-redirect=true";
             }
             
@@ -44,9 +42,23 @@ public class LoginBean implements Serializable {
             return "/pages/dashboard.xhtml?faces-redirect=true";
             
         } catch (AuthenticationException exception) {
+            // Catches normal login errors (e.g., wrong password)
             FacesContext.getCurrentInstance().addMessage(null, 
                 new FacesMessage(FacesMessage.SEVERITY_ERROR, exception.getMessage(), null));
-            return null;
+            return null; 
+            
+        } catch (Exception e) {
+            // Catches severe system/database crashes
+            Throwable rootCause = e;
+            while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
+                rootCause = rootCause.getCause();
+            }
+            
+            String errorMessage = "System Error: " + rootCause.getMessage();
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new FacesMessage(FacesMessage.SEVERITY_FATAL, errorMessage, null));
+                
+            return null; 
         }
     }
 
@@ -57,10 +69,14 @@ public class LoginBean implements Serializable {
         context.getExternalContext().redirect(context.getExternalContext().getRequestContextPath() + "/pages/login.xhtml");
     }
 
-    // Getters and Setters
+    // ==========================================
+    // GETTERS AND SETTERS (Required by JSF)
+    // ==========================================
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
+    
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+    
     public User getCurrentUser() { return currentUser; }
 }

@@ -32,9 +32,8 @@ public class UserService {
         }
     }
 
-    public void toggleUserStatus(Long userId, boolean activate, String actorUsername) {
-        userDAO.setActiveStatus(userId, activate);
-        String status = activate ? "ACTIVATED" : "DEACTIVATED";
-        auditLogService.logAction(actorUsername, "TOGGLE_STATUS", "User", userId, status + " user account.");
+    public void deleteUser(Long userId, String actorUsername) {
+        userDAO.delete(userId);
+        auditLogService.logAction(actorUsername, "DELETE_USER", "User", userId, "Deleted user account.");
     }
 }

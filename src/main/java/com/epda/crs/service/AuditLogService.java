@@ -11,9 +11,7 @@ import jakarta.inject.Inject;
 @Stateless
 public class AuditLogService {
     private static final AtomicLong COUNTER = new AtomicLong(100);
-
-    @Inject
-    private AuditLogDAO auditLogDAO;
+    @Inject private AuditLogDAO auditLogDAO;
 
     public List<AuditLog> getAuditLogs() { return auditLogDAO.findAll(); }
 

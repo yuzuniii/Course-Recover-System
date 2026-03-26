@@ -9,23 +9,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import jakarta.ejb.Stateless;
 
 /**
  * DAO for the eligibility_records table.
- *
- * Schema:
- *   eligibility_id INT AUTO_INCREMENT PRIMARY KEY,
- *   student_id     INT NOT NULL,
- *   semester       INT NOT NULL,
- *   year_of_study  INT NOT NULL,
- *   cgpa           DECIMAL(4,2),
- *   failed_count   INT,
- *   is_eligible    BOOLEAN DEFAULT FALSE,
- *   reason         VARCHAR(255),
- *   checked_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
- *   checked_by     INT  (FK to users.user_id)
  */
-@Dependent
+@Stateless
 public class EligibilityDAO {
 
     private EligibilityDTO mapRow(ResultSet rs) throws SQLException {
@@ -38,7 +27,23 @@ public class EligibilityDAO {
         dto.setEligible(rs.getBoolean("is_eligible"));
         dto.setReason(rs.getString("reason"));
         return dto;
-    }
+    } // <-- FIXED: Added this brace to close mapRow() properly
+
+    public java.util.Map<String, Long> getEligibilityStatusCounts() {
+        String sql = "SELECT is_eligible, COUNT(*) FROM eligibility_records GROUP BY is_eligible";
+        java.util.Map<String, Long> counts = new java.util.HashMap<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                String status = rs.getBoolean(1) ? "Eligible" : "Not Eligible";
+                counts.put(status, rs.getLong(2));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("EligibilityDAO.getEligibilityStatusCounts failed", e);
+        }
+        return counts;
+    } // <-- FIXED: Removed the extra brace that was here closing the class early
 
     public void save(EligibilityDTO dto) {
         String sql = "INSERT INTO eligibility_records " +

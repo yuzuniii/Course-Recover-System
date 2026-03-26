@@ -13,8 +13,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import jakarta.ejb.Stateless;
 
-@Dependent
+@Stateless
 public class RecoveryDAO {
 
     private static final String BASE_SELECT =
@@ -144,6 +145,31 @@ public class RecoveryDAO {
         } catch (SQLException e) {
             throw new RuntimeException("RecoveryDAO.update failed", e);
         }
+    }
+
+    public long countActivePlans() {
+        String sql = "SELECT COUNT(*) FROM recovery_plans WHERE status = 'ACTIVE'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getLong(1);
+        } catch (SQLException e) {
+            throw new RuntimeException("RecoveryDAO.countActivePlans failed", e);
+        }
+        return 0;
+    }
+
+    public List<RecoveryPlan> findCompletedPlans() {
+        String sql = BASE_SELECT + "WHERE p.status = 'COMPLETED'";
+        List<RecoveryPlan> list = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) list.add(mapRow(rs));
+        } catch (SQLException e) {
+            throw new RuntimeException("RecoveryDAO.findCompletedPlans failed", e);
+        }
+        return list;
     }
 
     public void updateStatus(Long planId, RecoveryStatus status) {

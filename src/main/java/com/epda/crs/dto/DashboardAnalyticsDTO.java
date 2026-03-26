@@ -1,43 +1,48 @@
 package com.epda.crs.dto;
 
-public class DashboardAnalyticsDTO {
+import java.io.Serializable;
 
-    private int totalStudents;
-    private int studentsUnderRecovery;
-    private int eligibleStudents;
-    private int nonEligibleStudents;
-    private int activePlans;
-    private int overdueMilestones;
+public class DashboardAnalyticsDTO implements Serializable {
+    
+    private long totalActivatedAccounts;
+    private long totalEnrolledStudents;
+    private long activeRecoveryPlans;
+    private long overdueMilestones;
 
     public DashboardAnalyticsDTO() {
     }
 
-    public DashboardAnalyticsDTO(int totalStudents, int studentsUnderRecovery,
-                                  int eligibleStudents, int nonEligibleStudents,
-                                  int activePlans, int overdueMilestones) {
-        this.totalStudents        = totalStudents;
-        this.studentsUnderRecovery = studentsUnderRecovery;
-        this.eligibleStudents     = eligibleStudents;
-        this.nonEligibleStudents  = nonEligibleStudents;
-        this.activePlans          = activePlans;
-        this.overdueMilestones    = overdueMilestones;
+    // --- Getters and Setters ---
+
+    public long getTotalActivatedAccounts() {
+        return totalActivatedAccounts;
     }
 
-    public int getTotalStudents() { return totalStudents; }
-    public void setTotalStudents(int totalStudents) { this.totalStudents = totalStudents; }
+    public void setTotalActivatedAccounts(long totalActivatedAccounts) {
+        this.totalActivatedAccounts = totalActivatedAccounts;
+    }
 
-    public int getStudentsUnderRecovery() { return studentsUnderRecovery; }
-    public void setStudentsUnderRecovery(int studentsUnderRecovery) { this.studentsUnderRecovery = studentsUnderRecovery; }
+    public long getTotalEnrolledStudents() {
+        return totalEnrolledStudents;
+    }
 
-    public int getEligibleStudents() { return eligibleStudents; }
-    public void setEligibleStudents(int eligibleStudents) { this.eligibleStudents = eligibleStudents; }
+    public void setTotalEnrolledStudents(long totalEnrolledStudents) {
+        this.totalEnrolledStudents = totalEnrolledStudents;
+    }
 
-    public int getNonEligibleStudents() { return nonEligibleStudents; }
-    public void setNonEligibleStudents(int nonEligibleStudents) { this.nonEligibleStudents = nonEligibleStudents; }
+    public long getActiveRecoveryPlans() {
+        return activeRecoveryPlans;
+    }
 
-    public int getActivePlans() { return activePlans; }
-    public void setActivePlans(int activePlans) { this.activePlans = activePlans; }
+    public void setActiveRecoveryPlans(long activeRecoveryPlans) {
+        this.activeRecoveryPlans = activeRecoveryPlans;
+    }
 
-    public int getOverdueMilestones() { return overdueMilestones; }
-    public void setOverdueMilestones(int overdueMilestones) { this.overdueMilestones = overdueMilestones; }
+    public long getOverdueMilestones() {
+        return overdueMilestones;
+    }
+
+    public void setOverdueMilestones(long overdueMilestones) {
+        this.overdueMilestones = overdueMilestones;
+    }
 }

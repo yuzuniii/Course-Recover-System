@@ -42,37 +42,49 @@ public class UserBean implements Serializable {
         this.selectedUser.setStatus(AccountStatus.ACTIVE);
     }
 
+    // Prepare an existing user for the "Edit User" dialog
+    public void prepareEditUser(User user) {
+        this.selectedUser = user;
+    }
+
     // Save or Update user
     public void saveUser() {
         try {
-            // FIX 3: Fetch the username and pass it to saveUser
             String actorUsername = getCurrentUsername();
+            boolean isNew = (selectedUser.getId() == null || selectedUser.getId() == 0);
+            
             userService.saveUser(selectedUser, actorUsername);
             
-            FacesContext.getCurrentInstance().addMessage(null, 
-                new FacesMessage("User Saved Successfully"));
+            String msg = isNew ? "User Created Successfully" : "User Updated Successfully";
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", msg));
             
-            // Refresh list and hide dialog
+            // Refresh list and update UI
             users = userService.getUsers(); 
             PrimeFaces.current().executeScript("PF('userDialog').hide()");
-            PrimeFaces.current().ajax().update("form:messages", "form:dt-users");
+            PrimeFaces.current().ajax().update("dt-users", "globalMessages");
         } catch (Exception e) {
             FacesContext.getCurrentInstance().addMessage(null, 
-                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not save user."));
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not save user: " + e.getMessage()));
         }
     }
 
-    // Deactivate or Activate user
-    public void toggleStatus(User user) {
-        boolean activate = user.getStatus() != AccountStatus.ACTIVE;
-        
-        // FIX 4: Fetch the username and pass it to toggleUserStatus
-        String actorUsername = getCurrentUsername();
-        userService.toggleUserStatus(user.getId(), activate, actorUsername);
-        
-        users = userService.getUsers(); // Refresh data
-        FacesContext.getCurrentInstance().addMessage(null, 
-            new FacesMessage("User status updated."));
+    public void deleteUser() {
+        try {
+            if (selectedUser != null && selectedUser.getId() != null) {
+                String actorUsername = getCurrentUsername();
+                userService.deleteUser(selectedUser.getId(), actorUsername);
+                
+                FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "User Deleted Successfully"));
+                
+                // Refresh list and update UI
+                users = userService.getUsers(); 
+                PrimeFaces.current().executeScript("PF('userDialog').hide()");
+                PrimeFaces.current().ajax().update("dt-users", "globalMessages");
+            }
+        } catch (Exception e) {
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not delete user: " + e.getMessage()));
+        }
     }
 
     // Getters and Setters

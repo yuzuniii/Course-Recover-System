@@ -5,6 +5,7 @@ import com.epda.crs.service.StudentService;
 import com.epda.crs.service.EligibilityService;
 import com.epda.crs.dto.EligibilityDTO;
 import jakarta.annotation.PostConstruct;
+import jakarta.ejb.EJB;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
@@ -18,10 +19,10 @@ import java.util.List;
 @ViewScoped
 public class StudentBean implements Serializable {
 
-    @Inject
+    @EJB
     private StudentService studentService;
 
-    @Inject
+    @EJB
     private EligibilityService eligibilityService;
 
     @Inject

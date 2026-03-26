@@ -6,6 +6,7 @@ public class Student {
     private String studentNumber;
     private String fullName;
     private String programName;
+    private String email;
     private int semester;
     private int yearOfStudy;
     private double cgpa;
@@ -37,6 +38,9 @@ public class Student {
 
     public String getProgramName() { return programName; }
     public void setProgramName(String programName) { this.programName = programName; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
     public int getSemester() { return semester; }
     public void setSemester(int semester) { this.semester = semester; }

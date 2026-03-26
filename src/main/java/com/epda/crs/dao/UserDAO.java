@@ -1,11 +1,11 @@
 package com.epda.crs.dao;
 
-import jakarta.ejb.Stateless;
 import com.epda.crs.config.DBConnection;
 import com.epda.crs.enums.AccountStatus;
 import com.epda.crs.enums.UserRole;
 import com.epda.crs.model.User;
 import jakarta.enterprise.context.Dependent;
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,8 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Stateless
-public class UserDAO {
+@Dependent
+public class UserDAO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     // roles table stores 'ADMIN' for COURSE_ADMINISTRATOR
     private UserRole mapRole(String roleName) {

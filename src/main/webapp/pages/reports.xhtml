@@ -6,40 +6,77 @@
 <h:head>
     <title>Academic Reports — CRS</title>
     <link rel="stylesheet" type="text/css" href="#{request.contextPath}/css/styles.css" />
+    <style>
+        .grade-f  { color: #dc2626; font-weight: 700; }
+        .grade-ok { color: #16a34a; font-weight: 600; }
+        .cgpa-good { color: #16a34a; font-weight: 700; }
+        .cgpa-low  { color: #dc2626; font-weight: 700; }
+    </style>
 </h:head>
 <h:body>
 <div class="layout-shell">
 
-    <!-- Sidebar -->
+    <!-- ── Sidebar ─────────────────────────────────────── -->
     <nav class="sidebar">
         <div class="sidebar-logo">
             <div class="logo-title">CRS</div>
             <div class="logo-sub">Course Recovery System</div>
         </div>
+
         <div class="nav-section">
             <div class="nav-label">Main</div>
-            <a href="#{request.contextPath}/pages/dashboard.xhtml" class="nav-item">■ Dashboard</a>
-            <a href="#{request.contextPath}/pages/students.xhtml" class="nav-item">■ Students</a>
+            <a href="#{request.contextPath}/pages/dashboard.xhtml"
+               class="nav-item">
+                &#9632; Dashboard
+            </a>
+            <a href="#{request.contextPath}/pages/students.xhtml"
+               class="nav-item">
+                &#9632; Students
+            </a>
+
             <div class="nav-label" style="margin-top:12px;">Academic</div>
-            <a href="#{request.contextPath}/pages/eligibility.xhtml" class="nav-item">✓ Eligibility</a>
-            <a href="#{request.contextPath}/pages/recovery.xhtml" class="nav-item">■ Recovery</a>
-            <a href="#{request.contextPath}/pages/reports.xhtml" class="nav-item active">■ Reports</a>
+            <a href="#{request.contextPath}/pages/eligibility.xhtml"
+               class="nav-item">
+                &#9632; Eligibility
+            </a>
+            <a href="#{request.contextPath}/pages/recovery.xhtml"
+               class="nav-item">
+                &#9632; Recovery
+            </a>
+            <a href="#{request.contextPath}/pages/reports.xhtml"
+               class="nav-item active">
+                &#10003; Reports
+            </a>
+
             <div class="nav-label" style="margin-top:12px;">System</div>
-            <a href="#{request.contextPath}/pages/users.xhtml" class="nav-item">■ Users</a>
-            <a href="#{request.contextPath}/pages/audit-log.xhtml" class="nav-item">■ Audit Log</a>
+            <a href="#{request.contextPath}/pages/users.xhtml"
+               class="nav-item">
+                &#9632; Users
+            </a>
+            <a href="#{request.contextPath}/pages/audit-log.xhtml"
+               class="nav-item">
+                &#9632; Audit Log
+            </a>
         </div>
+
         <div class="sidebar-footer">
             <div class="user-pill">
-                <div class="avatar">#{loginBean.currentUser != null ? loginBean.currentUser.fullName.substring(0,2).toUpperCase() : 'US'}</div>
+                <div class="avatar">
+                    #{loginBean.currentUser != null ? loginBean.currentUser.fullName.substring(0,2).toUpperCase() : 'US'}
+                </div>
                 <div>
-                    <div class="user-name">#{loginBean.currentUser != null ? loginBean.currentUser.fullName : 'User'}</div>
-                    <div class="user-role">#{loginBean.currentUser != null ? loginBean.currentUser.role : ''}</div>
+                    <div class="user-name">
+                        #{loginBean.currentUser != null ? loginBean.currentUser.fullName : 'User'}
+                    </div>
+                    <div class="user-role">
+                        #{loginBean.currentUser != null ? loginBean.currentUser.role : ''}
+                    </div>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Main -->
+    <!-- ── Main ────────────────────────────────────────── -->
     <div class="main-content">
 
         <!-- Topbar -->
@@ -51,47 +88,60 @@
         </div>
 
         <div class="page-content">
-            <!-- Messages -->
-            <p:growl id="globalMessages" showDetail="true" />
 
-            <!-- Report Generator -->
+            <!-- Messages -->
+            <div class="messages-area">
+                <p:messages globalOnly="true" showDetail="true" />
+            </div>
+
+            <!-- Generate Single Report -->
             <div class="card">
                 <div class="card-header">
-                    <span class="card-title">Generate Academic Report</span>
+                    <span class="card-title">Generate Student Report</span>
                 </div>
                 <div class="card-body">
                     <h:form id="reportForm">
                         <div class="form-grid-2">
                             <div class="form-group">
-                                <p:outputLabel for="student" value="Select Student" styleClass="form-label" />
-                                <p:selectOneMenu id="student" value="#{reportBean.selectedStudentId}" filter="true" filterMatchMode="contains" styleClass="form-input">
-                                    <f:selectItem itemLabel="Search Student..." itemValue="0" />
-                                    <f:selectItems value="#{reportBean.students}" var="s" itemLabel="#{s.fullName} (#{s.studentNumber})" itemValue="#{s.id}" />
-                                </p:selectOneMenu>
+                                <label class="form-label">Student</label>
+                                <h:selectOneMenu id="student" value="#{reportBean.selectedStudentId}"
+                                                 styleClass="form-control">
+                                    <f:selectItem itemValue="0" itemLabel="-- Select Student --" />
+                                    <f:selectItems value="#{reportBean.students}" var="s"
+                                                   itemValue="#{s.id}"
+                                                   itemLabel="#{s.studentNumber} — #{s.fullName}" />
+                                </h:selectOneMenu>
                             </div>
                             <div class="form-group">
-                                <p:outputLabel for="semester" value="Semester" styleClass="form-label" />
-                                <p:selectOneMenu id="semester" value="#{reportBean.selectedSemester}" styleClass="form-input">
-                                    <f:selectItem itemLabel="Select Semester" itemValue="0" />
+                                <label class="form-label">Semester</label>
+                                <h:selectOneMenu id="semester" value="#{reportBean.selectedSemester}"
+                                                 styleClass="form-control">
+                                    <f:selectItem itemValue="0" itemLabel="-- Select Semester --" />
                                     <f:selectItem itemValue="1" itemLabel="Semester 1" />
                                     <f:selectItem itemValue="2" itemLabel="Semester 2" />
-                                </p:selectOneMenu>
+                                    <f:selectItem itemValue="3" itemLabel="Semester 3" />
+                                </h:selectOneMenu>
                             </div>
                             <div class="form-group">
-                                <p:outputLabel for="year" value="Year of Study" styleClass="form-label" />
-                                <p:selectOneMenu id="year" value="#{reportBean.selectedYear}" styleClass="form-input">
-                                    <f:selectItem itemLabel="Select Year" itemValue="0" />
+                                <label class="form-label">Year of Study</label>
+                                <h:selectOneMenu id="year" value="#{reportBean.selectedYear}"
+                                                 styleClass="form-control">
+                                    <f:selectItem itemValue="0" itemLabel="-- Select Year --" />
                                     <f:selectItem itemValue="1" itemLabel="Year 1" />
                                     <f:selectItem itemValue="2" itemLabel="Year 2" />
                                     <f:selectItem itemValue="3" itemLabel="Year 3" />
                                     <f:selectItem itemValue="4" itemLabel="Year 4" />
-                                </p:selectOneMenu>
+                                </h:selectOneMenu>
                             </div>
                             <div class="form-group" style="justify-content:flex-end;">
                                 <label class="form-label">&#160;</label>
-                                <div style="display:flex; gap:10px;">
-                                    <p:commandButton value="Generate" actionListener="#{reportBean.generateReport}" update="reportOutput :globalMessages" styleClass="btn btn-primary" icon="pi pi-file-pdf" />
-                                    <p:commandButton value="Clear" actionListener="#{reportBean.clearReport}" update="reportOutput" styleClass="btn btn-outline" />
+                                <div style="display:flex;gap:8px;">
+                                    <h:commandButton value="Generate Report"
+                                                     action="#{reportBean.generateReport}"
+                                                     styleClass="btn btn-primary" />
+                                    <h:commandButton value="Clear"
+                                                     action="#{reportBean.clearReport}"
+                                                     styleClass="btn btn-outline" />
                                 </div>
                             </div>
                         </div>
@@ -99,79 +149,177 @@
                 </div>
             </div>
 
-            <!-- Report Output -->
-            <h:panelGroup id="reportOutput">
-                <h:panelGroup rendered="#{reportBean.currentReport != null}">
-                    <div class="dashboard-widget" style="margin-bottom:20px; border-left: 5px solid #{reportBean.currentReport.cgpa ge 2.0 ? 'var(--green)' : 'var(--red)'};">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <!-- Current Report Detail -->
+            <h:panelGroup rendered="#{reportBean.currentReport != null}">
+                <div class="result-panel #{reportBean.currentReport.cgpa ge 2.0 ? 'eligible' : 'not-eligible'}">
+                    <div class="result-header">
+                        <div>
+                            <div class="result-name">#{reportBean.currentReport.studentName}</div>
+                            <div class="result-code">#{reportBean.currentReport.studentCode} · #{reportBean.currentReport.programme}</div>
+                        </div>
+                        <span class="badge #{reportBean.currentReport.cgpa ge 2.0 ? 'badge-green' : 'badge-red'}"
+                              style="font-size:13px;padding:5px 14px;">
+                            CGPA&#160;
+                            <h:outputText value="#{reportBean.currentReport.cgpa}">
+                                <f:convertNumber maxFractionDigits="2" minFractionDigits="2" />
+                            </h:outputText>
+                        </span>
+                    </div>
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <span class="rl">Semester</span>
+                            <span class="rv">#{reportBean.currentReport.semester}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="rl">Year of Study</span>
+                            <span class="rv">#{reportBean.currentReport.yearOfStudy}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course results table -->
+                <div class="card" style="margin-top:0;">
+                    <div class="card-header">
+                        <span class="card-title">Course Results — #{reportBean.currentReport.studentName}</span>
+                    </div>
+                    <p:dataTable value="#{reportBean.currentReport.results}" var="row"
+                                 emptyMessage="No results available for this semester">
+                        <p:column headerText="Code">
+                            <span class="cell-primary">#{row.courseCode}</span>
+                        </p:column>
+                        <p:column headerText="Course Name">#{row.courseName}</p:column>
+                        <p:column headerText="Cr. Hrs">#{row.creditHours}</p:column>
+                        <p:column headerText="Grade">
+                            <span class="badge #{row.grade eq 'F' ? 'badge-red' : 'badge-green'}">
+                                #{row.grade}
+                            </span>
+                        </p:column>
+                        <p:column headerText="Points">
+                            <h:outputText value="#{row.gradePoint}"
+                                          styleClass="#{row.grade eq 'F' ? 'grade-f' : 'grade-ok'}">
+                                <f:convertNumber maxFractionDigits="2" minFractionDigits="2" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Attempt">#{row.attemptNumber}</p:column>
+                        <p:column headerText="Status">
+                            <span class="badge #{row.status eq 'PASSED' ? 'badge-green' : row.status eq 'FAILED' ? 'badge-red' : 'badge-gray'}">
+                                #{row.status}
+                            </span>
+                        </p:column>
+                    </p:dataTable>
+                </div>
+
+                <!-- Report Summary Card -->
+                <div class="card" style="margin-top:0;">
+                    <div class="card-header">
+                        <span class="card-title">Report Summary</span>
+                    </div>
+                    <div class="card-body">
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:16px;">
+
+                            <!-- CGPA + Standing -->
                             <div>
-                                <div style="font-size:20px; font-weight:700; color:var(--text-primary);">#{reportBean.currentReport.studentName}</div>
-                                <div style="font-size:14px; color:var(--text-muted);">#{reportBean.currentReport.studentCode} • #{reportBean.currentReport.programme}</div>
+                                <div class="stat-label">CGPA</div>
+                                <div class="stat-value #{reportBean.currentReport.cgpa ge 3.0 ? 'green' : reportBean.currentReport.cgpa ge 2.0 ? 'amber' : 'red'}" style="font-size:24px;">
+                                    <h:outputText value="#{reportBean.currentReport.cgpa}">
+                                        <f:convertNumber maxFractionDigits="2" minFractionDigits="2" />
+                                    </h:outputText>
+                                </div>
+                                <span class="badge #{reportBean.currentReport.cgpa ge 3.5 ? 'badge-green' : reportBean.currentReport.cgpa ge 3.0 ? 'badge-green' : reportBean.currentReport.cgpa ge 2.0 ? 'badge-amber' : 'badge-red'}" style="margin-top:6px;display:inline-flex;">
+                                    #{reportBean.currentReport.cgpa ge 3.5 ? 'Excellent standing' : reportBean.currentReport.cgpa ge 3.0 ? 'Good standing' : reportBean.currentReport.cgpa ge 2.0 ? 'Satisfactory standing' : 'At risk'}
+                                </span>
                             </div>
-                            <div style="text-align:right;">
-                                <div class="widget-title">SEMESTER CGPA</div>
-                                <div class="widget-value" style="color:#{reportBean.currentReport.cgpa ge 2.0 ? 'var(--green)' : 'var(--red)'};">
-                                    <h:outputText value="#{reportBean.currentReport.cgpa}"><f:convertNumber pattern="#0.00" /></h:outputText>
+
+                            <!-- Total courses -->
+                            <div>
+                                <div class="stat-label">Total Courses</div>
+                                <div class="stat-value blue" style="font-size:24px;">
+                                    #{reportBean.currentReport.results.size()}
+                                </div>
+                            </div>
+
+                            <!-- Failed courses -->
+                            <div>
+                                <div class="stat-label">Failed Courses</div>
+                                <div class="stat-value #{reportBean.currentReport.failedCount gt 0 ? 'red' : 'green'}" style="font-size:24px;">
+                                    #{reportBean.currentReport.failedCount}
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="card">
-                        <p:dataTable value="#{reportBean.currentReport.results}" var="row" styleClass="modern-table">
-                            <p:column headerText="Course Code" width="120">
-                                <span style="font-weight:600; color:var(--sidebar-accent);">#{row.courseCode}</span>
-                            </p:column>
-                            <p:column headerText="Course Name">#{row.courseName}</p:column>
-                            <p:column headerText="Cr. Hrs" width="80" style="text-align:center;">#{row.creditHours}</p:column>
-                            <p:column headerText="Grade" width="80" style="text-align:center;">
-                                <span class="badge badge-#{row.grade eq 'F' ? 'danger' : 'success'}">#{row.grade}</span>
-                            </p:column>
-                            <p:column headerText="Points" width="80" style="text-align:center;">
-                                <h:outputText value="#{row.gradePoint}"><f:convertNumber pattern="#0.00" /></h:outputText>
-                            </p:column>
-                            <p:column headerText="Status" width="120" style="text-align:center;">
-                                <span class="badge badge-#{row.status eq 'PASSED' ? 'success' : 'danger'}">#{row.status}</span>
-                            </p:column>
-                        </p:dataTable>
+                        <!-- View Printable Report -->
+                        <div style="padding-top:14px;border-top:1px solid #e5e7eb;">
+                            <a href="#{request.contextPath}/pages/report-view.jsp?studentId=#{reportBean.currentReport.studentId}&amp;semester=#{reportBean.currentReport.semester}&amp;year=#{reportBean.currentReport.yearOfStudy}"
+                               target="_blank"
+                               class="btn btn-primary btn-sm"
+                               style="display:inline-flex;align-items:center;gap:6px;">
+                                &#128438; View Printable Report
+                            </a>
+                        </div>
                     </div>
-
-                    <div style="margin-top:20px; text-align:right;">
-                        <p:button value="Print Official Report" icon="pi pi-print" styleClass="btn btn-outline"
-                                  href="#{request.contextPath}/pages/report-view.jsp?studentId=#{reportBean.currentReport.studentId}&amp;semester=#{reportBean.currentReport.semester}&amp;year=#{reportBean.currentReport.yearOfStudy}" 
-                                  target="_blank" />
-                    </div>
-                </h:panelGroup>
+                </div>
             </h:panelGroup>
 
-            <!-- Bulk Operation -->
-            <div class="card" style="margin-top:40px;">
+            <!-- Generate All Reports -->
+            <div class="card">
                 <div class="card-header">
-                    <span class="card-title">Bulk Report Generation</span>
+                    <span class="card-title">Generate All Reports</span>
                 </div>
                 <div class="card-body">
-                    <h:form id="bulkForm">
+                    <h:form id="allReportsForm">
                         <div class="form-grid-2">
                             <div class="form-group">
-                                <p:outputLabel value="Target Semester" styleClass="form-label" />
-                                <p:selectOneMenu value="#{reportBean.selectedSemester}" styleClass="form-input">
-                                    <f:selectItem itemLabel="Semester 1" itemValue="1" />
-                                    <f:selectItem itemLabel="Semester 2" itemValue="2" />
-                                </p:selectOneMenu>
+                                <label class="form-label">Semester</label>
+                                <h:selectOneMenu id="allSemester" value="#{reportBean.selectedSemester}"
+                                                 styleClass="form-control">
+                                    <f:selectItem itemValue="0" itemLabel="-- Select Semester --" />
+                                    <f:selectItem itemValue="1" itemLabel="Semester 1" />
+                                    <f:selectItem itemValue="2" itemLabel="Semester 2" />
+                                    <f:selectItem itemValue="3" itemLabel="Semester 3" />
+                                </h:selectOneMenu>
                             </div>
                             <div class="form-group">
-                                <p:outputLabel value="Target Year" styleClass="form-label" />
-                                <p:selectOneMenu value="#{reportBean.selectedYear}" styleClass="form-input">
-                                    <f:selectItems value="[1,2,3,4]" />
-                                </p:selectOneMenu>
+                                <label class="form-label">Year of Study</label>
+                                <h:selectOneMenu id="allYear" value="#{reportBean.selectedYear}"
+                                                 styleClass="form-control">
+                                    <f:selectItem itemValue="0" itemLabel="-- Select Year --" />
+                                    <f:selectItem itemValue="1" itemLabel="Year 1" />
+                                    <f:selectItem itemValue="2" itemLabel="Year 2" />
+                                    <f:selectItem itemValue="3" itemLabel="Year 3" />
+                                    <f:selectItem itemValue="4" itemLabel="Year 4" />
+                                </h:selectOneMenu>
                             </div>
                         </div>
-                        <p:commandButton value="Generate All Student Reports" actionListener="#{reportBean.generateAllReports}" update=":globalMessages" styleClass="btn btn-outline" style="width:100%; margin-top:15px;" />
+                        <div style="margin-top:14px;">
+                            <h:commandButton value="Generate All"
+                                             action="#{reportBean.generateAllReports}"
+                                             styleClass="btn btn-primary" />
+                        </div>
                     </h:form>
                 </div>
+
+                <p:dataTable value="#{reportBean.allReports}" var="rpt"
+                             emptyMessage="No reports generated yet">
+                    <p:column headerText="Student Code">
+                        <span class="cell-primary">#{rpt.studentCode}</span>
+                    </p:column>
+                    <p:column headerText="Student Name">#{rpt.studentName}</p:column>
+                    <p:column headerText="Programme">#{rpt.programme}</p:column>
+                    <p:column headerText="Semester">#{rpt.semester}</p:column>
+                    <p:column headerText="Year">#{rpt.yearOfStudy}</p:column>
+                    <p:column headerText="CGPA">
+                        <span class="#{rpt.cgpa >= 2.0 ? 'cgpa-good' : 'cgpa-low'}">
+                            <h:outputText value="#{rpt.cgpa}">
+                                <f:convertNumber maxFractionDigits="2" minFractionDigits="2" />
+                            </h:outputText>
+                        </span>
+                    </p:column>
+                    <p:column headerText="Courses">#{rpt.results.size()}</p:column>
+                </p:dataTable>
             </div>
-        </div>
-    </div>
-</div>
+
+        </div><!-- /page-content -->
+    </div><!-- /main-content -->
+</div><!-- /layout-shell -->
 </h:body>
 </html>

@@ -25,7 +25,7 @@ import jakarta.inject.Inject;
 @ViewScoped
 public class RecoveryBean implements Serializable {
 
-    @Inject
+    @EJB
     private RecoveryService recoveryService;
 
     @Inject
@@ -116,7 +116,8 @@ public class RecoveryBean implements Serializable {
     public void createPlan() {
         try {
             int actorId = (loginBean.getCurrentUser() != null) ? loginBean.getCurrentUser().getId().intValue() : 0;
-            recoveryService.createPlan(selectedStudentId, selectedCourseId, actorId);
+            RecoveryPlan newPlan = recoveryService.createPlan(selectedStudentId, selectedCourseId, actorId);
+            selectedPlanId = newPlan.getId().intValue();
             loadAllPlans();
             onPlanSelect();
             addInfo("Recovery Plan", "Recovery plan created successfully");

@@ -6,6 +6,7 @@ public class Course {
     private String courseCode;
     private String courseName;
     private int creditHours;
+    private String instructor;
     private String grade;
     private double gradePoint;
 
@@ -33,6 +34,9 @@ public class Course {
 
     public int getCreditHours() { return creditHours; }
     public void setCreditHours(int creditHours) { this.creditHours = creditHours; }
+
+    public String getInstructor() { return instructor; }
+    public void setInstructor(String instructor) { this.instructor = instructor; }
 
     public String getGrade() { return grade; }
     public void setGrade(String grade) { this.grade = grade; }

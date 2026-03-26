@@ -5,10 +5,11 @@ import com.epda.crs.exception.ValidationException;
 import com.epda.crs.model.Milestone;
 import com.epda.crs.model.RecoveryPlan;
 import com.epda.crs.service.RecoveryService;
-import jakarta.inject.Inject;
+import jakarta.ejb.EJB;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.List;
 @RequestScoped
 public class MilestoneBean implements Serializable {
 
-    @Inject
+    @EJB
     private RecoveryService recoveryService;
 
     @Inject

@@ -39,6 +39,7 @@ CREATE TABLE students (
     student_code     VARCHAR(50) UNIQUE,
     name             VARCHAR(100),
     programme        VARCHAR(100),
+    email            VARCHAR(100),
     year_of_study    INT,
     current_semester INT          DEFAULT 1,
     cgpa             DECIMAL(3,2) DEFAULT 0.00,
@@ -50,9 +51,10 @@ CREATE TABLE students (
 -- =========================
 CREATE TABLE courses (
     course_id    INT AUTO_INCREMENT PRIMARY KEY,
-    course_code  VARCHAR(20),
+    course_code  VARCHAR(20) UNIQUE,
     course_name  VARCHAR(100),
-    credit_hours INT
+    credit_hours INT,
+    instructor   VARCHAR(100)
 );
 
 -- =========================

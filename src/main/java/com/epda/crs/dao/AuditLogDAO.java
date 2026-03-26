@@ -4,6 +4,7 @@ import com.epda.crs.config.DBConnection;
 import com.epda.crs.model.AuditLog;
 import jakarta.enterprise.context.Dependent;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,7 +17,9 @@ import java.util.List;
 /**
  * DAO for audit_logs (log_id, user_id, action, entity_type, entity_id, description, logged_at).
  */
-public class AuditLogDAO {
+public class AuditLogDAO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     /** Looks up user_id for the given username. Returns null if not found. */
     private Integer resolveUserId(Connection conn, String username) throws SQLException {

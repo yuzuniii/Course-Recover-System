@@ -39,6 +39,8 @@ public class AuthService {
             throw new AuthenticationException("Account is inactive. Please contact the administrator.");
         }
 
+        userDAO.updateLastLogin(user.getId());
+        user.setLastLogin(java.time.LocalDateTime.now());
         auditLogService.logAction(username, "LOGIN_SUCCESS", "User", user.getId(), "User logged in successfully");
         return user;
         

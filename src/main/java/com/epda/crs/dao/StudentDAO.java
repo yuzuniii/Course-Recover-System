@@ -3,6 +3,7 @@ package com.epda.crs.dao;
 import com.epda.crs.config.DBConnection;
 import com.epda.crs.model.Student;
 import jakarta.enterprise.context.Dependent;
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,10 +11,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import jakarta.ejb.Stateless;
 
-@Stateless
-public class StudentDAO {
+@Dependent
+public class StudentDAO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Student mapRow(ResultSet rs) throws SQLException {
         Student s = new Student();
@@ -21,6 +23,7 @@ public class StudentDAO {
         s.setStudentNumber(rs.getString("student_code"));
         s.setFullName(rs.getString("name"));
         s.setProgramName(rs.getString("programme"));
+        s.setEmail(rs.getString("email"));
         s.setYearOfStudy(rs.getInt("year_of_study"));
         s.setSemester(rs.getInt("current_semester"));
         s.setCgpa(rs.getDouble("cgpa"));
@@ -71,16 +74,17 @@ public class StudentDAO {
     }
 
     public void save(Student student) {
-        String sql = "INSERT INTO students (student_code, name, programme, year_of_study, current_semester, cgpa) " +
-                     "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO students (student_code, name, programme, email, year_of_study, current_semester, cgpa) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, student.getStudentNumber());
             ps.setString(2, student.getFullName());
             ps.setString(3, student.getProgramName());
-            ps.setInt(4, student.getYearOfStudy());
-            ps.setInt(5, student.getSemester());
-            ps.setDouble(6, student.getCgpa());
+            ps.setString(4, student.getEmail());
+            ps.setInt(5, student.getYearOfStudy());
+            ps.setInt(6, student.getSemester());
+            ps.setDouble(7, student.getCgpa());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("StudentDAO.save failed", e);
@@ -100,17 +104,18 @@ public class StudentDAO {
     }
 
     public void update(Student student) {
-        String sql = "UPDATE students SET student_code = ?, name = ?, programme = ?, " +
+        String sql = "UPDATE students SET student_code = ?, name = ?, programme = ?, email = ?, " +
                      "year_of_study = ?, current_semester = ?, cgpa = ? WHERE student_id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, student.getStudentNumber());
             ps.setString(2, student.getFullName());
             ps.setString(3, student.getProgramName());
-            ps.setInt(4, student.getYearOfStudy());
-            ps.setInt(5, student.getSemester());
-            ps.setDouble(6, student.getCgpa());
-            ps.setInt(7, student.getId().intValue());
+            ps.setString(4, student.getEmail());
+            ps.setInt(5, student.getYearOfStudy());
+            ps.setInt(6, student.getSemester());
+            ps.setDouble(7, student.getCgpa());
+            ps.setInt(8, student.getId().intValue());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("StudentDAO.update failed", e);

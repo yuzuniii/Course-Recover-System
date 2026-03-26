@@ -4,13 +4,12 @@
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:p="http://primefaces.org/ui">
 <h:head>
-    <title>User Management — CRS</title>
+    <title>User Management - CRS</title>
     <link rel="stylesheet" type="text/css" href="#{request.contextPath}/css/styles.css" />
 </h:head>
 <h:body>
 <div class="layout-shell">
 
-    <!-- ── Sidebar ─────────────────────────────────────── -->
     <nav class="sidebar">
         <div class="sidebar-logo">
             <div class="logo-title">CRS</div>
@@ -63,10 +62,7 @@
         </div>
     </nav>
 
-    <!-- ── Main ────────────────────────────────────────── -->
     <div class="main-content">
-
-        <!-- Topbar -->
         <div class="topbar">
             <div class="topbar-left">
                 <div class="page-title">User Management</div>
@@ -74,7 +70,7 @@
             </div>
             <div class="topbar-actions">
                 <h:form id="topbarForm">
-                    <p:commandButton value="+ Add New User" 
+                    <p:commandButton value="+ Add New User"
                                      actionListener="#{userBean.prepareNewUser}"
                                      update=":userDialogForm:user-detail"
                                      oncomplete="PF('userDialog').show()"
@@ -84,8 +80,6 @@
         </div>
 
         <div class="page-content">
-
-            <!-- Messages -->
             <p:growl id="globalMessages" showDetail="true" />
 
             <div class="card">
@@ -94,7 +88,7 @@
                                  reflow="true" styleClass="modern-table"
                                  paginator="true" rows="10" paginatorPosition="bottom"
                                  emptyMessage="No users found.">
-                        
+
                         <p:column headerText="User" sortBy="#{user.fullName}">
                             <div style="display:flex; align-items:center; gap:12px;">
                                 <div class="avatar" style="width:32px; height:32px; font-size:10px;">
@@ -122,11 +116,11 @@
                         </p:column>
 
                         <p:column headerText="Actions" style="width:80px; text-align:center;">
-                            <p:commandButton icon="pi pi-user-edit" 
+                            <p:commandButton icon="pi pi-user-edit"
                                              actionListener="#{userBean.prepareEditUser(user)}"
                                              update=":userDialogForm:user-detail"
                                              oncomplete="PF('userDialog').show()"
-                                             styleClass="ui-button-rounded ui-button-text ui-button-plain" 
+                                             styleClass="ui-button-rounded ui-button-text ui-button-plain"
                                              title="Edit User" />
                         </p:column>
 
@@ -137,44 +131,41 @@
     </div>
 </div>
 
-<!-- ── User Details Dialog ──────────────────────────────── -->
-<p:dialog header="User Details" widgetVar="userDialog" modal="true" 
+<p:dialog header="User Details" widgetVar="userDialog" modal="true"
           width="500" responsive="true" showEffect="fade" hideEffect="fade"
           draggable="false" resizable="false" closable="true" styleClass="modern-dialog">
-    
+
     <h:form id="userDialogForm">
         <p:outputPanel id="user-detail" styleClass="dialog-content">
             <h:panelGroup rendered="#{not empty userBean.selectedUser}">
-                
-                <!-- Section: Personal Details -->
+
                 <div class="form-section">
                     <div class="form-section-header">Personal Details</div>
                     <div class="form-grid">
                         <div class="form-group">
                             <p:outputLabel for="fullName" value="Full Name" styleClass="form-label" />
-                            <p:inputText id="fullName" value="#{userBean.selectedUser.fullName}" 
+                            <p:inputText id="fullName" value="#{userBean.selectedUser.fullName}"
                                          required="true" styleClass="form-input" placeholder="e.g. John Doe" />
                         </div>
                         <div class="form-group">
                             <p:outputLabel for="email" value="Email Address" styleClass="form-label" />
-                            <p:inputText id="email" value="#{userBean.selectedUser.email}" 
+                            <p:inputText id="email" value="#{userBean.selectedUser.email}"
                                          required="true" styleClass="form-input" placeholder="john@example.com" />
                         </div>
                     </div>
                 </div>
 
-                <!-- Section: Account Settings -->
                 <div class="form-section">
                     <div class="form-section-header">Account Settings</div>
                     <div class="form-grid-2">
                         <div class="form-group">
                             <p:outputLabel for="username" value="Username" styleClass="form-label" />
-                            <p:inputText id="username" value="#{userBean.selectedUser.username}" 
+                            <p:inputText id="username" value="#{userBean.selectedUser.username}"
                                          required="true" styleClass="form-input" />
                         </div>
                         <div class="form-group">
                             <p:outputLabel for="password" value="Password" styleClass="form-label" />
-                            <p:password id="password" value="#{userBean.selectedUser.password}" 
+                            <p:password id="password" value="#{userBean.selectedUser.password}"
                                         styleClass="form-input" feedback="true" toggleMask="true" redisplay="true" />
                         </div>
                         <div class="form-group">
@@ -192,35 +183,38 @@
                     </div>
                 </div>
 
-                <!-- Metadata (Only for Edit) -->
                 <h:panelGroup rendered="#{not empty userBean.selectedUser.id and userBean.selectedUser.id ne 0}" styleClass="metadata-box">
                     <div class="metadata-text">
-                        Created: <h:outputText value="#{userBean.selectedUser.createdAt}">
+                        Created:
+                        <h:outputText value="#{userBean.selectedUser.createdAt}">
                             <f:convertDateTime pattern="MMM dd, yyyy HH:mm" type="localDateTime" />
                         </h:outputText>
                     </div>
-                    <div class="metadata-text">
-                        Last Login: <h:outputText value="#{userBean.selectedUser.lastLogin != null ? userBean.selectedUser.lastLogin : 'Never'}">
+                    <h:panelGroup rendered="#{not empty userBean.selectedUser.lastLogin}" layout="block" styleClass="metadata-text">
+                        Last Login:
+                        <h:outputText value="#{userBean.selectedUser.lastLogin}">
                             <f:convertDateTime pattern="MMM dd, yyyy HH:mm" type="localDateTime" />
                         </h:outputText>
-                    </div>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{empty userBean.selectedUser.lastLogin}" layout="block" styleClass="metadata-text">
+                        Last Login: Never
+                    </h:panelGroup>
                 </h:panelGroup>
 
-                <!-- Footer Actions -->
                 <div class="dialog-footer">
-                    <p:commandButton value="Delete User" 
+                    <p:commandButton value="Delete User"
                                      icon="pi pi-trash"
                                      rendered="#{not empty userBean.selectedUser.id and userBean.selectedUser.id ne 0}"
                                      oncomplete="PF('confirmDelete').show()"
                                      styleClass="btn btn-danger" />
-                    
-                    <p:commandButton value="Cancel" 
+
+                    <p:commandButton value="Cancel"
                                      icon="pi pi-times"
                                      onclick="PF('userDialog').hide()"
                                      type="button"
                                      styleClass="btn btn-outline" />
-                    
-                    <p:commandButton value="Save Changes" 
+
+                    <p:commandButton value="Save Changes"
                                      icon="pi pi-check"
                                      actionListener="#{userBean.saveUser}"
                                      update="user-detail :form:dt-users :globalMessages"
@@ -232,19 +226,18 @@
     </h:form>
 </p:dialog>
 
-<!-- ── Delete Confirmation Dialog ───────────────────────── -->
 <p:confirmDialog widgetVar="confirmDelete" showEffect="fade" width="300"
-                message="Are you sure you want to permanently delete this user?"
-                header="Confirm Deletion" severity="warn">
+                 message="Are you sure you want to permanently delete this user?"
+                 header="Confirm Deletion" severity="warn">
     <h:form id="deleteConfirmForm">
-        <p:commandButton value="Yes, Delete" 
+        <p:commandButton value="Yes, Delete"
                          icon="pi pi-check"
                          actionListener="#{userBean.deleteUser}"
                          update=":form:dt-users :globalMessages"
                          oncomplete="PF('confirmDelete').hide(); PF('userDialog').hide()"
                          styleClass="btn btn-danger" />
-        <p:commandButton value="No, Keep" 
-                         type="button" 
+        <p:commandButton value="No, Keep"
+                         type="button"
                          styleClass="btn btn-outline"
                          onclick="PF('confirmDelete').hide()" />
     </h:form>

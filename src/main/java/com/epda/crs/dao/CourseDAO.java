@@ -3,6 +3,7 @@ package com.epda.crs.dao;
 import com.epda.crs.config.DBConnection;
 import com.epda.crs.model.Course;
 import jakarta.enterprise.context.Dependent;
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,10 +11,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import jakarta.ejb.Stateless;
 
-@Stateless
-public class CourseDAO {
+@Dependent
+public class CourseDAO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Course mapRow(ResultSet rs) throws SQLException {
         Course c = new Course();
@@ -21,6 +23,7 @@ public class CourseDAO {
         c.setCourseCode(rs.getString("course_code"));
         c.setCourseName(rs.getString("course_name"));
         c.setCreditHours(rs.getInt("credit_hours"));
+        c.setInstructor(rs.getString("instructor"));
         // grade and gradePoint are not stored in the courses table;
         // they are populated by ResultDAO when reading student_course_results.
         c.setGrade("");

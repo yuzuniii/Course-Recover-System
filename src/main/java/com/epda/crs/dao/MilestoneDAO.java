@@ -3,6 +3,7 @@ package com.epda.crs.dao;
 import com.epda.crs.config.DBConnection;
 import com.epda.crs.enums.MilestoneStatus;
 import com.epda.crs.model.Milestone;
+import jakarta.enterprise.context.Dependent;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -11,6 +12,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Dependent
 public class MilestoneDAO {
 
     private Milestone mapRow(ResultSet rs) throws SQLException {

@@ -17,6 +17,7 @@ import com.epda.crs.model.Student;
 import com.epda.crs.util.EmailUtil;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -24,12 +25,23 @@ import java.util.Optional;
 @Stateless
 public class RecoveryService {
 
-    private final RecoveryDAO               recoveryDAO       = new RecoveryDAO();
-    private final MilestoneDAO              milestoneDAO      = new MilestoneDAO();
-    private final StudentDAO                studentDAO        = new StudentDAO();
-    private final CourseDAO                 courseDAO         = new CourseDAO();
-    private final RecoveryRecommendationDAO recommendationDAO = new RecoveryRecommendationDAO();
-    private final UserDAO                   userDAO           = new UserDAO();
+    @Inject
+    private RecoveryDAO recoveryDAO;
+
+    @Inject
+    private MilestoneDAO milestoneDAO;
+
+    @Inject
+    private StudentDAO studentDAO;
+
+    @Inject
+    private CourseDAO courseDAO;
+
+    @Inject
+    private RecoveryRecommendationDAO recommendationDAO;
+
+    @Inject
+    private UserDAO userDAO;
 
     @EJB
     private RecoveryRuleService recoveryRuleService;

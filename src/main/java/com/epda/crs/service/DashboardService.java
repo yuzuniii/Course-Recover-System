@@ -3,15 +3,24 @@ package com.epda.crs.service;
 import com.epda.crs.dao.StudentDAO;
 import com.epda.crs.dto.DashboardAnalyticsDTO;
 import com.epda.crs.model.RecoveryPlan;
+import jakarta.ejb.EJB;
 import java.util.List;
 import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class DashboardService {
-    private final RecoveryService recoveryService = new RecoveryService();
-    private final EligibilityService eligibilityService = new EligibilityService();
-    private final RecoveryRuleService recoveryRuleService = new RecoveryRuleService();
-    private final StudentDAO studentDAO = new StudentDAO();
+    @EJB
+    private RecoveryService recoveryService;
+
+    @EJB
+    private EligibilityService eligibilityService;
+
+    @EJB
+    private RecoveryRuleService recoveryRuleService;
+
+    @Inject
+    private StudentDAO studentDAO;
 
     public DashboardAnalyticsDTO getAnalytics() {
         List<RecoveryPlan> plans = recoveryService.getRecoveryPlans();

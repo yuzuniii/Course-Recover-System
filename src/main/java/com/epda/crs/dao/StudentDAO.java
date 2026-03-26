@@ -2,6 +2,7 @@ package com.epda.crs.dao;
 
 import com.epda.crs.config.DBConnection;
 import com.epda.crs.model.Student;
+import jakarta.enterprise.context.Dependent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Dependent
 public class StudentDAO {
 
     private Student mapRow(ResultSet rs) throws SQLException {

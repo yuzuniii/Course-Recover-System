@@ -9,14 +9,18 @@ import com.epda.crs.util.CGPACalculator;
 import com.epda.crs.util.EmailUtil;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Stateless
 public class ReportService {
 
-    private final StudentDAO studentDAO = new StudentDAO();
-    private final ResultDAO  resultDAO  = new ResultDAO();
+    @Inject
+    private StudentDAO studentDAO;
+
+    @Inject
+    private ResultDAO resultDAO;
 
     @EJB
     private AuditLogService auditLogService;

@@ -6,6 +6,7 @@ import com.epda.crs.model.Student;
 import com.epda.crs.service.EligibilityService;
 import java.io.Serializable;
 import java.util.List;
+import jakarta.ejb.EJB;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 
@@ -13,7 +14,9 @@ import jakarta.inject.Named;
 @ViewScoped
 public class StudentBean implements Serializable {
     private final StudentDAO studentDAO = new StudentDAO();
-    private final EligibilityService eligibilityService = new EligibilityService();
+
+    @EJB
+    private EligibilityService eligibilityService;
 
     public List<Student> getStudents() { return studentDAO.findAll(); }
     public List<EligibilityDTO> getEligibilityResults() { return eligibilityService.getEligibilityBreakdown(); }

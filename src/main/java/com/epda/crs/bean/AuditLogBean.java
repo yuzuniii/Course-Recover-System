@@ -5,16 +5,15 @@ import com.epda.crs.service.AuditLogService;
 import java.io.Serializable;
 import java.util.List;
 import jakarta.annotation.PostConstruct;
+import jakarta.ejb.EJB;
 import jakarta.faces.view.ViewScoped;
-import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 @Named
 @ViewScoped
 public class AuditLogBean implements Serializable {
     
-    // 1. Let the JEE container manage the EJB lifecycle
-    @Inject
+    @EJB
     private AuditLogService auditLogService;
 
     // 2. Store the list in a variable so it stays stable across the view

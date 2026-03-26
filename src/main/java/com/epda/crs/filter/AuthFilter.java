@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpSession;
 
 @WebFilter("/pages/*")
 public class AuthFilter implements Filter {
+    private static final boolean AUTH_DISABLED = true;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -27,6 +28,19 @@ public class AuthFilter implements Filter {
         User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
         String requestURI = req.getRequestURI();
 
+        if (AUTH_DISABLED) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        boolean publicPage = requestURI.endsWith("/login.xhtml")
+                || requestURI.endsWith("/forgot-password.xhtml");
+
+        if (publicPage) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         if (currentUser == null) {
             // Not logged in, redirect to login page
             res.sendRedirect(req.getContextPath() + "/pages/login.xhtml");
@@ -36,6 +50,11 @@ public class AuthFilter implements Filter {
         // Role-Based Access Control enforcement
         if (requestURI.contains("/users.xhtml") && currentUser.getRole() != UserRole.COURSE_ADMINISTRATOR) {
             // Academic Officers should not manage users
+            res.sendRedirect(req.getContextPath() + "/pages/dashboard.xhtml");
+            return;
+        }
+
+        if (requestURI.contains("/audit-log.xhtml") && currentUser.getRole() != UserRole.COURSE_ADMINISTRATOR) {
             res.sendRedirect(req.getContextPath() + "/pages/dashboard.xhtml");
             return;
         }

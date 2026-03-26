@@ -2,6 +2,7 @@ package com.epda.crs.dao;
 
 import com.epda.crs.config.DBConnection;
 import com.epda.crs.dto.EligibilityDTO;
+import jakarta.enterprise.context.Dependent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,6 +25,7 @@ import java.util.List;
  *   checked_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
  *   checked_by     INT  (FK to users.user_id)
  */
+@Dependent
 public class EligibilityDAO {
 
     private EligibilityDTO mapRow(ResultSet rs) throws SQLException {

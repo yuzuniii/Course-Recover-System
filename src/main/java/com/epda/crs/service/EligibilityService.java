@@ -10,16 +10,24 @@ import com.epda.crs.model.Student;
 import com.epda.crs.util.CGPACalculator;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Stateless
 public class EligibilityService {
 
-    private final StudentDAO     studentDAO     = new StudentDAO();
-    private final ResultDAO      resultDAO      = new ResultDAO();
-    private final EligibilityDAO eligibilityDAO = new EligibilityDAO();
-    private final EnrollmentDAO  enrollmentDAO  = new EnrollmentDAO();
+    @Inject
+    private StudentDAO studentDAO;
+
+    @Inject
+    private ResultDAO resultDAO;
+
+    @Inject
+    private EligibilityDAO eligibilityDAO;
+
+    @Inject
+    private EnrollmentDAO enrollmentDAO;
 
     @EJB
     private AuditLogService auditLogService;

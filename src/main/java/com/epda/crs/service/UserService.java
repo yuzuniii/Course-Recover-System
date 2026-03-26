@@ -2,17 +2,18 @@ package com.epda.crs.service;
 
 import com.epda.crs.dao.UserDAO;
 import com.epda.crs.model.User;
+import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import java.util.List;
 
 @Stateless
 public class UserService {
-    
+
     @Inject
     private UserDAO userDAO;
 
-    @Inject
+    @EJB
     private AuditLogService auditLogService;
 
     public List<User> getUsers() { 

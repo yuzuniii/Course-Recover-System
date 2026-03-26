@@ -5,6 +5,7 @@ import com.epda.crs.enums.RecoveryStatus;
 import com.epda.crs.model.Course;
 import com.epda.crs.model.RecoveryPlan;
 import com.epda.crs.model.Student;
+import jakarta.enterprise.context.Dependent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Dependent
 public class RecoveryDAO {
 
     private static final String BASE_SELECT =

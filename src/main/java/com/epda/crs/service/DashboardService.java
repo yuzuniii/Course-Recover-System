@@ -45,6 +45,10 @@ public class DashboardService {
         return auditLogDAO.findRecentActivity(5);
     }
 
+    public java.util.Map<String, Integer> getUsageTrend() {
+        return auditLogDAO.getUsageTrend();
+    }
+
     public Map<String, Double> getAverageCgpaByMajor() {
         return studentDAO.getAverageCgpaByMajor();
     }

@@ -16,6 +16,7 @@ import com.epda.crs.model.RecoveryRecommendation;
 import com.epda.crs.model.Student;
 import com.epda.crs.util.EmailUtil;
 import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -23,17 +24,17 @@ import java.util.Optional;
 @Stateless
 public class RecoveryService {
 
-    private final RecoveryDAO               recoveryDAO       = new RecoveryDAO();
-    private final MilestoneDAO              milestoneDAO      = new MilestoneDAO();
-    private final StudentDAO                studentDAO        = new StudentDAO();
-    private final CourseDAO                 courseDAO         = new CourseDAO();
-    private final RecoveryRecommendationDAO recommendationDAO = new RecoveryRecommendationDAO();
-    private final UserDAO                   userDAO           = new UserDAO();
+    @Inject private RecoveryDAO               recoveryDAO;
+    @Inject private MilestoneDAO              milestoneDAO;
+    @Inject private StudentDAO                studentDAO;
+    @Inject private CourseDAO                 courseDAO;
+    @Inject private RecoveryRecommendationDAO recommendationDAO;
+    @Inject private UserDAO                   userDAO;
 
-    @EJB
+    @Inject
     private RecoveryRuleService recoveryRuleService;
 
-    @EJB
+    @Inject
     private AuditLogService auditLogService;
 
     // -----------------------------------------------------------------------
@@ -103,54 +104,61 @@ public class RecoveryService {
         return plan;
     }
 
-    public void updatePlan(RecoveryPlan plan) {
+    public void updatePlan(RecoveryPlan plan, String actorUsername) {
         if (plan == null) throw new ValidationException("Recovery plan must not be null");
         recoveryDAO.update(plan);
+        auditLogService.logAction(actorUsername, "UPDATE_PLAN", "RECOVERY_PLAN", plan.getId(), "Updated recovery plan details");
     }
 
-    public void updateStatus(int planId, RecoveryStatus status) {
+    public void updateStatus(int planId, RecoveryStatus status, String actorUsername) {
         if (planId <= 0) throw new ValidationException("Invalid plan ID");
         if (status == null) throw new ValidationException("Status must not be null");
         recoveryDAO.updateStatus((long) planId, status);
+        auditLogService.logAction(actorUsername, "UPDATE_PLAN_STATUS", "RECOVERY_PLAN", (long) planId, "Updated plan status to " + status);
     }
 
     // -----------------------------------------------------------------------
     // Milestone management
     // -----------------------------------------------------------------------
 
-    public void addMilestone(Milestone milestone) {
+    public void addMilestone(Milestone milestone, String actorUsername) {
         if (milestone == null) throw new ValidationException("Milestone must not be null");
         milestoneDAO.save(milestone);
+        auditLogService.logAction(actorUsername, "ADD_MILESTONE", "RECOVERY_MILESTONE", milestone.getId(), "Added milestone to plan " + milestone.getRecoveryPlanId());
     }
 
-    public void updateMilestone(Milestone milestone) {
+    public void updateMilestone(Milestone milestone, String actorUsername) {
         if (milestone == null) throw new ValidationException("Milestone must not be null");
         milestoneDAO.update(milestone);
+        auditLogService.logAction(actorUsername, "UPDATE_MILESTONE", "RECOVERY_MILESTONE", milestone.getId(), "Updated milestone details");
     }
 
-    public void updateMilestoneStatus(int milestoneId, MilestoneStatus status) {
+    public void updateMilestoneStatus(int milestoneId, MilestoneStatus status, String actorUsername) {
         if (milestoneId <= 0) throw new ValidationException("Invalid milestone ID");
         if (status == null) throw new ValidationException("Status must not be null");
         milestoneDAO.updateStatus((long) milestoneId, status);
+        auditLogService.logAction(actorUsername, "UPDATE_MILESTONE_STATUS", "RECOVERY_MILESTONE", (long) milestoneId, "Updated milestone status to " + status);
     }
 
     // -----------------------------------------------------------------------
     // Recommendation management
     // -----------------------------------------------------------------------
 
-    public void addRecommendation(RecoveryRecommendation recommendation) {
+    public void addRecommendation(RecoveryRecommendation recommendation, String actorUsername) {
         if (recommendation == null) throw new ValidationException("Recommendation must not be null");
         recommendationDAO.save(recommendation);
-    }
+auditLogService.logAction(actorUsername, "ADD_RECOMMENDATION", "RECOVERY_RECOMMENDATION", recommendation.getId(), "Added recommendation to plan " + recommendation.getPlanId());    }
 
-    public void updateRecommendation(RecoveryRecommendation recommendation) {
+    public void updateRecommendation(RecoveryRecommendation recommendation, String actorUsername) {
         if (recommendation == null) throw new ValidationException("Recommendation must not be null");
         recommendationDAO.update(recommendation);
+        auditLogService.logAction(actorUsername, "UPDATE_RECOMMENDATION", "RECOVERY_RECOMMENDATION", recommendation.getId(), "Updated recommendation details");
     }
 
-    public void deleteRecommendation(long recId) {
+    public void deleteRecommendation(long recId, String actorUsername) {
         if (recId <= 0) throw new ValidationException("Invalid recommendation ID");
         recommendationDAO.delete(recId);
+        auditLogService.logAction(actorUsername, "DELETE_RECOMMENDATION", "RECOVERY_RECOMMENDATION", recId, "Deleted recommendation");
     }
 
     // -----------------------------------------------------------------------

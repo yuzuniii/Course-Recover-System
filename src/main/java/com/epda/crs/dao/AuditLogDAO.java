@@ -102,6 +102,30 @@ public class AuditLogDAO {
         return list;
     }
 
+    /**
+     * Fetches activity counts for the last 7 days.
+     * Returns a map of Day (e.g., "Mon") -> Count.
+     */
+    public java.util.Map<String, Integer> getUsageTrend() {
+        String sql = "SELECT DATE_FORMAT(logged_at, '%a') as day_name, COUNT(*) as count " +
+                     "FROM audit_logs " +
+                     "WHERE logged_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) " +
+                     "GROUP BY DATE(logged_at), day_name " +
+                     "ORDER BY DATE(logged_at) ASC";
+        
+        java.util.Map<String, Integer> trend = new java.util.LinkedHashMap<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                trend.put(rs.getString("day_name"), rs.getInt("count"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("AuditLogDAO.getUsageTrend failed", e);
+        }
+        return trend;
+    }
+
     public List<AuditLog> findByUserId(int userId) {
         String sql = BASE_SELECT + "WHERE al.user_id = ? ORDER BY al.logged_at DESC";
         List<AuditLog> list = new ArrayList<>();

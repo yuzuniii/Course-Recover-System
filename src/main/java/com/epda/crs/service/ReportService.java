@@ -12,13 +12,15 @@ import jakarta.ejb.Stateless;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import jakarta.inject.Inject;
+
 @Stateless
 public class ReportService {
 
-    private final StudentDAO studentDAO = new StudentDAO();
-    private final ResultDAO  resultDAO  = new ResultDAO();
+    @Inject private StudentDAO studentDAO;
+    @Inject private ResultDAO  resultDAO;
 
-    @EJB
+    @Inject
     private AuditLogService auditLogService;
 
     // -----------------------------------------------------------------------

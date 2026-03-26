@@ -2,32 +2,61 @@ package com.epda.crs.bean;
 
 import com.epda.crs.model.AuditLog;
 import com.epda.crs.service.AuditLogService;
-import java.io.Serializable;
-import java.util.List;
 import jakarta.annotation.PostConstruct;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import java.io.Serializable;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Named
 @ViewScoped
 public class AuditLogBean implements Serializable {
-    
-    // 1. Let the JEE container manage the EJB lifecycle
+
     @Inject
     private AuditLogService auditLogService;
 
-    // 2. Store the list in a variable so it stays stable across the view
     private List<AuditLog> auditLogs;
+    private List<AuditLog> filteredAuditLogs;
+    private List<String> actionTypes;
+    private List<String> actors;
 
-    // 3. Fetch the data ONLY ONCE when the page loads
     @PostConstruct
     public void init() {
         auditLogs = auditLogService.getAuditLogs();
+        
+        // Populate filter options
+        actionTypes = auditLogs.stream()
+                .map(AuditLog::getActionType)
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+        
+        actors = auditLogs.stream()
+                .map(AuditLog::getActorUsername)
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
     }
 
-    // 4. Return the stored list without re-querying the database
-    public List<AuditLog> getAuditLogs() { 
-        return auditLogs; 
+    public List<AuditLog> getAuditLogs() {
+        return auditLogs;
+    }
+
+    public List<AuditLog> getFilteredAuditLogs() {
+        return filteredAuditLogs;
+    }
+
+    public void setFilteredAuditLogs(List<AuditLog> filteredAuditLogs) {
+        this.filteredAuditLogs = filteredAuditLogs;
+    }
+
+    public List<String> getActionTypes() {
+        return actionTypes;
+    }
+
+    public List<String> getActors() {
+        return actors;
     }
 }

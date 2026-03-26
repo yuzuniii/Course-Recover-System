@@ -5,7 +5,7 @@ import com.epda.crs.exception.ValidationException;
 import com.epda.crs.model.Milestone;
 import com.epda.crs.model.RecoveryPlan;
 import com.epda.crs.service.RecoveryService;
-import jakarta.ejb.EJB;
+import jakarta.inject.Inject;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
@@ -18,8 +18,11 @@ import java.util.List;
 @RequestScoped
 public class MilestoneBean implements Serializable {
 
-    @EJB
+    @Inject
     private RecoveryService recoveryService;
+
+    @Inject
+    private LoginBean loginBean;
 
     private List<Milestone> milestones;
     private Milestone selectedMilestone;
@@ -29,6 +32,11 @@ public class MilestoneBean implements Serializable {
     // -----------------------------------------------------------------------
     // Actions
     // -----------------------------------------------------------------------
+
+    private String getActor() {
+        return (loginBean != null && loginBean.getCurrentUser() != null) 
+                ? loginBean.getCurrentUser().getUsername() : "system";
+    }
 
     public void loadMilestones() {
         try {
@@ -45,7 +53,7 @@ public class MilestoneBean implements Serializable {
     public void addMilestone() {
         try {
             newMilestone.setRecoveryPlanId((long) selectedPlanId);
-            recoveryService.addMilestone(newMilestone);
+            recoveryService.addMilestone(newMilestone, getActor());
             loadMilestones();
             newMilestone = new Milestone();
             addInfo("Milestone", "Milestone added successfully");
@@ -58,7 +66,7 @@ public class MilestoneBean implements Serializable {
 
     public void updateMilestone() {
         try {
-            recoveryService.updateMilestone(selectedMilestone);
+            recoveryService.updateMilestone(selectedMilestone, getActor());
             loadMilestones();
             addInfo("Milestone", "Milestone updated successfully");
         } catch (ValidationException e) {
@@ -70,7 +78,7 @@ public class MilestoneBean implements Serializable {
 
     public void updateStatus(int milestoneId, MilestoneStatus status) {
         try {
-            recoveryService.updateMilestoneStatus(milestoneId, status);
+            recoveryService.updateMilestoneStatus(milestoneId, status, getActor());
             loadMilestones();
             addInfo("Milestone", "Milestone status updated successfully");
         } catch (ValidationException e) {

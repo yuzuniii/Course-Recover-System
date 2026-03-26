@@ -18,24 +18,36 @@ import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
+import jakarta.inject.Inject;
 
 @Named
 @ViewScoped
 public class RecoveryBean implements Serializable {
 
-    @EJB
+    @Inject
     private RecoveryService recoveryService;
 
-    private List<RecoveryPlan> recoveryPlans;
+    @Inject
+    private StudentDAO studentDAO;
+
+    @Inject
+    private CourseDAO courseDAO;
+
+    @Inject
+    private ResultDAO resultDAO;
+
+    @Inject
+    private LoginBean loginBean;
+
+    private java.util.List<RecoveryPlan> recoveryPlans;
     private RecoveryPlan selectedPlan;
     private int selectedStudentId;
     private int selectedCourseId;
-    private List<Student> students;
-    private List<Course> courses;
-    private List<Course> failedCourses;
+    private java.util.List<Student> students;
+    private java.util.List<Course> courses;
+    private java.util.List<Course> failedCourses;
     private RecoveryRecommendation newRecommendation = new RecoveryRecommendation();
-    private List<RecoveryRecommendation> recommendations = new ArrayList<>();
+    private java.util.List<RecoveryRecommendation> recommendations = new ArrayList<>();
 
     // -----------------------------------------------------------------------
     // Lifecycle
@@ -44,12 +56,12 @@ public class RecoveryBean implements Serializable {
     @PostConstruct
     public void init() {
         try {
-            students = new StudentDAO().findAll();
+            students = studentDAO.findAll();
         } catch (Exception e) {
             students = new ArrayList<>();
         }
         try {
-            courses = new CourseDAO().findAll();
+            courses = courseDAO.findAll();
         } catch (Exception e) {
             courses = new ArrayList<>();
         }
@@ -101,7 +113,8 @@ public class RecoveryBean implements Serializable {
 
     public void createPlan() {
         try {
-            recoveryService.createPlan(selectedStudentId, selectedCourseId, 0);
+            int actorId = (loginBean.getCurrentUser() != null) ? loginBean.getCurrentUser().getId().intValue() : 0;
+            recoveryService.createPlan(selectedStudentId, selectedCourseId, actorId);
             loadAllPlans();
             addInfo("Recovery Plan", "Recovery plan created successfully");
         } catch (ValidationException e) {
@@ -113,7 +126,8 @@ public class RecoveryBean implements Serializable {
 
     public void updatePlanStatus(int planId, RecoveryStatus status) {
         try {
-            recoveryService.updateStatus(planId, status);
+            String actor = (loginBean.getCurrentUser() != null) ? loginBean.getCurrentUser().getUsername() : "system";
+            recoveryService.updateStatus(planId, status, actor);
             loadAllPlans();
             addInfo("Recovery Plan", "Plan status updated successfully");
         } catch (ValidationException e) {
@@ -126,8 +140,9 @@ public class RecoveryBean implements Serializable {
     public void addRecommendation() {
         if (selectedPlan == null) return;
         try {
+            String actor = (loginBean.getCurrentUser() != null) ? loginBean.getCurrentUser().getUsername() : "system";
             newRecommendation.setPlanId(selectedPlan.getId());
-            recoveryService.addRecommendation(newRecommendation);
+            recoveryService.addRecommendation(newRecommendation, actor);
             newRecommendation = new RecoveryRecommendation();
             refreshRecommendations();
             addInfo("Recommendation", "Recommendation added successfully");
@@ -141,7 +156,8 @@ public class RecoveryBean implements Serializable {
     public void deleteRecommendation(long recId) {
         if (selectedPlan == null) return;
         try {
-            recoveryService.deleteRecommendation(recId);
+            String actor = (loginBean.getCurrentUser() != null) ? loginBean.getCurrentUser().getUsername() : "system";
+            recoveryService.deleteRecommendation(recId, actor);
             refreshRecommendations();
             addInfo("Recommendation", "Recommendation deleted successfully");
         } catch (ValidationException e) {
@@ -167,9 +183,8 @@ public class RecoveryBean implements Serializable {
             return;
         }
         try {
-            CourseDAO courseDAO = new CourseDAO();
-            List<Integer> ids = new ResultDAO().findFailedCourseIds(studentId);
-            List<Course> failed = new ArrayList<>();
+            java.util.List<Integer> ids = resultDAO.findFailedCourseIds(studentId);
+            java.util.List<Course> failed = new ArrayList<>();
             for (int id : ids) {
                 courseDAO.findById((long) id).ifPresent(failed::add);
             }
@@ -207,8 +222,8 @@ public class RecoveryBean implements Serializable {
     // Getters and setters
     // -----------------------------------------------------------------------
 
-    public List<RecoveryPlan> getRecoveryPlans() { return recoveryPlans; }
-    public void setRecoveryPlans(List<RecoveryPlan> recoveryPlans) { this.recoveryPlans = recoveryPlans; }
+    public java.util.List<RecoveryPlan> getRecoveryPlans() { return recoveryPlans; }
+    public void setRecoveryPlans(java.util.List<RecoveryPlan> recoveryPlans) { this.recoveryPlans = recoveryPlans; }
 
     public RecoveryPlan getSelectedPlan() { return selectedPlan; }
     public void setSelectedPlan(RecoveryPlan selectedPlan) {
@@ -222,20 +237,20 @@ public class RecoveryBean implements Serializable {
     public int getSelectedCourseId() { return selectedCourseId; }
     public void setSelectedCourseId(int selectedCourseId) { this.selectedCourseId = selectedCourseId; }
 
-    public List<Student> getStudents() { return students; }
-    public void setStudents(List<Student> students) { this.students = students; }
+    public java.util.List<Student> getStudents() { return students; }
+    public void setStudents(java.util.List<Student> students) { this.students = students; }
 
-    public List<Course> getCourses() { return courses; }
-    public void setCourses(List<Course> courses) { this.courses = courses; }
+    public java.util.List<Course> getCourses() { return courses; }
+    public void setCourses(java.util.List<Course> courses) { this.courses = courses; }
 
-    public List<Course> getFailedCourses() { return failedCourses; }
-    public void setFailedCourses(List<Course> failedCourses) { this.failedCourses = failedCourses; }
+    public java.util.List<Course> getFailedCourses() { return failedCourses; }
+    public void setFailedCourses(java.util.List<Course> failedCourses) { this.failedCourses = failedCourses; }
 
     public RecoveryRecommendation getNewRecommendation() { return newRecommendation; }
     public void setNewRecommendation(RecoveryRecommendation newRecommendation) { this.newRecommendation = newRecommendation; }
 
-    public List<RecoveryRecommendation> getRecommendations() { return recommendations; }
-    public void setRecommendations(List<RecoveryRecommendation> recommendations) { this.recommendations = recommendations; }
+    public java.util.List<RecoveryRecommendation> getRecommendations() { return recommendations; }
+    public void setRecommendations(java.util.List<RecoveryRecommendation> recommendations) { this.recommendations = recommendations; }
 
     // -----------------------------------------------------------------------
     // Private helpers

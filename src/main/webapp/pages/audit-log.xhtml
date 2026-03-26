@@ -4,164 +4,119 @@
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:p="http://primefaces.org/ui">
 <h:head>
-    <f:facet name="first">
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    </f:facet>
-    <title>Audit Log - CRS</title>
-    
-    <style>
-        /* Base Instagram-like styling */
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #fafafa;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            color: #262626;
-        }
-
-        /* Instagram Top Navigation Bar */
-        .top-nav {
-            background-color: #ffffff;
-            border-bottom: 1px solid #dbdbdb;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .nav-content {
-            width: 100%;
-            max-width: 935px; /* Instagram's standard content width */
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-        }
-
-        .nav-brand {
-            font-size: 20px;
-            font-weight: 600;
-            text-decoration: none;
-            color: #262626;
-        }
-
-        .nav-links a {
-            color: #0095f6; /* Instagram Blue */
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        /* Main Content Container */
-        .main-container {
-            max-width: 935px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-
-        .page-header {
-            font-size: 24px;
-            font-weight: 300;
-            margin-bottom: 20px;
-            color: #262626;
-        }
-
-        /* White Card for the Data Table */
-        .ig-card {
-            background-color: #ffffff;
-            border: 1px solid #dbdbdb;
-            border-radius: 4px;
-            overflow: hidden; 
-        }
-
-        /* PrimeFaces Table Overrides for minimalist look */
-        body .ui-datatable .ui-datatable-header,
-        body .ui-datatable .ui-paginator {
-            background-color: #ffffff;
-            border: none;
-            border-bottom: 1px solid #dbdbdb;
-        }
-        
-        body .ui-datatable .ui-datatable-data > tr > td {
-            border-color: #efefef;
-            padding: 12px 15px;
-            font-size: 14px;
-        }
-        
-        body .ui-datatable .ui-column-title {
-            font-weight: 600;
-            font-size: 14px;
-            color: #262626;
-        }
-
-        /* Stylized Action Badge */
-        .action-badge {
-            background-color: #efefef;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #262626;
-            text-transform: uppercase;
-        }
-    </style>
+    <title>Audit Logs — CRS</title>
+    <link rel="stylesheet" type="text/css" href="#{request.contextPath}/css/styles.css" />
 </h:head>
 <h:body>
-    
-    <div class="top-nav">
-        <div class="nav-content">
-            <h:outputLink value="#{request.contextPath}/pages/dashboard.xhtml" class="nav-brand">
-                CRS Admin
-            </h:outputLink>
-            <div class="nav-links">
-                <h:outputLink value="#{request.contextPath}/pages/dashboard.xhtml">Back to Dashboard</h:outputLink>
+<div class="layout-shell">
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-title">CRS</div>
+            <div class="logo-sub">Course Recovery System</div>
+        </div>
+        <div class="nav-section">
+            <div class="nav-label">Main</div>
+            <a href="#{request.contextPath}/pages/dashboard.xhtml" class="nav-item">■ Dashboard</a>
+            <a href="#{request.contextPath}/pages/students.xhtml" class="nav-item">■ Students</a>
+            <div class="nav-label" style="margin-top:12px;">Academic</div>
+            <a href="#{request.contextPath}/pages/eligibility.xhtml" class="nav-item">✓ Eligibility</a>
+            <a href="#{request.contextPath}/pages/recovery.xhtml" class="nav-item">■ Recovery</a>
+            <a href="#{request.contextPath}/pages/reports.xhtml" class="nav-item">■ Reports</a>
+            <div class="nav-label" style="margin-top:12px;">System</div>
+            <a href="#{request.contextPath}/pages/users.xhtml" class="nav-item">■ Users</a>
+            <a href="#{request.contextPath}/pages/audit-log.xhtml" class="nav-item active">■ Audit Log</a>
+        </div>
+        <div class="sidebar-footer">
+            <div class="user-pill">
+                <div class="avatar">#{loginBean.currentUser != null ? loginBean.currentUser.fullName.substring(0,2).toUpperCase() : 'US'}</div>
+                <div>
+                    <div class="user-name">#{loginBean.currentUser != null ? loginBean.currentUser.fullName : 'User'}</div>
+                    <div class="user-role">#{loginBean.currentUser != null ? loginBean.currentUser.role : ''}</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main -->
+    <div class="main-content">
+
+        <!-- Topbar -->
+        <div class="topbar">
+            <div class="topbar-left">
+                <div class="page-title">Audit Logs</div>
+                <div class="breadcrumb">System / Audit Log</div>
+            </div>
+            <div class="topbar-actions">
+                <h:form id="topbarForm">
+                    <p:commandButton value="Export Excel" icon="pi pi-file-excel" styleClass="btn btn-outline" style="margin-right:10px">
+                        <p:dataExporter type="xls" target=":form:dt-logs" fileName="audit-logs" />
+                    </p:commandButton>
+                    <p:commandButton value="Export PDF" icon="pi pi-file-pdf" styleClass="btn btn-outline">
+                        <p:dataExporter type="pdf" target=":form:dt-logs" fileName="audit-logs" />
+                    </p:commandButton>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="page-content">
+            <div class="card">
+                <h:form id="form">
+                    <p:dataTable id="dt-logs" widgetVar="dtLogs" var="log" value="#{auditLogBean.auditLogs}"
+                                 filteredValue="#{auditLogBean.filteredAuditLogs}"
+                                 paginator="true" rows="20" paginatorPosition="bottom"
+                                 emptyMessage="No audit logs found." styleClass="modern-table">
+                        
+                        <f:facet name="header">
+                            <div style="display:flex; justify-content: space-between; align-items: center;">
+                                <span>System Activity Records</span>
+                                <p:inputText id="globalFilter" onkeyup="PF('dtLogs').filter()" style="width:250px" placeholder="Search all fields..." />
+                            </div>
+                        </f:facet>
+
+                        <p:column headerText="Timestamp" sortBy="#{log.createdAt}" width="180">
+                            <h:outputText value="#{log.createdAt}">
+                                <f:convertDateTime pattern="MMM dd, yyyy HH:mm:ss" type="localDateTime" />
+                            </h:outputText>
+                        </p:column>
+
+                        <p:column headerText="Actor" sortBy="#{log.actorUsername}" filterBy="#{log.actorUsername}" filterMatchMode="exact">
+                            <f:facet name="filter">
+                                <p:selectOneMenu onchange="PF('dtLogs').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All Actors" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{auditLogBean.actors}" />
+                                </p:selectOneMenu>
+                            </f:facet>
+                            <span style="font-weight:600">#{log.actorUsername}</span>
+                        </p:column>
+
+                        <p:column headerText="Action Type" sortBy="#{log.actionType}" filterBy="#{log.actionType}" filterMatchMode="exact">
+                            <f:facet name="filter">
+                                <p:selectOneMenu onchange="PF('dtLogs').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All Actions" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{auditLogBean.actionTypes}" />
+                                </p:selectOneMenu>
+                            </f:facet>
+                            <span class="badge badge-#{log.actionType.toLowerCase().contains('delete') || log.actionType.toLowerCase().contains('fail') ? 'danger' : 
+                                            (log.actionType.toLowerCase().contains('update') ? 'info' : 'success')}">
+                                #{log.actionType}
+                            </span>
+                        </p:column>
+
+                        <p:column headerText="Entity" sortBy="#{log.entityName}" width="150">
+                            #{log.entityName}
+                        </p:column>
+
+                        <p:column headerText="Details">
+                            #{log.details}
+                        </p:column>
+
+                    </p:dataTable>
+                </h:form>
             </div>
         </div>
     </div>
-
-    <div class="main-container">
-        <div class="page-header">System Audit Log</div>
-        
-        <div class="ig-card">
-            <h:form id="auditForm">
-                <p:dataTable value="#{auditLogBean.auditLogs}" var="log" 
-                             paginator="true" rows="15" 
-                             paginatorPosition="bottom"
-                             styleClass="ui-datatable-striped" 
-                             emptyMessage="No audit logs found.">
-                    
-                    <p:column headerText="Actor" sortBy="#{log.actorUsername}" filterBy="#{log.actorUsername}" filterMatchMode="contains" width="150">
-                        <h:outputText value="#{log.actorUsername}" style="font-weight: 600;" />
-                    </p:column>
-                    
-                    <p:column headerText="Action" sortBy="#{log.actionType}" width="150">
-                        <span class="action-badge">
-                            <h:outputText value="#{log.actionType}" />
-                        </span>
-                    </p:column>
-                    
-                    <p:column headerText="Entity" width="120">
-                        <h:outputText value="#{log.entityName}" />
-                    </p:column>
-                    
-                    <p:column headerText="Details">
-                        <h:outputText value="#{log.details}" style="color: #8e8e8e; font-size: 13px;" />
-                    </p:column>
-                    
-                    <p:column headerText="Timestamp" sortBy="#{log.createdAt}" width="180">
-                        <h:outputText value="#{log.createdAt}" style="color: #8e8e8e; font-size: 13px;">
-                            <f:convertDateTime type="localDateTime" pattern="dd MMM yyyy, HH:mm" />
-                        </h:outputText>
-                    </p:column>
-                    
-                </p:dataTable>
-            </h:form>
-        </div>
-    </div>
-    
+</div>
 </h:body>
 </html>

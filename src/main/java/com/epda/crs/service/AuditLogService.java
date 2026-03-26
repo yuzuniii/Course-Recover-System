@@ -6,11 +6,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class AuditLogService {
     private static final AtomicLong COUNTER = new AtomicLong(100);
-    private final AuditLogDAO auditLogDAO = new AuditLogDAO();
+    @Inject private AuditLogDAO auditLogDAO;
 
     public List<AuditLog> getAuditLogs() { return auditLogDAO.findAll(); }
 

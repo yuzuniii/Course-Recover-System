@@ -556,6 +556,32 @@ textarea.ui-inputtextarea:focus {
     font-weight: 600;
 }
 
+/* ── Badges ────────────────────────────────────────────── */
+.badge {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    display: inline-block;
+}
+
+.badge-success { background: var(--green-bg); color: var(--green); }
+.badge-danger { background: var(--red-bg); color: var(--red); }
+.badge-info { background: #e0f2fe; color: #0369a1; }
+.badge-warning { background: var(--amber-bg); color: var(--amber); }
+
+/* ── DataTable Filter Overrides ────────────────────────── */
+.ui-custom-filter {
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.ui-datatable .ui-column-filter {
+    margin-top: 8px !important;
+}
+
 .ui-selectonemenu .ui-selectonemenu-label {
     padding: 7px 12px !important;
     color: var(--text-primary) !important;

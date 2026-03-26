@@ -34,6 +34,9 @@ import org.primefaces.model.charts.axes.cartesian.CartesianScales;
 import org.primefaces.model.charts.axes.cartesian.linear.CartesianLinearAxes;
 import org.primefaces.model.charts.axes.cartesian.linear.CartesianLinearTicks;
 import org.primefaces.model.charts.optionconfig.legend.Legend;
+import org.primefaces.model.charts.line.LineChartModel;
+import org.primefaces.model.charts.line.LineChartDataSet;
+import org.primefaces.model.charts.line.LineChartOptions;
 
 @Named
 @ViewScoped
@@ -46,6 +49,8 @@ public class DashboardBean implements Serializable {
     private DonutChartModel eligibilityChartModel;
     private ScheduleModel recoveryScheduleModel;
     private List<AuditLog> recentActivity;
+    private BarChartModel cgpaChartModel;
+    private LineChartModel usageTrendModel;
 
     @PostConstruct
     public void init() {
@@ -54,6 +59,43 @@ public class DashboardBean implements Serializable {
         createRecoverySchedule();
         recentActivity = dashboardService.getRecentActivity();
         createCgpaChart();
+        createUsageTrendChart();
+    }
+
+    private void createUsageTrendChart() {
+        usageTrendModel = new LineChartModel();
+        ChartData data = new ChartData();
+
+        LineChartDataSet dataSet = new LineChartDataSet();
+        List<Object> values = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+
+        java.util.Map<String, Integer> trendMap = dashboardService.getUsageTrend();
+        if (trendMap != null) {
+            for (java.util.Map.Entry<String, Integer> entry : trendMap.entrySet()) {
+                labels.add(entry.getKey());
+                values.add(entry.getValue());
+            }
+        }
+
+        dataSet.setData(values);
+        dataSet.setLabel("System Actions");
+        dataSet.setFill(true);
+        dataSet.setTension(0.4);
+        dataSet.setBorderColor("rgb(139, 92, 246)");
+        dataSet.setBackgroundColor("rgba(139, 92, 246, 0.1)");
+        
+        data.addChartDataSet(dataSet);
+        data.setLabels(labels);
+
+        LineChartOptions options = new LineChartOptions();
+        Title title = new Title();
+        title.setDisplay(true);
+        title.setText("7-Day System Usage Trend");
+        options.setTitle(title);
+        
+        usageTrendModel.setOptions(options);
+        usageTrendModel.setData(data);
     }
 
     private void createEligibilityChart() {
@@ -172,8 +214,6 @@ public class DashboardBean implements Serializable {
     public DonutChartModel getEligibilityChartModel() { return eligibilityChartModel; }
     public ScheduleModel getRecoveryScheduleModel() { return recoveryScheduleModel; }
     public List<AuditLog> getRecentActivity() { return recentActivity; }
-    private BarChartModel cgpaChartModel;
     public BarChartModel getCgpaChartModel() { return cgpaChartModel; }
-
-    
+    public LineChartModel getUsageTrendModel() { return usageTrendModel; }
 }

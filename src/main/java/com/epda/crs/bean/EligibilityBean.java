@@ -13,19 +13,24 @@ import jakarta.inject.Named;
 import java.io.Serializable;
 import java.util.List;
 
+import jakarta.inject.Inject;
+
 @Named
 @ViewScoped
 public class EligibilityBean implements Serializable {
 
-    @EJB
+    @Inject
     private EligibilityService eligibilityService;
+
+    @Inject
+    private LoginBean loginBean;
 
     private int selectedStudentId;
     private int selectedSemester;
     private int selectedYear;
     private EligibilityDTO eligibilityResult;
-    private List<Student> ineligibleStudents;
-    private List<EligibilityDTO> allStudentDtos;
+    private java.util.List<Student> ineligibleStudents;
+    private java.util.List<EligibilityDTO> allStudentDtos;
     private String enrollmentMessage;
 
     // -----------------------------------------------------------------------
@@ -48,8 +53,11 @@ public class EligibilityBean implements Serializable {
 
     public void checkEligibility() {
         try {
+            String actor = (loginBean != null && loginBean.getCurrentUser() != null) 
+                    ? loginBean.getCurrentUser().getUsername() : "system";
+            
             eligibilityResult = eligibilityService.checkEligibility(
-                    selectedStudentId, selectedSemester, selectedYear);
+                    selectedStudentId, selectedSemester, selectedYear, actor);
 
             enrollmentMessage = eligibilityResult.isEligible()
                     ? "Student is eligible and has been enrolled in failed courses."

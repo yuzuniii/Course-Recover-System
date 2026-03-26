@@ -17,6 +17,7 @@ com\epda\crs\dao\MilestoneDAO.class
 com\epda\crs\service\RecoveryRuleService.class
 com\epda\crs\service\ReportService.class
 com\epda\crs\model\AuditLog.class
+com\epda\crs\service\StudentService.class
 com\epda\crs\dto\DashboardAnalyticsDTO.class
 com\epda\crs\bean\AuditLogBean.class
 com\epda\crs\dao\UserDAO.class

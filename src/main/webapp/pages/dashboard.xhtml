@@ -100,13 +100,23 @@
                     </div>
                 </div>
                 <div class="dashboard-widget">
-                    <div class="widget-title">Calendar</div>
+                    <div class="widget-title">Recovery Calendar</div>
                     <p:schedule value="#{dashboardBean.recoveryScheduleModel}" />
                 </div>
             </div>
 
+            <!-- New Trend Chart Row -->
+            <div class="dashboard-grid" style="margin-top: 20px;">
+                <div class="dashboard-widget" style="grid-column: span 2;">
+                    <div class="widget-title">System Usage Trend (Last 7 Days)</div>
+                    <div class="widget-chart" style="height: 300px;">
+                        <p:lineChart model="#{dashboardBean.usageTrendModel}" style="width: 100%; height: 100%;" />
+                    </div>
+                </div>
+            </div>
+
             <!-- Recent Activity -->
-            <div class="dashboard-widget">
+            <div class="dashboard-widget" style="margin-top: 20px;">
                 <div class="widget-title">Recent Activity</div>
                 <ul class="activity-log">
                     <p:dataList value="#{dashboardBean.recentActivity}" var="log" type="definition">

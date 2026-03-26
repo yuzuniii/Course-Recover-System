@@ -7,13 +7,15 @@ import com.epda.crs.exception.ValidationException;
 import com.epda.crs.model.Milestone;
 import com.epda.crs.model.RecoveryPlan;
 import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.time.LocalDate;
 import java.util.List;
 
 @Stateless
 public class RecoveryRuleService {
 
-    private final RecoveryDAO recoveryDAO = new RecoveryDAO();
+    @Inject
+    private RecoveryDAO recoveryDAO;
 
     // -----------------------------------------------------------------------
     // Attempt-limit enforcement (CLAUDE.md: maximum 3 attempts per course)

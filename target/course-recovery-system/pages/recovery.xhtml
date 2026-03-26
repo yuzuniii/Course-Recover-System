@@ -4,311 +4,240 @@
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:p="http://primefaces.org/ui">
 <h:head>
-    <title>Recovery Plans — CRS</title>
+    <title>Recovery Management — CRS</title>
     <link rel="stylesheet" type="text/css" href="#{request.contextPath}/css/styles.css" />
 </h:head>
 <h:body>
 <div class="layout-shell">
 
-    <!-- ── Sidebar ─────────────────────────────────────── -->
+    <!-- Sidebar -->
     <nav class="sidebar">
         <div class="sidebar-logo">
             <div class="logo-title">CRS</div>
             <div class="logo-sub">Course Recovery System</div>
         </div>
-
         <div class="nav-section">
             <div class="nav-label">Main</div>
-            <a href="#{request.contextPath}/pages/dashboard.xhtml"
-               class="nav-item">
-                &#9632; Dashboard
-            </a>
-            <a href="#{request.contextPath}/pages/students.xhtml"
-               class="nav-item">
-                &#9632; Students
-            </a>
-
+            <a href="#{request.contextPath}/pages/dashboard.xhtml" class="nav-item">■ Dashboard</a>
+            <a href="#{request.contextPath}/pages/students.xhtml" class="nav-item">■ Students</a>
             <div class="nav-label" style="margin-top:12px;">Academic</div>
-            <a href="#{request.contextPath}/pages/eligibility.xhtml"
-               class="nav-item">
-                &#9632; Eligibility
-            </a>
-            <a href="#{request.contextPath}/pages/recovery.xhtml"
-               class="nav-item active">
-                &#10003; Recovery
-            </a>
-            <a href="#{request.contextPath}/pages/reports.xhtml"
-               class="nav-item">
-                &#9632; Reports
-            </a>
-
+            <a href="#{request.contextPath}/pages/eligibility.xhtml" class="nav-item">✓ Eligibility</a>
+            <a href="#{request.contextPath}/pages/recovery.xhtml" class="nav-item active">■ Recovery</a>
+            <a href="#{request.contextPath}/pages/reports.xhtml" class="nav-item">■ Reports</a>
             <div class="nav-label" style="margin-top:12px;">System</div>
-            <a href="#{request.contextPath}/pages/users.xhtml"
-               class="nav-item">
-                &#9632; Users
-            </a>
-            <a href="#{request.contextPath}/pages/audit-log.xhtml"
-               class="nav-item">
-                &#9632; Audit Log
-            </a>
+            <a href="#{request.contextPath}/pages/users.xhtml" class="nav-item">■ Users</a>
+            <a href="#{request.contextPath}/pages/audit-log.xhtml" class="nav-item">■ Audit Log</a>
         </div>
-
         <div class="sidebar-footer">
             <div class="user-pill">
-                <div class="avatar">
-                    #{loginBean.currentUser != null ? loginBean.currentUser.fullName.substring(0,2).toUpperCase() : 'US'}
-                </div>
+                <div class="avatar">#{loginBean.currentUser != null ? loginBean.currentUser.fullName.substring(0,2).toUpperCase() : 'US'}</div>
                 <div>
-                    <div class="user-name">
-                        #{loginBean.currentUser != null ? loginBean.currentUser.fullName : 'User'}
-                    </div>
-                    <div class="user-role">
-                        #{loginBean.currentUser != null ? loginBean.currentUser.role : ''}
-                    </div>
+                    <div class="user-name">#{loginBean.currentUser != null ? loginBean.currentUser.fullName : 'User'}</div>
+                    <div class="user-role">#{loginBean.currentUser != null ? loginBean.currentUser.role : ''}</div>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- ── Main ────────────────────────────────────────── -->
+    <!-- Main -->
     <div class="main-content">
 
         <!-- Topbar -->
         <div class="topbar">
             <div class="topbar-left">
-                <div class="page-title">Recovery Plans</div>
+                <div class="page-title">Recovery Management</div>
                 <div class="breadcrumb">Academic / Recovery</div>
             </div>
             <div class="topbar-actions">
-                <h:form id="loadAllForm" style="margin:0;">
-                    <h:commandButton value="Load All Plans"
-                                     action="#{recoveryBean.loadAllPlans}"
-                                     styleClass="btn btn-outline" />
+                <h:form id="topbarForm">
+                    <p:commandButton value="+ Create Recovery Plan" 
+                                     actionListener="#{recoveryBean.prepareNewPlan}"
+                                     update=":planDialogForm:plan-detail"
+                                     oncomplete="PF('planDialog').show()"
+                                     styleClass="btn btn-primary" />
                 </h:form>
             </div>
         </div>
 
         <div class="page-content">
-
             <!-- Messages -->
-            <div class="messages-area">
-                <p:messages globalOnly="true" showDetail="true" />
-            </div>
+            <p:growl id="globalMessages" showDetail="true" />
 
-            <!-- Create Recovery Plan -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Create Recovery Plan</span>
+            <!-- Filters & Stats Row -->
+            <div class="dashboard-grid" style="margin-bottom: 20px;">
+                <div class="dashboard-widget">
+                    <div class="widget-title">Active Plans</div>
+                    <div class="widget-value">#{dashboardBean.analytics.activeRecoveryPlans}</div>
                 </div>
-                <div class="card-body">
-                    <h:form id="createPlanForm">
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">Student</label>
-                                <p:selectOneMenu id="studentId"
-                                                 value="#{recoveryBean.selectedStudentId}"
-                                                 filter="true"
-                                                 filterMatchMode="contains"
-                                                 style="width:100%;">
-                                    <f:selectItem itemValue="0" itemLabel="— Select Student —" />
-                                    <f:selectItems value="#{recoveryBean.students}" var="s"
-                                                   itemValue="#{s.id}"
-                                                   itemLabel="#{s.fullName} — #{s.studentNumber}" />
-                                    <p:ajax event="change"
-                                            listener="#{recoveryBean.onStudentChange}"
-                                            update="courseDropdown"
-                                            process="@this" />
-                                </p:selectOneMenu>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Course (failed only)</label>
-                                <p:selectOneMenu id="courseDropdown"
-                                                 value="#{recoveryBean.selectedCourseId}"
-                                                 filter="true"
-                                                 filterMatchMode="contains"
-                                                 style="width:100%;">
-                                    <f:selectItem itemValue="0" itemLabel="— Select Course —" />
-                                    <f:selectItems value="#{recoveryBean.failedCourses}" var="c"
-                                                   itemValue="#{c.id}"
-                                                   itemLabel="#{c.courseCode} — #{c.courseName}" />
-                                </p:selectOneMenu>
-                            </div>
-                        </div>
-                        <div style="margin-top:14px;">
-                            <h:commandButton value="Create Plan"
-                                             action="#{recoveryBean.createPlan}"
-                                             styleClass="btn btn-primary" />
+                <div class="dashboard-widget">
+                    <div class="widget-title">Quick Search</div>
+                    <h:form id="searchForm">
+                        <div style="display:flex; gap:10px;">
+                            <p:selectOneMenu value="#{recoveryBean.selectedStudentId}" filter="true" filterMatchMode="contains" style="flex-grow:1;">
+                                <f:selectItem itemLabel="Filter by Student" itemValue="0" />
+                                <f:selectItems value="#{recoveryBean.students}" var="s" itemLabel="#{s.fullName} (#{s.studentNumber})" itemValue="#{s.id}" />
+                            </p:selectOneMenu>
+                            <p:commandButton icon="pi pi-search" actionListener="#{recoveryBean.loadPlansByStudent}" update=":form:dt-plans" styleClass="btn btn-primary" />
+                            <p:commandButton icon="pi pi-refresh" actionListener="#{recoveryBean.loadAllPlans}" update=":form:dt-plans" styleClass="btn btn-outline" />
                         </div>
                     </h:form>
                 </div>
             </div>
 
-            <!-- All Recovery Plans Table -->
+            <!-- Recovery Plans Table -->
             <div class="card">
-                <div class="card-header">
-                    <span class="card-title">All Recovery Plans</span>
-                    <h:form id="loadByStudentForm" style="margin:0;">
-                        <h:commandButton value="Load By Student"
-                                         action="#{recoveryBean.loadPlansByStudent}"
-                                         styleClass="btn btn-outline btn-sm" />
-                    </h:form>
-                </div>
-                <p:dataTable value="#{recoveryBean.recoveryPlans}" var="plan"
-                             emptyMessage="No recovery plans found — click 'Load All Plans' above">
-                    <p:column headerText="ID">
-                        <span class="cell-primary">#{plan.id}</span>
-                    </p:column>
-                    <p:column headerText="Student">#{plan.student.fullName}</p:column>
-                    <p:column headerText="Course">
-                        <span class="cell-primary">#{plan.course.courseCode}</span>
-                        <br/>
-                        <span class="cell-secondary">#{plan.course.courseName}</span>
-                    </p:column>
-                    <p:column headerText="Attempt">
-                        <span class="badge badge-blue">Attempt #{plan.attemptNumber}</span>
-                    </p:column>
-                    <p:column headerText="Status">
-                        <h:outputText value="#{plan.status}"
-                                      styleClass="badge #{plan.status != null and plan.status.name() == 'COMPLETED' ? 'badge-green' : plan.status != null and plan.status.name() == 'FAILED' ? 'badge-red' : 'badge-amber'}" />
-                    </p:column>
-                    <p:column headerText="Start">#{plan.startDate}</p:column>
-                    <p:column headerText="End">#{plan.endDate}</p:column>
-                    <p:column headerText="Actions">
-                        <h:form>
-                            <h:commandButton value="Mark Completed"
-                                             action="#{recoveryBean.updatePlanStatus(plan.id.intValue(), 'COMPLETED')}"
-                                             styleClass="btn btn-success btn-sm" />
-                        </h:form>
-                    </p:column>
-                </p:dataTable>
-            </div>
-
-            <!-- Milestones -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Milestones</span>
-                </div>
-                <div class="card-body">
-                    <h:form id="milestoneForm">
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">Recovery Plan</label>
-                                <p:selectOneMenu id="planId"
-                                                 value="#{milestoneBean.selectedPlanId}"
-                                                 filter="true"
-                                                 filterMatchMode="contains"
-                                                 style="width:100%;">
-                                    <f:selectItem itemValue="0" itemLabel="— Select Plan —" />
-                                    <f:selectItems value="#{recoveryBean.recoveryPlans}" var="plan"
-                                                   itemValue="#{plan.id}"
-                                                   itemLabel="Plan ##{plan.id} — #{plan.student.fullName} (#{plan.course.courseCode})" />
-                                    <p:ajax event="change"
-                                            listener="#{milestoneBean.loadMilestones}"
-                                            update="milestonesTable"
-                                            process="@this" />
-                                </p:selectOneMenu>
+                <h:form id="form">
+                    <p:dataTable id="dt-plans" widgetVar="dtPlans" var="plan" value="#{recoveryBean.recoveryPlans}"
+                                 reflow="true" styleClass="modern-table"
+                                 paginator="true" rows="10" paginatorPosition="bottom"
+                                 emptyMessage="No recovery plans found.">
+                        
+                        <p:column headerText="Student" sortBy="#{plan.student.fullName}">
+                            <div style="display:flex; flex-direction:column;">
+                                <span style="font-weight:600;">#{plan.student.fullName}</span>
+                                <span style="font-size:12px; color:var(--text-muted);">#{plan.student.studentNumber}</span>
                             </div>
-                            <div class="form-group" style="justify-content:flex-end;">
-                                <label class="form-label">&#160;</label>
-                                <h:commandButton value="&#8635; Refresh"
-                                                 action="#{milestoneBean.loadMilestones}"
-                                                 styleClass="btn btn-outline" />
-                            </div>
-                        </div>
-
-                        <div class="section-divider" style="margin:18px 0;"></div>
-
-                        <div class="card-title" style="margin-bottom:12px;">Add Milestone</div>
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">Title</label>
-                                <h:inputText id="milestoneTitle"
-                                             value="#{milestoneBean.newMilestone.title}"
-                                             styleClass="form-control"
-                                             placeholder="Milestone title" />
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Description</label>
-                                <h:inputTextarea id="milestoneDesc"
-                                                 value="#{milestoneBean.newMilestone.description}"
-                                                 rows="2"
-                                                 styleClass="form-control"
-                                                 placeholder="Milestone description" />
-                            </div>
-                        </div>
-                        <div style="margin-top:10px;">
-                            <h:commandButton value="Add Milestone"
-                                             action="#{milestoneBean.addMilestone}"
-                                             styleClass="btn btn-primary" />
-                        </div>
-                    </h:form>
-                </div>
-
-                <!-- Milestones table -->
-                <p:dataTable id="milestonesTable"
-                             value="#{milestoneBean.milestones}" var="ms"
-                             emptyMessage="No milestones found — select a plan above"
-                             rowStyleClass="#{ms.status != null and ms.status.name() == 'OVERDUE' ? 'row-overdue' : ''}">
-                    <p:column headerText="ID">#{ms.id}</p:column>
-                    <p:column headerText="Title">
-                        <span class="cell-primary">#{ms.title}</span>
-                    </p:column>
-                    <p:column headerText="Description">#{ms.description}</p:column>
-                    <p:column headerText="Due Date">#{ms.dueDate}</p:column>
-                    <p:column headerText="Status">
-                        <h:outputText value="#{ms.status}"
-                                      styleClass="badge #{ms.status != null and ms.status.name() == 'COMPLETED' ? 'badge-green' : ms.status != null and ms.status.name() == 'OVERDUE' ? 'badge-red' : 'badge-amber'}" />
-                    </p:column>
-                    <p:column headerText="Actions">
-                        <h:form>
-                            <h:commandButton value="Mark Done"
-                                             action="#{milestoneBean.updateStatus(ms.id.intValue(), 'DONE')}"
-                                             styleClass="btn btn-success btn-sm" />
-                        </h:form>
-                    </p:column>
-                </p:dataTable>
-            </div>
-
-            <!-- Recommendations (shown when plan selected) -->
-            <h:panelGroup rendered="#{recoveryBean.selectedPlan != null}">
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">Recommendations — Plan ##{recoveryBean.selectedPlan.id}</span>
-                    </div>
-                    <div class="card-body">
-                        <h:form id="addRecForm">
-                            <div class="form-group" style="margin-bottom:10px;">
-                                <label class="form-label">New Recommendation</label>
-                                <h:inputTextarea value="#{recoveryBean.newRecommendation.recommendation}"
-                                                 rows="3"
-                                                 styleClass="form-control"
-                                                 placeholder="Enter recommendation text..." />
-                            </div>
-                            <h:commandButton value="Add Recommendation"
-                                             action="#{recoveryBean.addRecommendation}"
-                                             styleClass="btn btn-primary" />
-                        </h:form>
-                    </div>
-
-                    <p:dataTable value="#{recoveryBean.recommendations}" var="rec"
-                                 emptyMessage="No recommendations found">
-                        <p:column headerText="ID">#{rec.id}</p:column>
-                        <p:column headerText="Recommendation">#{rec.recommendation}</p:column>
-                        <p:column headerText="Added At">#{rec.addedAt}</p:column>
-                        <p:column headerText="Actions">
-                            <h:form>
-                                <h:commandButton value="Delete"
-                                                 action="#{recoveryBean.deleteRecommendation(rec.id)}"
-                                                 styleClass="btn btn-danger btn-sm"
-                                                 onclick="return confirm('Are you sure you want to delete this recommendation?');" />
-                            </h:form>
                         </p:column>
-                    </p:dataTable>
-                </div>
-            </h:panelGroup>
 
-        </div><!-- /page-content -->
-    </div><!-- /main-content -->
-</div><!-- /layout-shell -->
+                        <p:column headerText="Course" sortBy="#{plan.course.courseCode}">
+                            <div style="display:flex; flex-direction:column;">
+                                <span style="font-weight:600; color:var(--sidebar-accent);">#{plan.course.courseCode}</span>
+                                <span style="font-size:12px; color:var(--text-muted);">#{plan.course.courseName}</span>
+                            </div>
+                        </p:column>
+
+                        <p:column headerText="Attempt" width="100">
+                            <span class="badge badge-info">Attempt #{plan.attemptNumber}</span>
+                        </p:column>
+
+                        <p:column headerText="Status" width="120">
+                            <span class="badge badge-#{plan.status.name() == 'COMPLETED' ? 'success' : (plan.status.name() == 'FAILED' ? 'danger' : 'warning')}">
+                                #{plan.status}
+                            </span>
+                        </p:column>
+
+                        <p:column headerText="Timeline" width="200">
+                            <div style="font-size:12px;">
+                                <i class="pi pi-calendar-plus" style="margin-right:5px; font-size:10px;"></i>
+                                <h:outputText value="#{plan.startDate}"><f:convertDateTime pattern="MMM dd, yyyy" /></h:outputText>
+                                <br/>
+                                <i class="pi pi-calendar-times" style="margin-right:5px; font-size:10px;"></i>
+                                <h:outputText value="#{plan.endDate}"><f:convertDateTime pattern="MMM dd, yyyy" /></h:outputText>
+                            </div>
+                        </p:column>
+
+                        <p:column headerText="Actions" style="width:120px; text-align:center;">
+                            <p:commandButton icon="pi pi-eye" 
+                                             actionListener="#{recoveryBean.setSelectedPlan(plan)}"
+                                             update=":viewPlanDialogForm:view-plan-detail"
+                                             oncomplete="PF('viewPlanDialog').show()"
+                                             styleClass="ui-button-rounded ui-button-text ui-button-plain" 
+                                             title="View Details" />
+                            <p:commandButton icon="pi pi-check" 
+                                             actionListener="#{recoveryBean.updatePlanStatus(plan.id.intValue(), 'COMPLETED')}"
+                                             update="dt-plans :globalMessages"
+                                             styleClass="ui-button-rounded ui-button-text ui-button-success" 
+                                             title="Mark Completed"
+                                             rendered="#{plan.status.name() eq 'ACTIVE'}" />
+                        </p:column>
+
+                    </p:dataTable>
+                </h:form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Create Plan Dialog ───────────────────────────── -->
+<p:dialog header="Create Recovery Plan" widgetVar="planDialog" modal="true" 
+          width="500" responsive="true" showEffect="fade" hideEffect="fade"
+          draggable="false" resizable="false" styleClass="modern-dialog">
+    <h:form id="planDialogForm">
+        <p:outputPanel id="plan-detail" styleClass="dialog-content">
+            <div class="form-section">
+                <div class="form-section-header">Select Student &amp; Course</div>
+                <div class="form-group">
+                    <p:outputLabel for="student" value="Student" styleClass="form-label" />
+                    <p:selectOneMenu id="student" value="#{recoveryBean.selectedStudentId}" filter="true" filterMatchMode="contains" styleClass="form-input">
+                        <f:selectItem itemLabel="Select Student" itemValue="0" />
+                        <f:selectItems value="#{recoveryBean.students}" var="s" itemLabel="#{s.fullName} (#{s.studentNumber})" itemValue="#{s.id}" />
+                        <p:ajax event="change" listener="#{recoveryBean.onStudentChange}" update="course" />
+                    </p:selectOneMenu>
+                </div>
+                <div class="form-group">
+                    <p:outputLabel for="course" value="Failed Course" styleClass="form-label" />
+                    <p:selectOneMenu id="course" value="#{recoveryBean.selectedCourseId}" filter="true" filterMatchMode="contains" styleClass="form-input">
+                        <f:selectItem itemLabel="Select Course" itemValue="0" />
+                        <f:selectItems value="#{recoveryBean.failedCourses}" var="c" itemLabel="#{c.courseCode} - #{c.courseName}" itemValue="#{c.id}" />
+                    </p:selectOneMenu>
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <p:commandButton value="Cancel" onclick="PF('planDialog').hide()" type="button" styleClass="btn btn-outline" />
+                <p:commandButton value="Create Plan" actionListener="#{recoveryBean.createPlan}" update=":form:dt-plans :globalMessages" oncomplete="PF('planDialog').hide()" styleClass="btn btn-primary" />
+            </div>
+        </p:outputPanel>
+    </h:form>
+</p:dialog>
+
+<!-- ── View Plan Details Dialog ─────────────────────── -->
+<p:dialog header="Plan Details &amp; Milestones" widgetVar="viewPlanDialog" modal="true" 
+          width="800" responsive="true" showEffect="fade" hideEffect="fade"
+          styleClass="modern-dialog">
+    <h:form id="viewPlanDialogForm">
+        <p:outputPanel id="view-plan-detail" styleClass="dialog-content" rendered="#{not empty recoveryBean.selectedPlan}">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <!-- Left: Plan Info -->
+                <div>
+                    <div class="form-section">
+                        <div class="form-section-header">Information</div>
+                        <p:panelGrid columns="2" styleClass="ui-panelgrid-blank">
+                            <h:outputText value="Student:" style="font-weight:600;" />
+                            <h:outputText value="#{recoveryBean.selectedPlan.student.fullName}" />
+                            
+                            <h:outputText value="Course:" style="font-weight:600;" />
+                            <h:outputText value="#{recoveryBean.selectedPlan.course.courseCode}" />
+                            
+                            <h:outputText value="Attempt:" style="font-weight:600;" />
+                            <h:outputText value="Attempt ##{recoveryBean.selectedPlan.attemptNumber}" />
+
+                            <h:outputText value="Policy:" style="font-weight:600;" />
+                            <h:outputText value="#{recoveryBean.selectedPlan.recommendation}" style="font-style:italic; font-size:12px;" />
+                        </p:panelGrid>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-section-header">Recommendations</div>
+                        <p:dataList value="#{recoveryBean.recommendations}" var="rec" type="unordered" emptyMessage="No recommendations yet.">
+                            #{rec.recommendation}
+                        </p:dataList>
+                        <div style="margin-top:10px; display:flex; gap:5px;">
+                            <p:inputTextarea value="#{recoveryBean.newRecommendation.recommendation}" placeholder="Add recommendation..." rows="2" style="flex-grow:1;" />
+                            <p:commandButton icon="pi pi-plus" actionListener="#{recoveryBean.addRecommendation}" update="view-plan-detail :globalMessages" styleClass="btn btn-primary" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Milestones -->
+                <div>
+                    <div class="form-section">
+                        <div class="form-section-header">Milestones Progress</div>
+                        <p:dataTable value="#{recoveryBean.selectedPlan.milestones}" var="ms" size="small">
+                            <p:column headerText="Milestone">#{ms.title}</p:column>
+                            <p:column headerText="Status" width="100">
+                                <span class="badge badge-#{ms.status.name() eq 'COMPLETED' ? 'success' : 'warning'}">#{ms.status}</span>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dialog-footer">
+                <p:commandButton value="Close" onclick="PF('viewPlanDialog').hide()" type="button" styleClass="btn btn-outline" />
+            </div>
+        </p:outputPanel>
+    </h:form>
+</p:dialog>
+
 </h:body>
 </html>

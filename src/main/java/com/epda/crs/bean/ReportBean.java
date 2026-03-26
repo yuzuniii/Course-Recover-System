@@ -13,19 +13,21 @@ import jakarta.inject.Named;
 import java.io.Serializable;
 import java.util.List;
 
+import jakarta.inject.Inject;
+
 @Named
 @ViewScoped
 public class ReportBean implements Serializable {
 
-    @EJB
+    @Inject
     private ReportService reportService;
 
     private int selectedStudentId;
     private int selectedSemester;
     private int selectedYear;
     private AcademicReportDTO currentReport;
-    private List<AcademicReportDTO> allReports;
-    private List<Student> students;
+    private java.util.List<AcademicReportDTO> allReports;
+    private java.util.List<Student> students;
 
     @PostConstruct
     public void init() {

@@ -1,26 +1,167 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:f="http://xmlns.jcp.org/jsf/core">
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
 <h:head>
-    <title>Audit Log</title>
-    <link rel="stylesheet" type="text/css" href="#{request.contextPath}/css/styles.css" />
+    <f:facet name="first">
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    </f:facet>
+    <title>Audit Log - CRS</title>
+    
+    <style>
+        /* Base Instagram-like styling */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #fafafa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #262626;
+        }
+
+        /* Instagram Top Navigation Bar */
+        .top-nav {
+            background-color: #ffffff;
+            border-bottom: 1px solid #dbdbdb;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-content {
+            width: 100%;
+            max-width: 935px; /* Instagram's standard content width */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .nav-brand {
+            font-size: 20px;
+            font-weight: 600;
+            text-decoration: none;
+            color: #262626;
+        }
+
+        .nav-links a {
+            color: #0095f6; /* Instagram Blue */
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Main Content Container */
+        .main-container {
+            max-width: 935px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .page-header {
+            font-size: 24px;
+            font-weight: 300;
+            margin-bottom: 20px;
+            color: #262626;
+        }
+
+        /* White Card for the Data Table */
+        .ig-card {
+            background-color: #ffffff;
+            border: 1px solid #dbdbdb;
+            border-radius: 4px;
+            overflow: hidden; 
+        }
+
+        /* PrimeFaces Table Overrides for minimalist look */
+        body .ui-datatable .ui-datatable-header,
+        body .ui-datatable .ui-paginator {
+            background-color: #ffffff;
+            border: none;
+            border-bottom: 1px solid #dbdbdb;
+        }
+        
+        body .ui-datatable .ui-datatable-data > tr > td {
+            border-color: #efefef;
+            padding: 12px 15px;
+            font-size: 14px;
+        }
+        
+        body .ui-datatable .ui-column-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #262626;
+        }
+
+        /* Stylized Action Badge */
+        .action-badge {
+            background-color: #efefef;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #262626;
+            text-transform: uppercase;
+        }
+    </style>
 </h:head>
 <h:body>
-    <div class="layout">
-        <div class="header">
-            <div class="title">Audit Log</div>
-            <div class="nav"><a href="#{request.contextPath}/pages/dashboard.xhtml">Dashboard</a></div>
-        </div>
-        <div class="table-wrapper">
-            <h:dataTable value="#{auditLogBean.auditLogs}" var="log" styleClass="table">
-                <h:column><f:facet name="header">Actor</f:facet>#{log.actorUsername}</h:column>
-                <h:column><f:facet name="header">Action</f:facet>#{log.actionType}</h:column>
-                <h:column><f:facet name="header">Entity</f:facet>#{log.entityName}</h:column>
-                <h:column><f:facet name="header">Details</f:facet>#{log.details}</h:column>
-                <h:column><f:facet name="header">Timestamp</f:facet>#{log.createdAt}</h:column>
-            </h:dataTable>
+    
+    <div class="top-nav">
+        <div class="nav-content">
+            <h:outputLink value="#{request.contextPath}/pages/dashboard.xhtml" class="nav-brand">
+                CRS Admin
+            </h:outputLink>
+            <div class="nav-links">
+                <h:outputLink value="#{request.contextPath}/pages/dashboard.xhtml">Back to Dashboard</h:outputLink>
+            </div>
         </div>
     </div>
+
+    <div class="main-container">
+        <div class="page-header">System Audit Log</div>
+        
+        <div class="ig-card">
+            <h:form id="auditForm">
+                <p:dataTable value="#{auditLogBean.auditLogs}" var="log" 
+                             paginator="true" rows="15" 
+                             paginatorPosition="bottom"
+                             styleClass="ui-datatable-striped" 
+                             emptyMessage="No audit logs found.">
+                    
+                    <p:column headerText="Actor" sortBy="#{log.actorUsername}" filterBy="#{log.actorUsername}" filterMatchMode="contains" width="150">
+                        <h:outputText value="#{log.actorUsername}" style="font-weight: 600;" />
+                    </p:column>
+                    
+                    <p:column headerText="Action" sortBy="#{log.actionType}" width="150">
+                        <span class="action-badge">
+                            <h:outputText value="#{log.actionType}" />
+                        </span>
+                    </p:column>
+                    
+                    <p:column headerText="Entity" width="120">
+                        <h:outputText value="#{log.entityName}" />
+                    </p:column>
+                    
+                    <p:column headerText="Details">
+                        <h:outputText value="#{log.details}" style="color: #8e8e8e; font-size: 13px;" />
+                    </p:column>
+                    
+                    <p:column headerText="Timestamp" sortBy="#{log.createdAt}" width="180">
+                        <h:outputText value="#{log.createdAt}" style="color: #8e8e8e; font-size: 13px;">
+                            <f:convertDateTime type="localDateTime" pattern="dd MMM yyyy, HH:mm" />
+                        </h:outputText>
+                    </p:column>
+                    
+                </p:dataTable>
+            </h:form>
+        </div>
+    </div>
+    
 </h:body>
 </html>

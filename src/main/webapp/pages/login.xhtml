@@ -17,11 +17,18 @@
             </div>
             <div>
                 <label>Password</label>
-                <h:inputSecret value="#{loginBean.password}" style="width:100%;margin:8px 0 16px;padding:10px;"/>
+                <h:inputSecret value="#{loginBean.password}" style="width:100%;margin:8px 0 8px;padding:10px;"/>
             </div>
+            
+            <div style="text-align: right; margin-bottom: 16px;">
+                <h:outputLink value="#{request.contextPath}/pages/forgot-password.xhtml" style="color: #0095f6; text-decoration: none; font-size: 14px;">
+                    Forgot Password?
+                </h:outputLink>
+            </div>
+
             <h:commandButton value="Login" action="#{loginBean.login}" styleClass="button"/>
         </h:form>
-        <p class="subtle">Demo accounts: admin/admin123 and officer/officer123</p>
+        <p class="subtle" style="margin-top: 20px;">Demo accounts: admin/admin123 and officer/officer123</p>
     </div>
 </h:body>
 </html>

@@ -4,13 +4,30 @@ import com.epda.crs.model.AuditLog;
 import com.epda.crs.service.AuditLogService;
 import java.io.Serializable;
 import java.util.List;
+import jakarta.annotation.PostConstruct;
 import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 @Named
 @ViewScoped
 public class AuditLogBean implements Serializable {
-    private final AuditLogService auditLogService = new AuditLogService();
+    
+    // 1. Let the JEE container manage the EJB lifecycle
+    @Inject
+    private AuditLogService auditLogService;
 
-    public List<AuditLog> getAuditLogs() { return auditLogService.getAuditLogs(); }
+    // 2. Store the list in a variable so it stays stable across the view
+    private List<AuditLog> auditLogs;
+
+    // 3. Fetch the data ONLY ONCE when the page loads
+    @PostConstruct
+    public void init() {
+        auditLogs = auditLogService.getAuditLogs();
+    }
+
+    // 4. Return the stored list without re-querying the database
+    public List<AuditLog> getAuditLogs() { 
+        return auditLogs; 
+    }
 }

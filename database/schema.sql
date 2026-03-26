@@ -19,6 +19,7 @@ CREATE TABLE users (
     full_name  VARCHAR(150),
     email      VARCHAR(100),
     status     VARCHAR(20)  DEFAULT 'ACTIVE',
+    last_login TIMESTAMP    NULL DEFAULT NULL,  -- NEW COLUMN ADDED HERE
     created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -42,11 +42,13 @@ public class UserDAO {
         // role comes from the join — may be null if user has no role row
         String roleName = rs.getString("role_name");
         user.setRole(mapRole(roleName));
+        Timestamp lastLoginTs = rs.getTimestamp("last_login");
+        if (lastLoginTs != null) user.setLastLogin(lastLoginTs.toLocalDateTime());
         return user;
     }
 
     private static final String BASE_SELECT =
-        "SELECT u.user_id, u.username, u.password, u.full_name, u.email, u.status, u.created_at, " +
+        "SELECT u.user_id, u.username, u.password, u.full_name, u.email, u.status, u.last_login, u.created_at, " +
         "       r.role_name " +
         "FROM   users u " +
         "LEFT JOIN user_roles ur ON u.user_id = ur.user_id " +
@@ -114,18 +116,33 @@ public class UserDAO {
     }
 
     public void update(User user) {
-        String sql = "UPDATE users SET password = ?, full_name = ?, email = ?, status = ? WHERE user_id = ?";
+        String sql = "UPDATE users SET username = ?, full_name = ?, email = ?, status = ? WHERE user_id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, user.getPassword());
+            ps.setString(1, user.getUsername());
             ps.setString(2, user.getFullName());
             ps.setString(3, user.getEmail());
             ps.setString(4, user.getStatus() != null ? user.getStatus().name() : AccountStatus.ACTIVE.name());
             ps.setInt(5, user.getId().intValue());
             ps.executeUpdate();
+            
+            // Update role if provided
+            if (user.getRole() != null) {
+                updateUserRole(conn, user.getId(), user.getRole());
+            }
         } catch (SQLException e) {
             throw new RuntimeException("UserDAO.update failed", e);
         }
+    }
+
+    private void updateUserRole(Connection conn, long userId, UserRole role) throws SQLException {
+        // Delete existing role and insert new one
+        String deleteSql = "DELETE FROM user_roles WHERE user_id = ?";
+        try (PreparedStatement deletePs = conn.prepareStatement(deleteSql)) {
+            deletePs.setLong(1, userId);
+            deletePs.executeUpdate();
+        }
+        insertUserRole(conn, userId, role);
     }
 
     public void setActiveStatus(Long userId, boolean active) {
@@ -158,6 +175,28 @@ public class UserDAO {
                     }
                 }
             }
+        }
+    }
+
+    public void delete(Long userId) {
+        String sql = "DELETE FROM users WHERE user_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("UserDAO.delete failed", e);
+        }
+    }
+
+    public void updateLastLogin(Long userId) {
+        String sql = "UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE user_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("UserDAO.updateLastLogin failed", e);
         }
     }
 }

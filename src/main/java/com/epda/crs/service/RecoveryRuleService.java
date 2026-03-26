@@ -55,9 +55,9 @@ public class RecoveryRuleService {
      */
     public String getAttemptScope(int attemptNo) {
         return switch (attemptNo) {
-            case 1 -> "Full course recovery";
-            case 2 -> "Failed components only";
-            case 3 -> "All components - final attempt";
+            case 1 -> "1st Attempt: Standard enrollment";
+            case 2 -> "2nd Attempt: Resubmit/resit failed components only";
+            case 3 -> "3rd Attempt: Retake all assessment components";
             default -> "No further attempts allowed";
         };
     }

@@ -14,10 +14,10 @@
         </div>
         <div class="table-wrapper">
             <h:dataTable value="#{studentBean.students}" var="student" styleClass="table">
-                <h:column><f:facet name="header">Student No</f:facet>#{student.studentNumber}</h:column>
-                <h:column><f:facet name="header">Name</f:facet>#{student.fullName}</h:column>
-                <h:column><f:facet name="header">Program</f:facet>#{student.programName}</h:column>
-                <h:column><f:facet name="header">Semester</f:facet>#{student.semester}</h:column>
+                <h:column><f:facet name="header">Student No</f:facet>#{student.studentCode}</h:column>
+                <h:column><f:facet name="header">Name</f:facet>#{student.name}</h:column>
+                <h:column><f:facet name="header">Program</f:facet>#{student.programme}</h:column>
+                <h:column><f:facet name="header">Semester</f:facet>#{student.currentSemester}</h:column>
                 <h:column><f:facet name="header">CGPA</f:facet>#{student.cgpa}</h:column>
                 <h:column><f:facet name="header">Failed Courses</f:facet>#{student.failedCourseCount}</h:column>
             </h:dataTable>

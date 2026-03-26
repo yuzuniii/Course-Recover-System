@@ -15,7 +15,6 @@ import com.epda.crs.model.RecoveryPlan;
 import com.epda.crs.model.RecoveryRecommendation;
 import com.epda.crs.model.Student;
 import com.epda.crs.util.EmailUtil;
-import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import java.time.LocalDate;
 import java.util.List;

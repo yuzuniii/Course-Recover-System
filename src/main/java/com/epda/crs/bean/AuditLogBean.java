@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @ViewScoped
 public class AuditLogBean implements Serializable {
 
-    @Inject
+    @EJB
     private AuditLogService auditLogService;
 
     private List<AuditLog> auditLogs;

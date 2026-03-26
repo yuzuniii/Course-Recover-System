@@ -44,6 +44,7 @@ public class RecoveryBean implements Serializable {
     private RecoveryPlan selectedPlan;
     private int selectedStudentId;
     private int selectedCourseId;
+    private int selectedPlanId;
     private java.util.List<Student> students;
     private java.util.List<Course> courses;
     private java.util.List<Course> failedCourses;
@@ -255,6 +256,9 @@ public class RecoveryBean implements Serializable {
 
     public int getSelectedCourseId() { return selectedCourseId; }
     public void setSelectedCourseId(int selectedCourseId) { this.selectedCourseId = selectedCourseId; }
+
+    public int getSelectedPlanId() { return selectedPlanId; }
+    public void setSelectedPlanId(int selectedPlanId) { this.selectedPlanId = selectedPlanId; }
 
     public java.util.List<Student> getStudents() { return students; }
     public void setStudents(java.util.List<Student> students) { this.students = students; }

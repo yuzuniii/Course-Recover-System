@@ -86,6 +86,18 @@ public class StudentDAO {
         }
     }
 
+    public long countAllStudents() {
+        String sql = "SELECT COUNT(*) FROM students";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getLong(1);
+        } catch (SQLException e) {
+            throw new RuntimeException("StudentDAO.countAllStudents failed", e);
+        }
+        return 0;
+    }
+
     public void update(Student student) {
         String sql = "UPDATE students SET student_code = ?, name = ?, programme = ?, " +
                      "year_of_study = ?, current_semester = ?, cgpa = ? WHERE student_id = ?";
@@ -102,5 +114,29 @@ public class StudentDAO {
         } catch (SQLException e) {
             throw new RuntimeException("StudentDAO.update failed", e);
         }
+    }
+
+    public java.util.Map<String, Double> getAverageCgpaByMajor() {
+        String sql = "SELECT programme, AVG(cgpa) FROM students GROUP BY programme";
+        java.util.Map<String, Double> map = new java.util.HashMap<>();
+        
+        try (java.sql.Connection conn = com.epda.crs.config.DBConnection.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql);
+             java.sql.ResultSet rs = ps.executeQuery()) {
+             
+            while (rs.next()) {
+                String major = rs.getString(1);
+                double avgCgpa = rs.getDouble(2);
+                
+                // Round to 2 decimal places for a cleaner chart
+                avgCgpa = Math.round(avgCgpa * 100.0) / 100.0; 
+                
+                // If a student somehow has no major, label them "Unknown"
+                map.put(major != null ? major : "Unknown", avgCgpa);
+            }
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("StudentDAO.getAverageCgpaByMajor failed", e);
+        }
+        return map;
     }
 }

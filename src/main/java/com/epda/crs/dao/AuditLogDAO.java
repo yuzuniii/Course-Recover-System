@@ -87,6 +87,21 @@ public class AuditLogDAO {
         return list;
     }
 
+    public List<AuditLog> findRecentActivity(int limit) {
+        String sql = BASE_SELECT + "ORDER BY al.logged_at DESC LIMIT ?";
+        List<AuditLog> list = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("AuditLogDAO.findRecentActivity failed", e);
+        }
+        return list;
+    }
+
     public List<AuditLog> findByUserId(int userId) {
         String sql = BASE_SELECT + "WHERE al.user_id = ? ORDER BY al.logged_at DESC";
         List<AuditLog> list = new ArrayList<>();

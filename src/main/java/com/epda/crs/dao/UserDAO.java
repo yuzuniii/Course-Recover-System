@@ -189,6 +189,18 @@ public class UserDAO {
         }
     }
 
+    public long countActiveUsers() {
+        String sql = "SELECT COUNT(*) FROM users WHERE status = 'ACTIVE'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getLong(1);
+        } catch (SQLException e) {
+            throw new RuntimeException("UserDAO.countActiveUsers failed", e);
+        }
+        return 0;
+    }
+
     public void updateLastLogin(Long userId) {
         String sql = "UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE user_id = ?";
         try (Connection conn = DBConnection.getConnection();

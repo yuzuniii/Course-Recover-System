@@ -298,6 +298,109 @@ textarea.ui-inputtextarea:focus {
     font-size: 13px !important;
 }
 
+/* ── Dashboard Specific ────────────────────────────────── */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.dashboard-widget {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.widget-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+}
+
+.widget-value {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.widget-chart {
+    height: 250px;
+}
+
+.activity-log {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.activity-indicator.success { background-color: var(--green); }
+.activity-indicator.failure { background-color: var(--red); }
+.activity-indicator.update { background-color: var(--blue); }
+
+.activity-details {
+    flex-grow: 1;
+}
+
+.activity-action {
+    font-weight: 600;
+}
+
+.activity-user {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.activity-time {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.topbar-clock {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.topbar-user .user-name {
+    font-weight: 600;
+}
+
+.logout-button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 18px;
+}
+
 /* ── Modern Dialog & Form Styling ────────────────────────── */
 .dialog-content { padding: 10px 5px; }
 

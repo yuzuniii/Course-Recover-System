@@ -4,60 +4,138 @@
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:p="http://primefaces.org/ui">
 <h:head>
-    <f:facet name="first">
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    </f:facet>
-    <title>Dashboard</title>
+    <title>Dashboard — CRS</title>
     <link rel="stylesheet" type="text/css" href="#{request.contextPath}/css/styles.css" />
-    <style>
-        .dashboard-grid { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
-        .dashboard-card { flex: 1; min-width: 200px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .metric-value { font-size: 2.5rem; font-weight: bold; color: #0095f6; margin-top: 10px; }
-        .nav-bar { display: flex; gap: 15px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #dbdbdb; }
-        .nav-bar a { text-decoration: none; color: #262626; font-weight: 600; }
-        .nav-bar a:hover { color: #0095f6; }
-    </style>
+    <script type="text/javascript"> 
+        function updateClock() { 
+            const now = new Date(); 
+            const time = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); 
+            const date = now.toLocaleDateString([], {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}); 
+            const clockDiv = document.getElementById('clock');
+            if (clockDiv) {
+                clockDiv.innerHTML = date + ' ' + time; 
+            }
+        } 
+        // Start the clock and make it tick every 1 second without pinging the server!
+        setInterval(updateClock, 1000);
+    </script>
 </h:head>
-<h:body style="background-color: #fafafa; padding: 20px; font-family: sans-serif;">
-    <div style="max-width: 1200px; margin: 0 auto;">
-        <h2 style="color: #262626;">Dashboard Analytics</h2>
-        
-        <div class="nav-bar">
-            <h:outputLink value="#{request.contextPath}/pages/users.xhtml">Users</h:outputLink>
-            <h:outputLink value="#{request.contextPath}/pages/students.xhtml">Students</h:outputLink>
-            <h:outputLink value="#{request.contextPath}/pages/eligibility.xhtml">Eligibility</h:outputLink>
-            <h:outputLink value="#{request.contextPath}/pages/recovery.xhtml">Recovery</h:outputLink>
-            <h:outputLink value="#{request.contextPath}/pages/reports.xhtml">Reports</h:outputLink>
-            <h:outputLink value="#{request.contextPath}/pages/audit-log.xhtml">Audit Log</h:outputLink>
-            
-            <h:form style="display:inline; margin-left: auto;">
-                <p:commandLink action="#{loginBean.logout}" value="Logout" style="color: #ed4956; font-weight: bold;" />
-            </h:form>
+<h:body onload="updateClock()">
+<div class="layout-shell">
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-title">CRS</div>
+            <div class="logo-sub">Course Recovery System</div>
+        </div>
+        <div class="nav-section">
+            <div class="nav-label">Main</div>
+            <a href="#{request.contextPath}/pages/dashboard.xhtml" class="nav-item active">&#9632; Dashboard</a>
+            <a href="#{request.contextPath}/pages/students.xhtml" class="nav-item">&#9632; Students</a>
+            <div class="nav-label" style="margin-top:12px;">Academic</div>
+            <a href="#{request.contextPath}/pages/eligibility.xhtml" class="nav-item">&#10003; Eligibility</a>
+            <a href="#{request.contextPath}/pages/recovery.xhtml" class="nav-item">&#9632; Recovery</a>
+            <a href="#{request.contextPath}/pages/reports.xhtml" class="nav-item">&#9632; Reports</a>
+            <div class="nav-label" style="margin-top:12px;">System</div>
+            <a href="#{request.contextPath}/pages/users.xhtml" class="nav-item">&#9632; Users</a>
+            <a href="#{request.contextPath}/pages/audit-log.xhtml" class="nav-item">&#9632; Audit Log</a>
+        </div>
+        <div class="sidebar-footer">
+            <div class="user-pill">
+                <div class="avatar">#{loginBean.currentUser != null ? loginBean.currentUser.fullName.substring(0,2).toUpperCase() : 'US'}</div>
+                <div>
+                    <div class="user-name">#{loginBean.currentUser != null ? loginBean.currentUser.fullName : 'User'}</div>
+                    <div class="user-role">#{loginBean.currentUser != null ? loginBean.currentUser.role : ''}</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main -->
+    <div class="main-content">
+
+        <!-- Topbar -->
+        <div class="topbar">
+            <div class="topbar-left">
+                <div class="page-title">Dashboard</div>
+                <div class="breadcrumb">Main / Dashboard</div>
+            </div>
+            <div class="topbar-actions">
+                <div id="clock" class="topbar-clock"></div>
+                <div class="topbar-user">
+                    <span class="user-name">#{loginBean.currentUser.fullName}</span>
+                    <h:form><p:commandButton icon="pi pi-sign-out" action="#{loginBean.logout}" styleClass="logout-button" /></h:form>
+                </div>
+            </div>
         </div>
 
-        <div class="dashboard-grid">
-            <p:card styleClass="dashboard-card">
-                <f:facet name="title">Students Under Recovery</f:facet>
-                <div class="metric-value">#{dashboardBean.analytics.studentsUnderRecovery}</div>
-            </p:card>
-            
-            <p:card styleClass="dashboard-card">
-                <f:facet name="title">Active Plans</f:facet>
-                <div class="metric-value">#{dashboardBean.analytics.activePlans}</div>
-            </p:card>
+        <div class="page-content">
+            <!-- Quick Stats -->
+            <div class="dashboard-grid">
+                <div class="dashboard-widget">
+                    <div class="widget-title">Total Activated Accounts</div>
+                    <div class="widget-value">#{dashboardBean.analytics.totalActivatedAccounts}</div>
+                </div>
+                <div class="dashboard-widget">
+                    <div class="widget-title">Total Enrolled Students</div>
+                    <div class="widget-value">#{dashboardBean.analytics.totalEnrolledStudents}</div>
+                </div>
+                <div class="dashboard-widget">
+                    <div class="widget-title">Active Recovery Plans</div>
+                    <div class="widget-value">#{dashboardBean.analytics.activeRecoveryPlans}</div>
+                </div>
+                <div class="dashboard-widget">
+                    <div class="widget-title">Overdue Milestones</div>
+                    <div class="widget-value">#{dashboardBean.analytics.overdueMilestones}</div>
+                </div>
+            </div>
 
-            <p:card styleClass="dashboard-card">
-                <f:facet name="title">Overdue Milestones</f:facet>
-                <div class="metric-value">#{dashboardBean.analytics.overdueMilestones}</div>
-            </p:card>
+            <!-- Charts & Calendar -->
+            <div class="dashboard-grid">
+                <div class="dashboard-widget">
+                    <div class="widget-title">Eligibility Chart</div>
+                    <div class="widget-chart">
+                        <p:donutChart model="#{dashboardBean.eligibilityChartModel}" />
+                    </div>
+                </div>
+                <div class="dashboard-widget">
+                    <div class="widget-title">Calendar</div>
+                    <p:schedule value="#{dashboardBean.recoveryScheduleModel}" />
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="dashboard-widget">
+                <div class="widget-title">Recent Activity</div>
+                <ul class="activity-log">
+                    <p:dataList value="#{dashboardBean.recentActivity}" var="log" type="definition">
+                        <li class="activity-item">
+                            <div class="activity-indicator #{log.actionType.toLowerCase().contains('fail') ? 'failure' : (log.actionType.toLowerCase().contains('delete') ? 'failure' : (log.actionType.toLowerCase().contains('update') ? 'update' : 'success'))}"></div>
+                            <div class="activity-details">
+                                <div class="activity-action">#{log.details}</div>
+                                <div class="activity-user">by #{log.actorUsername}</div>
+                            </div>
+                            <div class="activity-time">
+                                    <h:outputText value="#{log.createdAt}">
+                                    <f:convertDateTime type="localDateTime" pattern="dd MMM yyyy, HH:mm" />
+                                </h:outputText>
+                            </div>
+                        </li>
+                    </p:dataList>
+                </ul>
+            </div>
+
+            <div class="dashboard-grid" style="margin-bottom: 20px;">
+                <div class="dashboard-widget" style="width: 100%;">
+                    <div class="widget-title">Average CGPA by Programme</div>
+                    <div class="widget-chart" style="padding-top: 15px;">
+                        <p:barChart model="#{dashboardBean.cgpaChartModel}" style="width: 100%; height: 300px;" />
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <p:card style="box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <f:facet name="title">Eligibility Breakdown</f:facet>
-            <p style="font-size: 1.1rem;"><strong>Eligible Students:</strong> <span style="color: #28a745;">#{dashboardBean.analytics.eligibleStudents}</span></p>
-            <p style="font-size: 1.1rem;"><strong>Not Eligible Students:</strong> <span style="color: #dc3545;">#{dashboardBean.analytics.nonEligibleStudents}</span></p>
-        </p:card>
     </div>
+</div>
 </h:body>
 </html>

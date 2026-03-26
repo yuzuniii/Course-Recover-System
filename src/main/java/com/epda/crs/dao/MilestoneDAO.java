@@ -88,6 +88,18 @@ public class MilestoneDAO {
         }
     }
 
+    public long countOverdueMilestones() {
+        String sql = "SELECT COUNT(*) FROM recovery_milestones WHERE status != 'COMPLETED' AND due_date < CURDATE()";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getLong(1);
+        } catch (SQLException e) {
+            throw new RuntimeException("MilestoneDAO.countOverdueMilestones failed", e);
+        }
+        return 0;
+    }
+
     public void updateStatus(Long milestoneId, MilestoneStatus status) {
         String sql = "UPDATE recovery_milestones SET status = ? WHERE milestone_id = ?";
         try (Connection conn = DBConnection.getConnection();

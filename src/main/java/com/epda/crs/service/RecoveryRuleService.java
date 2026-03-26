@@ -39,9 +39,7 @@ public class RecoveryRuleService {
     public void validateAttempt(int studentId, int courseId) {
         int next = getNextAttemptNumber(studentId, courseId);
         if (next > 3) {
-            throw new ValidationException(
-                "Maximum 3 recovery attempts exceeded for student " + studentId +
-                " in course " + courseId);
+            throw new ValidationException("Maximum 3 attempts reached for this course");
         }
     }
 

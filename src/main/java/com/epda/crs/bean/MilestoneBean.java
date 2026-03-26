@@ -31,6 +31,10 @@ public class MilestoneBean implements Serializable {
     // -----------------------------------------------------------------------
 
     public void loadMilestones() {
+        if (selectedPlanId <= 0) {
+            milestones = new ArrayList<>();
+            return;
+        }
         try {
             milestones = recoveryService.findById(selectedPlanId)
                     .map(RecoveryPlan::getMilestones)
@@ -43,6 +47,10 @@ public class MilestoneBean implements Serializable {
     }
 
     public void addMilestone() {
+        if (selectedPlanId <= 0) {
+            addError("Milestone", "Please select a recovery plan");
+            return;
+        }
         try {
             newMilestone.setRecoveryPlanId((long) selectedPlanId);
             recoveryService.addMilestone(newMilestone);

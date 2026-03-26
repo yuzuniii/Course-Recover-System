@@ -533,3 +533,28 @@ textarea.ui-inputtextarea:focus {
 .button       { background: var(--blue); color: #fff; border: 0; padding: 8px 16px; border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; font-weight: 600; }
 .button-sm    { background: var(--blue); color: #fff; border: 0; padding: 5px 10px;  border-radius: var(--radius-sm); cursor: pointer; font-size: 12px; font-weight: 600; }
 .button.danger, .button-danger { background: var(--red); }
+
+/* ── Recovery plan row highlight ─────────────────────────── */
+.selected-plan-row td { background: #e6f1fb; font-weight: 500; }
+
+/* ── Disabled PrimeFaces button ──────────────────────────── */
+.ui-button.ui-state-disabled,
+.ui-button.ui-state-disabled:hover,
+.ui-button[disabled],
+button[disabled] {
+    opacity: 0.45 !important;
+    background-color: #6c757d !important;
+    border-color: #6c757d !important;
+    color: #ffffff !important;
+    cursor: not-allowed !important;
+    visibility: visible !important;
+    display: inline-flex !important;
+    pointer-events: none !important;
+}
+
+/* ── Enabled primary button ──────────────────────────────── */
+.btn-primary.ui-button:not(.ui-state-disabled) {
+    background-color: #1a1f2e !important;
+    border-color: #1a1f2e !important;
+    color: #ffffff !important;
+}

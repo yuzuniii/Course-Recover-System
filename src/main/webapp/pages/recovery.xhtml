@@ -79,20 +79,14 @@
                 <div class="page-title">Recovery Plans</div>
                 <div class="breadcrumb">Academic / Recovery</div>
             </div>
-            <div class="topbar-actions">
-                <h:form id="loadAllForm" style="margin:0;">
-                    <h:commandButton value="Load All Plans"
-                                     action="#{recoveryBean.loadAllPlans}"
-                                     styleClass="btn btn-outline" />
-                </h:form>
-            </div>
+            <div class="topbar-actions"></div>
         </div>
 
         <div class="page-content">
 
             <!-- Messages -->
             <div class="messages-area">
-                <p:messages globalOnly="true" showDetail="true" />
+                <p:messages id="globalMessages" globalOnly="true" showDetail="true" />
             </div>
 
             <!-- Create Recovery Plan -->
@@ -116,7 +110,7 @@
                                                    itemLabel="#{s.fullName} — #{s.studentNumber}" />
                                     <p:ajax event="change"
                                             listener="#{recoveryBean.onStudentChange}"
-                                            update="courseDropdown"
+                                            update="courseDropdown createPlanBtn"
                                             process="@this" />
                                 </p:selectOneMenu>
                             </div>
@@ -131,13 +125,20 @@
                                     <f:selectItems value="#{recoveryBean.failedCourses}" var="c"
                                                    itemValue="#{c.id}"
                                                    itemLabel="#{c.courseCode} — #{c.courseName}" />
+                                    <p:ajax event="change"
+                                            update="createPlanBtn"
+                                            process="@this" />
                                 </p:selectOneMenu>
                             </div>
                         </div>
                         <div style="margin-top:14px;">
-                            <h:commandButton value="Create Plan"
+                            <p:commandButton id="createPlanBtn"
+                                             value="Create Plan"
                                              action="#{recoveryBean.createPlan}"
-                                             styleClass="btn btn-primary" />
+                                             styleClass="btn btn-primary"
+                                             style="min-width: 120px;"
+                                             disabled="#{recoveryBean.selectedStudentId == 0 or recoveryBean.selectedCourseId == 0}"
+                                             update="globalMessages plansTable milestonesTable" />
                         </div>
                     </h:form>
                 </div>
@@ -147,14 +148,18 @@
             <div class="card">
                 <div class="card-header">
                     <span class="card-title">All Recovery Plans</span>
-                    <h:form id="loadByStudentForm" style="margin:0;">
+                    <h:form id="planFilterForm" style="margin:0;display:flex;gap:8px;">
                         <h:commandButton value="Load By Student"
                                          action="#{recoveryBean.loadPlansByStudent}"
                                          styleClass="btn btn-outline btn-sm" />
+                        <h:commandButton value="Show All Plans"
+                                         action="#{recoveryBean.loadAllPlans}"
+                                         styleClass="btn btn-outline btn-sm" />
                     </h:form>
                 </div>
-                <p:dataTable value="#{recoveryBean.recoveryPlans}" var="plan"
-                             emptyMessage="No recovery plans found — click 'Load All Plans' above">
+                <p:dataTable id="plansTable" value="#{recoveryBean.recoveryPlans}" var="plan"
+                             emptyMessage="No recovery plans found — click 'Load All Plans' above"
+                             rowStyleClass="#{plan.id == recoveryBean.selectedPlanId ? 'selected-plan-row' : ''}">
                     <p:column headerText="ID">
                         <span class="cell-primary">#{plan.id}</span>
                     </p:column>
@@ -204,7 +209,7 @@
                                                    itemLabel="Plan ##{plan.id} — #{plan.student.fullName} (#{plan.course.courseCode})" />
                                     <p:ajax event="change"
                                             listener="#{milestoneBean.loadMilestones}"
-                                            update="milestonesTable"
+                                            update="milestonesTable plansTable"
                                             process="@this" />
                                 </p:selectOneMenu>
                             </div>

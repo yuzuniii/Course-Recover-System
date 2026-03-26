@@ -1,5 +1,6 @@
 package com.epda.crs.bean;
 
+import com.epda.crs.bean.MilestoneBean;
 import com.epda.crs.dao.CourseDAO;
 import com.epda.crs.dao.ResultDAO;
 import com.epda.crs.dao.StudentDAO;
@@ -31,6 +32,7 @@ public class RecoveryBean implements Serializable {
     private RecoveryPlan selectedPlan;
     private int selectedStudentId;
     private int selectedCourseId;
+    private int selectedPlanId;
     private List<Student> students;
     private List<Course> courses;
     private List<Course> failedCourses;
@@ -53,9 +55,6 @@ public class RecoveryBean implements Serializable {
         } catch (Exception e) {
             courses = new ArrayList<>();
         }
-        // Default: show all courses before a student is selected
-        failedCourses = courses;
-
         // If arriving from eligibility page with a pre-selected student,
         // set the dropdown value and load that student's plans automatically.
         String studentParam = FacesContext.getCurrentInstance()
@@ -69,8 +68,11 @@ public class RecoveryBean implements Serializable {
         }
 
         if (selectedStudentId > 0) {
+            loadFailedCourses(selectedStudentId);
             loadPlansByStudent();
         } else {
+            // Default: show all courses when no student is pre-selected
+            failedCourses = courses;
             loadAllPlans();
         }
     }
@@ -101,8 +103,10 @@ public class RecoveryBean implements Serializable {
 
     public void createPlan() {
         try {
-            recoveryService.createPlan(selectedStudentId, selectedCourseId, 0);
+            RecoveryPlan newPlan = recoveryService.createPlan(selectedStudentId, selectedCourseId, 0);
+            selectedPlanId = newPlan.getId().intValue();
             loadAllPlans();
+            onPlanSelect();
             addInfo("Recovery Plan", "Recovery plan created successfully");
         } catch (ValidationException e) {
             addError("Recovery Plan", e.getMessage());
@@ -148,6 +152,23 @@ public class RecoveryBean implements Serializable {
             addError("Recommendation", e.getMessage());
         } catch (Exception e) {
             addError("Recommendation", "An unexpected error occurred");
+        }
+    }
+
+    /** Called by p:ajax when the plan dropdown in the milestone section changes. */
+    public void onPlanSelect() {
+        System.out.println("[RecoveryBean.onPlanSelect] selectedPlanId=" + selectedPlanId);
+        MilestoneBean mb = FacesContext.getCurrentInstance()
+                .getApplication()
+                .evaluateExpressionGet(
+                        FacesContext.getCurrentInstance(),
+                        "#{milestoneBean}",
+                        MilestoneBean.class);
+        if (mb != null) {
+            mb.setSelectedPlanId(selectedPlanId);
+            mb.loadMilestones();
+            System.out.println("[RecoveryBean.onPlanSelect] milestones loaded, count=" +
+                    (mb.getMilestones() != null ? mb.getMilestones().size() : "null"));
         }
     }
 
@@ -221,6 +242,9 @@ public class RecoveryBean implements Serializable {
 
     public int getSelectedCourseId() { return selectedCourseId; }
     public void setSelectedCourseId(int selectedCourseId) { this.selectedCourseId = selectedCourseId; }
+
+    public int getSelectedPlanId() { return selectedPlanId; }
+    public void setSelectedPlanId(int selectedPlanId) { this.selectedPlanId = selectedPlanId; }
 
     public List<Student> getStudents() { return students; }
     public void setStudents(List<Student> students) { this.students = students; }

@@ -1,6 +1,7 @@
 # Ignore Claude notes
 CLAUDE.md
 .claude/
+AGENT.md
 
 # Environment
 .env

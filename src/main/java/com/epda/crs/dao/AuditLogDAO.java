@@ -2,6 +2,9 @@ package com.epda.crs.dao;
 
 import com.epda.crs.config.DBConnection;
 import com.epda.crs.model.AuditLog;
+
+import jakarta.ejb.Stateless;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,6 +16,7 @@ import java.util.List;
 /**
  * DAO for audit_logs (log_id, user_id, action, entity_type, entity_id, description, logged_at).
  */
+@Stateless
 public class AuditLogDAO {
 
     /** Looks up user_id for the given username. Returns null if not found. */

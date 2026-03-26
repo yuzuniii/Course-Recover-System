@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import jakarta.ejb.Stateless;
 
 /**
  * DAO for the eligibility_records table.
@@ -24,6 +25,7 @@ import java.util.List;
  *   checked_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
  *   checked_by     INT  (FK to users.user_id)
  */
+@Stateless
 public class EligibilityDAO {
 
     private EligibilityDTO mapRow(ResultSet rs) throws SQLException {

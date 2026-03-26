@@ -9,7 +9,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import jakarta.ejb.Stateless;
 
+@Stateless
 public class RecoveryRecommendationDAO {
 
     private RecoveryRecommendation mapRow(ResultSet rs) throws SQLException {

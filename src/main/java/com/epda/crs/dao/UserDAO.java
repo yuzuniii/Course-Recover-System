@@ -1,5 +1,6 @@
 package com.epda.crs.dao;
 
+import jakarta.ejb.Stateless;
 import com.epda.crs.config.DBConnection;
 import com.epda.crs.enums.AccountStatus;
 import com.epda.crs.enums.UserRole;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Stateless
 public class UserDAO {
 
     // roles table stores 'ADMIN' for COURSE_ADMINISTRATOR

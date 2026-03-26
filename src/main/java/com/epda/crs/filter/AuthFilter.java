@@ -27,19 +27,29 @@ public class AuthFilter implements Filter {
         User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
         String requestURI = req.getRequestURI();
 
-        if (currentUser == null) {
-            // Not logged in, redirect to login page
+        // 1. Identify if the user is trying to access a public page
+        boolean isLoginPage = requestURI.contains("/pages/login.xhtml");
+        boolean isForgotPasswordPage = requestURI.contains("/pages/forgot-password.xhtml");
+
+        // 2. If not logged in AND not on a public page, redirect to login
+        if (currentUser == null && !isLoginPage && !isForgotPasswordPage) {
             res.sendRedirect(req.getContextPath() + "/pages/login.xhtml");
             return;
         }
 
-        // Role-Based Access Control enforcement
-        if (requestURI.contains("/users.xhtml") && currentUser.getRole() != UserRole.COURSE_ADMINISTRATOR) {
-            // Academic Officers should not manage users
+        // 3. (Optional but recommended) If already logged in, don't let them sit on the login page
+        if (currentUser != null && (isLoginPage || isForgotPasswordPage)) {
             res.sendRedirect(req.getContextPath() + "/pages/dashboard.xhtml");
             return;
         }
 
+        // 4. Role-Based Access Control enforcement (only applies if logged in)
+        if (currentUser != null && requestURI.contains("/users.xhtml") && currentUser.getRole() != UserRole.COURSE_ADMINISTRATOR) {
+            res.sendRedirect(req.getContextPath() + "/pages/dashboard.xhtml");
+            return;
+        }
+
+        // 5. Allow the request to proceed
         chain.doFilter(request, response);
     }
 }

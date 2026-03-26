@@ -12,7 +12,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import jakarta.ejb.Stateless;
 
+@Stateless
 public class RecoveryDAO {
 
     private static final String BASE_SELECT =

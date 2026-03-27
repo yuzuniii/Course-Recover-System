@@ -2,6 +2,7 @@ package com.epda.crs.bean;
 
 import com.epda.crs.dto.AcademicReportDTO;
 import com.epda.crs.exception.ValidationException;
+import com.epda.crs.util.EmailUtil;
 import com.epda.crs.model.Student;
 import com.epda.crs.service.ReportService;
 import jakarta.annotation.PostConstruct;
@@ -63,6 +64,27 @@ public class ReportBean implements Serializable {
             addError("Reports", e.getMessage());
         } catch (Exception e) {
             addError("Reports", "An unexpected error occurred");
+        }
+    }
+
+    public void sendReportEmail() {
+        if (currentReport == null) {
+            addError("Email", "No report to send. Generate a report first.");
+            return;
+        }
+        try {
+            EmailUtil.sendEmail(
+                    currentReport.getStudentCode() + "@student.crs.local",
+                    "Academic Report — Semester " + currentReport.getSemester() +
+                    " Year " + currentReport.getYearOfStudy(),
+                    "Dear " + currentReport.getStudentName() + ",\n\n" +
+                    "Your academic report for semester " + currentReport.getSemester() +
+                    " of year " + currentReport.getYearOfStudy() +
+                    " has been generated.\nCGPA: " +
+                    String.format("%.2f", currentReport.getCgpa()));
+            addInfo("Email", "Report notification sent to student.");
+        } catch (Exception e) {
+            addError("Email", "Failed to send email: " + e.getMessage());
         }
     }
 

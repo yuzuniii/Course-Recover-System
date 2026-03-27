@@ -4,7 +4,8 @@ param(
     [string]$MySqlExe = "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe",
     [string]$Database = "crs_system",
     [string]$Username = "root",
-    [string]$Password = "admin"
+    [string]$Password = "admin",
+    [string]$OutputSql = (Join-Path $PSScriptRoot "csv-import-data.sql")
 )
 
 $ErrorActionPreference = "Stop"
@@ -106,9 +107,8 @@ foreach ($row in $courseRows) {
     )
 }
 
-$tempSql = Join-Path $env:TEMP "crs_csv_import.sql"
-Set-Content -Path $tempSql -Value $sqlLines -Encoding UTF8
+Set-Content -Path $OutputSql -Value $sqlLines -Encoding UTF8
 
-Get-Content -Raw $tempSql | & $MySqlExe "-u$Username" "-p$Password" $Database
+Get-Content -Raw $OutputSql | & $MySqlExe "-u$Username" "-p$Password" $Database
 
 Write-Output "Imported $($studentRows.Count) students and $($courseRows.Count) courses into $Database."

@@ -11,6 +11,7 @@ public class Student {
     private int yearOfStudy;
     private double cgpa;
     private int failedCourseCount;
+    private java.util.List<FailedComponent> failedComponents;
 
     public Student() {
     }
@@ -53,4 +54,7 @@ public class Student {
 
     public int getFailedCourseCount() { return failedCourseCount; }
     public void setFailedCourseCount(int failedCourseCount) { this.failedCourseCount = failedCourseCount; }
+
+    public java.util.List<FailedComponent> getFailedComponents() { return failedComponents; }
+    public void setFailedComponents(java.util.List<FailedComponent> failedComponents) { this.failedComponents = failedComponents; }
 }

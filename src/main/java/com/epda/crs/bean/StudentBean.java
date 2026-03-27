@@ -1,5 +1,6 @@
 package com.epda.crs.bean;
 
+import com.epda.crs.model.FailedComponent;
 import com.epda.crs.model.Student;
 import com.epda.crs.service.StudentService;
 import com.epda.crs.service.EligibilityService;
@@ -30,6 +31,8 @@ public class StudentBean implements Serializable {
 
     private List<Student> students;
     private Student selectedStudent;
+    
+    private FailedComponent selectedComponent;
 
     @PostConstruct
     public void init() {
@@ -44,6 +47,50 @@ public class StudentBean implements Serializable {
         this.selectedStudent = student;
     }
 
+    public void prepareAddComponent(Student student) {
+        this.selectedComponent = new FailedComponent();
+        // Link to a default result_id for now or fetch the student's actual result_id if available
+        // For demonstration purposes, we'll assume result_id 1
+        this.selectedComponent.setResultId(1); 
+    }
+
+    public void editComponent(FailedComponent comp) {
+        this.selectedComponent = comp;
+    }
+
+    public void saveComponent() {
+        try {
+            String actor = loginBean.getCurrentUser() != null ? loginBean.getCurrentUser().getUsername() : "system";
+            studentService.saveFailedComponent(selectedComponent, actor);
+            
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "Failed component saved"));
+            
+            students = studentService.getStudents(); // Refresh list
+            PrimeFaces.current().executeScript("PF('failedComponentDialog').hide()");
+            PrimeFaces.current().ajax().update("directoryContent", "globalMessages");
+        } catch (Exception e) {
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not save component: " + e.getMessage()));
+        }
+    }
+
+    public void deleteComponent(FailedComponent comp) {
+        try {
+            String actor = loginBean.getCurrentUser() != null ? loginBean.getCurrentUser().getUsername() : "system";
+            studentService.deleteFailedComponent((long) comp.getComponentId(), comp.getResultId(), actor);
+            
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new FacesMessage(FacesMessage.SEVERITY_INFO, "Deleted", "Failed component removed"));
+            
+            students = studentService.getStudents(); // Refresh list
+            PrimeFaces.current().ajax().update("directoryContent", "globalMessages");
+        } catch (Exception e) {
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not delete component: " + e.getMessage()));
+        }
+    }
+
     public void saveStudent() {
         try {
             String actor = loginBean.getCurrentUser() != null ? loginBean.getCurrentUser().getUsername() : "system";
@@ -54,7 +101,7 @@ public class StudentBean implements Serializable {
             
             students = studentService.getStudents(); // Refresh list
             PrimeFaces.current().executeScript("PF('studentDialog').hide()");
-            PrimeFaces.current().ajax().update("form:dt-students", "globalMessages");
+            PrimeFaces.current().ajax().update("directoryContent", "globalMessages");
         } catch (Exception e) {
             FacesContext.getCurrentInstance().addMessage(null, 
                 new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not save student: " + e.getMessage()));
@@ -64,6 +111,9 @@ public class StudentBean implements Serializable {
     public List<Student> getStudents() { return students; }
     public Student getSelectedStudent() { return selectedStudent; }
     public void setSelectedStudent(Student selectedStudent) { this.selectedStudent = selectedStudent; }
+    
+    public FailedComponent getSelectedComponent() { return selectedComponent; }
+    public void setSelectedComponent(FailedComponent selectedComponent) { this.selectedComponent = selectedComponent; }
     
     public List<EligibilityDTO> getEligibilityResults() { return eligibilityService.getEligibilityBreakdown(); }
 }

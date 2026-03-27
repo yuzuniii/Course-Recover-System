@@ -20,10 +20,10 @@ public class UserDAO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    // roles table stores 'ADMIN' for COURSE_ADMINISTRATOR
     private UserRole mapRole(String roleName) {
         if (roleName == null) return null;
         if (roleName.equalsIgnoreCase("ADMIN")) return UserRole.COURSE_ADMINISTRATOR;
+        if (roleName.equalsIgnoreCase("COURSE_ADMINISTRATOR")) return UserRole.COURSE_ADMINISTRATOR;
         if (roleName.equalsIgnoreCase("ACADEMIC_OFFICER")) return UserRole.ACADEMIC_OFFICER;
         try { return UserRole.valueOf(roleName); } catch (IllegalArgumentException e) { return null; }
     }
@@ -162,23 +162,30 @@ public class UserDAO implements Serializable {
     }
 
     private void insertUserRole(Connection conn, long userId, UserRole role) throws SQLException {
-        // Map enum back to the role_name stored in the roles table
-        String roleName = (role == UserRole.COURSE_ADMINISTRATOR) ? "ADMIN" : role.name();
+        String[] roleNames = role == UserRole.COURSE_ADMINISTRATOR
+            ? new String[] { "COURSE_ADMINISTRATOR", "ADMIN" }
+            : new String[] { role.name() };
+
         String findRole = "SELECT role_id FROM roles WHERE role_name = ?";
-        try (PreparedStatement ps = conn.prepareStatement(findRole)) {
-            ps.setString(1, roleName);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    int roleId = rs.getInt("role_id");
-                    String insert = "INSERT IGNORE INTO user_roles (user_id, role_id) VALUES (?, ?)";
-                    try (PreparedStatement ins = conn.prepareStatement(insert)) {
-                        ins.setLong(1, userId);
-                        ins.setInt(2, roleId);
-                        ins.executeUpdate();
+        for (String roleName : roleNames) {
+            try (PreparedStatement ps = conn.prepareStatement(findRole)) {
+                ps.setString(1, roleName);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        int roleId = rs.getInt("role_id");
+                        String insert = "INSERT IGNORE INTO user_roles (user_id, role_id) VALUES (?, ?)";
+                        try (PreparedStatement ins = conn.prepareStatement(insert)) {
+                            ins.setLong(1, userId);
+                            ins.setInt(2, roleId);
+                            ins.executeUpdate();
+                            return;
+                        }
                     }
                 }
             }
         }
+
+        throw new SQLException("No matching role row found for " + role);
     }
 
     public void delete(Long userId) {

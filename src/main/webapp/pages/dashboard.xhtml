@@ -2,7 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
-      xmlns:p="http://primefaces.org/ui">
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 <h:head>
     <title>Dashboard — CRS</title>
     <link rel="stylesheet" type="text/css" href="#{request.contextPath}/css/styles.css" />
@@ -23,34 +24,9 @@
 <h:body onload="updateClock()">
 <div class="layout-shell">
 
-    <!-- Sidebar -->
-    <nav class="sidebar">
-        <div class="sidebar-logo">
-            <div class="logo-title">CRS</div>
-            <div class="logo-sub">Course Recovery System</div>
-        </div>
-        <div class="nav-section">
-            <div class="nav-label">Main</div>
-            <a href="#{request.contextPath}/pages/dashboard.xhtml" class="nav-item active">&#9632; Dashboard</a>
-            <a href="#{request.contextPath}/pages/students.xhtml" class="nav-item">&#9632; Students</a>
-            <div class="nav-label" style="margin-top:12px;">Academic</div>
-            <a href="#{request.contextPath}/pages/eligibility.xhtml" class="nav-item">&#10003; Eligibility</a>
-            <a href="#{request.contextPath}/pages/recovery.xhtml" class="nav-item">&#9632; Recovery</a>
-            <a href="#{request.contextPath}/pages/reports.xhtml" class="nav-item">&#9632; Reports</a>
-            <div class="nav-label" style="margin-top:12px;">System</div>
-            <a href="#{request.contextPath}/pages/users.xhtml" class="nav-item">&#9632; Users</a>
-            <a href="#{request.contextPath}/pages/audit-log.xhtml" class="nav-item">&#9632; Audit Log</a>
-        </div>
-        <div class="sidebar-footer">
-            <div class="user-pill">
-                <div class="avatar">#{loginBean.currentUser != null ? loginBean.currentUser.fullName.substring(0,2).toUpperCase() : 'US'}</div>
-                <div>
-                    <div class="user-name">#{loginBean.currentUser != null ? loginBean.currentUser.fullName : 'User'}</div>
-                    <div class="user-role">#{loginBean.currentUser != null ? loginBean.currentUser.role : ''}</div>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <ui:include src="/WEB-INF/includes/sidebar.xhtml">
+        <ui:param name="activePage" value="dashboard" />
+    </ui:include>
 
     <!-- Main -->
     <div class="main-content">
@@ -94,23 +70,58 @@
             <!-- Charts & Calendar -->
             <div class="dashboard-grid">
                 <div class="dashboard-widget">
-                    <div class="widget-title">Eligibility Chart</div>
-                    <div class="widget-chart">
-                        <p:donutChart model="#{dashboardBean.eligibilityChartModel}" />
-                    </div>
-                </div>
-                <div class="dashboard-widget">
-                    <div class="widget-title">Recovery Calendar</div>
-                    <p:schedule value="#{dashboardBean.recoveryScheduleModel}" />
+                    <div class="widget-title">Calendar</div>
+                    <p:schedule value="#{dashboardBean.recoveryScheduleModel}" aspectRatio="2.0" contentHeight="350" />
                 </div>
             </div>
 
             <!-- New Trend Chart Row -->
             <div class="dashboard-grid" style="margin-top: 20px;">
                 <div class="dashboard-widget" style="grid-column: span 2;">
-                    <div class="widget-title">System Usage Trend (Last 7 Days)</div>
-                    <div class="widget-chart" style="height: 300px;">
-                        <p:lineChart model="#{dashboardBean.usageTrendModel}" style="width: 100%; height: 100%;" />
+                    <div class="widget-title">System Activity Trend (Last 7 Days)</div>
+                    <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+                        <p:lineChart model="#{dashboardBean.usageTrendModel}" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid" style="margin-top: 20px;">
+                <div class="dashboard-widget">
+                    <div class="widget-title">Component Performance Summary</div>
+                    <div class="eligibility-split">
+                        <div class="eligibility-chart-col">
+                            <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+                                <p:donutChart model="#{dashboardBean.eligibilityChartModel}" />
+                            </div>
+                        </div>
+                        <div class="eligibility-summary-col">
+                            <div class="metrics-grid">
+                                <div class="metric-item border-green">
+                                    <div class="metric-label">Passes</div>
+                                    <div class="metric-value text-green">
+                                        <h:outputText value="#{dashboardBean.totalPasses}" />
+                                    </div>
+                                </div>
+                                <div class="metric-item border-blue">
+                                    <div class="metric-label">Assignments Failed</div>
+                                    <div class="metric-value text-blue">
+                                        <h:outputText value="#{dashboardBean.assignmentFailures}" />
+                                    </div>
+                                </div>
+                                <div class="metric-item border-amber">
+                                    <div class="metric-label">Mid-Terms Failed</div>
+                                    <div class="metric-value text-amber">
+                                        <h:outputText value="#{dashboardBean.midtermFailures}" />
+                                    </div>
+                                </div>
+                                <div class="metric-item border-red">
+                                    <div class="metric-label">Final Exams Failed</div>
+                                    <div class="metric-value text-red">
+                                        <h:outputText value="#{dashboardBean.finalExamFailures}" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -139,8 +150,8 @@
             <div class="dashboard-grid" style="margin-bottom: 20px;">
                 <div class="dashboard-widget" style="width: 100%;">
                     <div class="widget-title">Average CGPA by Programme</div>
-                    <div class="widget-chart" style="padding-top: 15px;">
-                        <p:barChart model="#{dashboardBean.cgpaChartModel}" style="width: 100%; height: 300px;" />
+                    <div class="chart-container">
+                        <p:barChart model="#{dashboardBean.cgpaChartModel}" />
                     </div>
                 </div>
             </div>
@@ -149,3 +160,4 @@
 </div>
 </h:body>
 </html>
+

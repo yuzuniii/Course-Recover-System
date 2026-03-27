@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+<h:head>
+    <title>Student Profile — CRS</title>
+    <link rel="stylesheet" type="text/css" href="#{request.contextPath}/css/styles.css" />
+    <style>
+        .profile-stat-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .profile-stat-card {
+            flex: 1;
+            min-width: 140px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px 20px;
+            text-align: center;
+        }
+        .profile-stat-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #9ca3af;
+            margin-bottom: 6px;
+        }
+        .profile-stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        .progress-bar-track {
+            background: #e8e6e0;
+            border-radius: 4px;
+            height: 12px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .profile-student-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+    </style>
+</h:head>
+<h:body>
+<div class="layout-shell">
+    <ui:include src="/WEB-INF/includes/sidebar.xhtml">
+        <ui:param name="activePage" value="directory" />
+    </ui:include>
+
+    <!-- ── Main ────────────────────────────────────────── -->
+    <div class="main-content">
+        <div class="topbar">
+            <div class="topbar-left">
+                <div class="page-title">Student Profile</div>
+                <div class="breadcrumb">
+                    Students /
+                    #{studentProfileBean.student ne null ? studentProfileBean.student.fullName : '—'}
+                </div>
+            </div>
+            <div class="topbar-actions">
+                <a href="#{request.contextPath}/pages/directory.xhtml"
+                   class="btn btn-outline btn-sm" style="text-decoration:none;">
+                    &#8592; Back to Directory
+                </a>
+            </div>
+        </div>
+
+        <div class="page-content">
+
+            <!-- Guard: no student found -->
+            <h:panelGroup rendered="#{studentProfileBean.student eq null}" layout="block">
+                <div class="card">
+                    <div class="card-body" style="color:#dc2626;padding:20px;">
+                        Student not found. Please go back and select a valid student.
+                    </div>
+                </div>
+            </h:panelGroup>
+
+            <h:panelGroup rendered="#{studentProfileBean.student ne null}" layout="block">
+
+                <!-- ── SECTION 1: Student Header Card ───────────── -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="profile-student-header">
+                            <div>
+                                <div style="font-size:24px;font-weight:700;margin-bottom:6px;">
+                                    #{studentProfileBean.student.fullName}
+                                </div>
+                                <div style="color:var(--text-secondary);margin-bottom:4px;">
+                                    <strong>ID:</strong> #{studentProfileBean.student.studentNumber}
+                                    &#160;&#183;&#160;
+                                    <strong>Email:</strong> #{studentProfileBean.student.email}
+                                </div>
+                                <div style="color:var(--text-secondary);margin-bottom:4px;">
+                                    <strong>Programme:</strong> #{studentProfileBean.student.programName}
+                                    &#160;&#183;&#160;
+                                    <strong>Year:</strong> #{studentProfileBean.student.yearOfStudy}
+                                    &#160;&#183;&#160;
+                                    <strong>Semester:</strong> #{studentProfileBean.student.semester}
+                                </div>
+                                <div style="margin-top:10px;">
+                                    <a href="#{request.contextPath}/pages/recovery.xhtml?studentId=#{studentProfileBean.student.id}"
+                                       class="btn btn-outline btn-sm" style="text-decoration:none;">
+                                        Manage Recovery Plans
+                                    </a>
+                                </div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-size:40px;font-weight:700;line-height:1;
+                                            color:#{studentProfileBean.student.cgpa ge 2.0 ? '#16a34a' : '#dc2626'};">
+                                    <h:outputText value="#{studentProfileBean.student.cgpa}">
+                                        <f:convertNumber maxFractionDigits="2" minFractionDigits="2" />
+                                    </h:outputText>
+                                </div>
+                                <div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">CGPA</div>
+                                <h:panelGroup rendered="#{studentProfileBean.eligibilityStatus ne null}">
+                                    <span class="badge #{studentProfileBean.eligibilityStatus.eligible ? 'badge-green' : 'badge-red'}"
+                                          style="font-size:13px;padding:5px 14px;">
+                                        #{studentProfileBean.eligibilityStatus.eligible ? 'ELIGIBLE' : 'NOT ELIGIBLE'}
+                                    </span>
+                                    <div style="font-size:12px;color:var(--text-secondary);margin-top:6px;max-width:220px;">
+                                        #{studentProfileBean.eligibilityStatus.reason}
+                                    </div>
+                                </h:panelGroup>
+                                <h:panelGroup rendered="#{studentProfileBean.eligibilityStatus eq null}">
+                                    <span class="badge badge-amber" style="font-size:13px;padding:5px 14px;">
+                                        NOT CHECKED
+                                    </span>
+                                </h:panelGroup>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── SECTION 2: Progress Overview ─────────────── -->
+                <div class="profile-stat-row">
+                    <div class="profile-stat-card">
+                        <div class="profile-stat-label">Recovery Plans</div>
+                        <div class="profile-stat-value">
+                            #{studentProfileBean.recoveryPlans ne null ? studentProfileBean.recoveryPlans.size() : 0}
+                        </div>
+                    </div>
+                    <div class="profile-stat-card">
+                        <div class="profile-stat-label">Total Milestones</div>
+                        <div class="profile-stat-value">#{studentProfileBean.totalMilestones}</div>
+                    </div>
+                    <div class="profile-stat-card">
+                        <div class="profile-stat-label">Completed Milestones</div>
+                        <div class="profile-stat-value" style="color:#16a34a;">
+                            #{studentProfileBean.completedMilestones}
+                        </div>
+                    </div>
+                    <div class="profile-stat-card">
+                        <div class="profile-stat-label">Progress</div>
+                        <div class="profile-stat-value">#{studentProfileBean.progressPercentage}%</div>
+                        <div class="progress-bar-track">
+                            <div style="background:#27500a;height:100%;border-radius:4px;
+                                        width:#{studentProfileBean.progressPercentage}%;
+                                        transition:width 0.3s;"></div>
+                        </div>
+                        <div style="font-size:11px;color:var(--text-secondary);margin-top:4px;">
+                            #{studentProfileBean.completedMilestones} of #{studentProfileBean.totalMilestones} completed
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── SECTION 3: Course Results Table ──────────── -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Academic Results</span>
+                    </div>
+                    <p:dataTable value="#{studentProfileBean.results}" var="res"
+                                 emptyMessage="No results found">
+                        <p:column headerText="Course Code">
+                            <span class="cell-primary">#{res.courseCode}</span>
+                        </p:column>
+                        <p:column headerText="Course Title">#{res.courseName}</p:column>
+                        <p:column headerText="Credits">#{res.creditHours}</p:column>
+                        <p:column headerText="Grade">
+                            <span class="badge #{res.grade eq 'F' ? 'badge-red' : 'badge-green'}">
+                                #{res.grade}
+                            </span>
+                        </p:column>
+                        <p:column headerText="Grade Point">
+                            <h:outputText value="#{res.gradePoint}">
+                                <f:convertNumber maxFractionDigits="2" minFractionDigits="2" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Attempt">#{res.attemptNumber}</p:column>
+                        <p:column headerText="Status">
+                            <span class="badge #{res.grade eq 'F' ? 'badge-red' : 'badge-green'}">
+                                #{res.grade eq 'F' ? 'FAILED' : 'PASSED'}
+                            </span>
+                        </p:column>
+                    </p:dataTable>
+                </div>
+
+                <!-- ── SECTION 4: Recovery Plans ────────────────── -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Recovery Plans</span>
+                    </div>
+                    <p:dataTable id="plansProfileTable"
+                                 value="#{studentProfileBean.recoveryPlans}" var="plan"
+                                 rowKey="#{plan.id}"
+                                 emptyMessage="No recovery plans found">
+                        <p:column style="width:2rem">
+                            <p:rowToggler />
+                        </p:column>
+                        <p:column headerText="Plan ID">
+                            <span class="cell-primary">##{plan.id}</span>
+                        </p:column>
+                        <p:column headerText="Course">
+                            <span class="cell-primary">#{plan.course.courseCode}</span>
+                            <br/>
+                            <span class="cell-secondary">#{plan.course.courseName}</span>
+                        </p:column>
+                        <p:column headerText="Attempt">
+                            <span class="badge badge-blue">Attempt #{plan.attemptNumber}</span>
+                        </p:column>
+                        <p:column headerText="Status">
+                            <h:outputText value="#{plan.status}"
+                                          styleClass="badge #{plan.status != null and plan.status.name() == 'COMPLETED' ? 'badge-green' : plan.status != null and plan.status.name() == 'FAILED' ? 'badge-red' : 'badge-amber'}" />
+                        </p:column>
+                        <p:column headerText="Start">#{plan.startDate}</p:column>
+                        <p:column headerText="End">#{plan.endDate}</p:column>
+                        <p:column headerText="Action">
+                            <a href="#{request.contextPath}/pages/recovery.xhtml?studentId=#{plan.student.id}"
+                               class="btn btn-outline btn-sm" style="text-decoration:none;">
+                                Manage Plan
+                            </a>
+                        </p:column>
+
+                        <p:rowExpansion>
+                            <div style="padding:12px 20px;background:#f8fafc;border-top:1px solid #e5e7eb;">
+                                <div style="font-weight:600;font-size:13px;margin-bottom:8px;color:#374151;">
+                                    Recovery Components
+                                </div>
+                                <h:panelGroup rendered="#{not empty studentProfileBean.getPlanComponents(plan.id)}"
+                                              layout="block">
+                                    <p:dataTable value="#{studentProfileBean.getPlanComponents(plan.id)}" var="comp"
+                                                 styleClass="ui-datatable-sm">
+                                        <p:column headerText="Component">#{comp.componentName}</p:column>
+                                        <p:column headerText="Type">#{comp.componentType}</p:column>
+                                        <p:column headerText="Original Score">#{comp.componentScore}</p:column>
+                                        <p:column headerText="Pass Required">#{comp.passRequired}</p:column>
+                                        <p:column headerText="Status">
+                                            <span class="badge badge-amber">PENDING</span>
+                                        </p:column>
+                                    </p:dataTable>
+                                </h:panelGroup>
+                                <h:panelGroup rendered="#{empty studentProfileBean.getPlanComponents(plan.id)}"
+                                              layout="block">
+                                    <div style="color:var(--text-secondary);font-size:13px;">
+                                        No specific components selected — plan covers the full course.
+                                    </div>
+                                </h:panelGroup>
+                            </div>
+                        </p:rowExpansion>
+                    </p:dataTable>
+                </div>
+
+                <!-- ── SECTION 5: Latest Eligibility Status ──────── -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Latest Eligibility Status</span>
+                    </div>
+                    <div class="card-body">
+                        <h:panelGroup rendered="#{studentProfileBean.eligibilityStatus ne null}" layout="block">
+                            <div style="display:flex;gap:24px;flex-wrap:wrap;">
+                                <div>
+                                    <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#9ca3af;margin-bottom:4px;">CGPA</div>
+                                    <div style="font-size:22px;font-weight:700;
+                                                color:#{studentProfileBean.eligibilityStatus.cgpa ge 2.0 ? '#16a34a' : '#dc2626'};">
+                                        <h:outputText value="#{studentProfileBean.eligibilityStatus.cgpa}">
+                                            <f:convertNumber maxFractionDigits="2" minFractionDigits="2" />
+                                        </h:outputText>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#9ca3af;margin-bottom:4px;">Verdict</div>
+                                    <span class="badge #{studentProfileBean.eligibilityStatus.eligible ? 'badge-green' : 'badge-red'}"
+                                          style="font-size:13px;padding:5px 14px;margin-top:4px;display:inline-block;">
+                                        #{studentProfileBean.eligibilityStatus.eligible ? 'ELIGIBLE' : 'NOT ELIGIBLE'}
+                                    </span>
+                                </div>
+                                <div>
+                                    <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#9ca3af;margin-bottom:4px;">Semester / Year</div>
+                                    <div style="font-size:15px;font-weight:600;">
+                                        Sem #{studentProfileBean.eligibilityStatus.semester},
+                                        Year #{studentProfileBean.eligibilityStatus.yearOfStudy}
+                                    </div>
+                                </div>
+                                <div style="flex:1;min-width:200px;">
+                                    <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#9ca3af;margin-bottom:4px;">Reason</div>
+                                    <div style="font-size:13px;color:#374151;">
+                                        #{studentProfileBean.eligibilityStatus.reason}
+                                    </div>
+                                </div>
+                            </div>
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{studentProfileBean.eligibilityStatus eq null}" layout="block">
+                            <div style="color:var(--text-secondary);font-size:13px;">
+                                No eligibility check has been performed for this student yet.
+                            </div>
+                        </h:panelGroup>
+                    </div>
+                </div>
+
+            </h:panelGroup>
+
+        </div><!-- /page-content -->
+    </div><!-- /main-content -->
+</div><!-- /layout-shell -->
+</h:body>
+</html>
+

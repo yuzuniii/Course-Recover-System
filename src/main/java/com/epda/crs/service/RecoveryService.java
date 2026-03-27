@@ -4,8 +4,10 @@ import com.epda.crs.dao.CourseDAO;
 import com.epda.crs.dao.MilestoneDAO;
 import com.epda.crs.dao.RecoveryDAO;
 import com.epda.crs.dao.RecoveryRecommendationDAO;
+import com.epda.crs.dao.ResultDAO;
 import com.epda.crs.dao.StudentDAO;
 import com.epda.crs.dao.UserDAO;
+import com.epda.crs.dto.EligibilityDTO;
 import com.epda.crs.enums.MilestoneStatus;
 import com.epda.crs.enums.RecoveryStatus;
 import com.epda.crs.exception.ValidationException;
@@ -14,7 +16,6 @@ import com.epda.crs.model.Milestone;
 import com.epda.crs.model.RecoveryPlan;
 import com.epda.crs.model.RecoveryRecommendation;
 import com.epda.crs.model.Student;
-import com.epda.crs.util.EmailUtil;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import java.time.LocalDate;
@@ -30,12 +31,16 @@ public class RecoveryService {
     @Inject private CourseDAO                 courseDAO;
     @Inject private RecoveryRecommendationDAO recommendationDAO;
     @Inject private UserDAO                   userDAO;
+    @Inject private ResultDAO                 resultDAO;
 
     @Inject
     private RecoveryRuleService recoveryRuleService;
 
     @Inject
     private AuditLogService auditLogService;
+
+    @Inject
+    private EligibilityService eligibilityService;
 
     // -----------------------------------------------------------------------
     // Plan CRUD
@@ -77,15 +82,6 @@ public class RecoveryService {
 
         // Persist (only reached if validation passed)
         recoveryDAO.save(plan);
-
-        // Email notification
-        EmailUtil.sendEmail(
-                student.getStudentNumber() + "@student.crs.local",
-                "Recovery Plan Created — " + course.getCourseName(),
-                "Dear " + student.getFullName() + ",\n\n" +
-                "A recovery plan has been created for " + course.getCourseName() +
-                " (attempt " + attemptNo + ").\nScope: " + scope +
-                "\nStart date: " + plan.getStartDate());
 
         // Audit log
         String actor = userDAO.findById((long) createdBy)
@@ -138,6 +134,61 @@ public class RecoveryService {
         if (status == null) throw new ValidationException("Status must not be null");
         milestoneDAO.updateStatus((long) milestoneId, status);
         auditLogService.logAction(actorUsername, "UPDATE_MILESTONE_STATUS", "RECOVERY_MILESTONE", (long) milestoneId, "Updated milestone status to " + status);
+    }
+
+    // -----------------------------------------------------------------------
+    // Grade update
+    // -----------------------------------------------------------------------
+
+    /**
+     * Updates the grade for a student's recovery attempt and optionally triggers
+     * a re-eligibility check. Returns an EligibilityDTO when the grade passes
+     * (not F), or null when the grade is still F.
+     *
+     * @throws ValidationException if planId is invalid or plan not found
+     */
+    public EligibilityDTO updateStudentGrade(int planId, String newGrade,
+                                             double newGradePoint, int updatedBy) {
+        if (planId <= 0) throw new ValidationException("Invalid plan ID");
+        if (newGrade == null || newGrade.isBlank()) throw new ValidationException("Grade must not be empty");
+
+        RecoveryPlan plan = recoveryDAO.findById((long) planId)
+                .orElseThrow(() -> new ValidationException("Recovery plan not found"));
+
+        int studentId  = plan.getStudent().getId().intValue();
+        int courseId   = plan.getCourse().getId().intValue();
+        int attemptNum = plan.getAttemptNumber();
+
+        // Persist grade change
+        resultDAO.updateGrade(studentId, courseId, attemptNum, newGrade, newGradePoint);
+
+        // Auto-complete plan when student passes
+        boolean passed = !"F".equalsIgnoreCase(newGrade);
+        if (passed) {
+            recoveryDAO.updateStatus((long) planId, RecoveryStatus.COMPLETED);
+        }
+
+        // Audit log
+        String actor = userDAO.findById((long) updatedBy)
+                .map(u -> u.getUsername())
+                .orElse("user:" + updatedBy);
+        if (auditLogService != null) {
+            auditLogService.logAction(actor, "UPDATE_GRADE", "RECOVERY_PLAN", (long) planId,
+                    "Grade updated to " + newGrade + " for student " + studentId +
+                    ", course " + courseId + ", attempt " + attemptNum);
+        }
+
+        // Re-eligibility check when student passes
+        if (passed) {
+            try {
+                Student student = plan.getStudent();
+                return eligibilityService.checkEligibility(
+                        studentId, student.getSemester(), student.getYearOfStudy(), actor);
+            } catch (Exception e) {
+                // non-fatal — eligibility check failure does not roll back grade update
+            }
+        }
+        return null;
     }
 
     // -----------------------------------------------------------------------

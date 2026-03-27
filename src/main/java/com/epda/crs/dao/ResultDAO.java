@@ -2,6 +2,7 @@ package com.epda.crs.dao;
 
 import com.epda.crs.config.DBConnection;
 import com.epda.crs.model.Course;
+import com.epda.crs.model.FailedComponent;
 import com.epda.crs.util.CGPACalculator;
 import jakarta.enterprise.context.Dependent;
 import java.sql.Connection;
@@ -156,6 +157,136 @@ public class ResultDAO {
             }
         } catch (SQLException e) {
             throw new RuntimeException("ResultDAO.getFullResultsByStudentId failed", e);
+        }
+        return list;
+    }
+
+    /**
+     * Returns distinct semester numbers (int) from eligibility_records for this student.
+     * Used by EligibilityBean to populate the semester dropdown dynamically.
+     */
+    public List<Integer> getDistinctSemestersByStudent(int studentId) {
+        String sql = "SELECT DISTINCT semester FROM eligibility_records " +
+                     "WHERE student_id = ? ORDER BY semester";
+        List<Integer> list = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, studentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(rs.getInt("semester"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("ResultDAO.getDistinctSemestersByStudent failed", e);
+        }
+        return list;
+    }
+
+    /**
+     * Returns distinct year_of_study values (int) from eligibility_records for this student.
+     * Used by EligibilityBean to populate the year dropdown dynamically.
+     */
+    public List<Integer> getDistinctYearsByStudent(int studentId) {
+        String sql = "SELECT DISTINCT year_of_study FROM eligibility_records " +
+                     "WHERE student_id = ? ORDER BY year_of_study";
+        List<Integer> list = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, studentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(rs.getInt("year_of_study"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("ResultDAO.getDistinctYearsByStudent failed", e);
+        }
+        return list;
+    }
+
+    /**
+     * Returns all failed_components rows for every failed course of the given student.
+     * Joins failed_components → student_course_results to filter by student_id.
+     */
+    public List<FailedComponent> getFailedComponentsByStudentId(int studentId) {
+        String sql = "SELECT fc.component_id, fc.result_id, fc.component_name, " +
+                     "       fc.component_score, fc.pass_required " +
+                     "FROM   failed_components fc " +
+                     "JOIN   student_course_results scr ON fc.result_id = scr.result_id " +
+                     "WHERE  scr.student_id = ? AND scr.grade = 'F' " +
+                     "ORDER BY scr.course_id, fc.component_id";
+        List<FailedComponent> list = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, studentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    FailedComponent fc = new FailedComponent();
+                    fc.setComponentId(rs.getInt("component_id"));
+                    fc.setResultId(rs.getInt("result_id"));
+                    fc.setComponentName(rs.getString("component_name"));
+                    fc.setComponentScore(rs.getDouble("component_score"));
+                    fc.setPassRequired(rs.getDouble("pass_required"));
+                    list.add(fc);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("ResultDAO.getFailedComponentsByStudentId failed", e);
+        }
+        return list;
+    }
+
+    /**
+     * Updates grade, grade_point, and status for a specific result row.
+     * Derives status from the grade: 'F' → FAILED, anything else → PASSED.
+     */
+    public void updateGrade(int studentId, int courseId, int attemptNumber,
+                            String newGrade, double newGradePoint) {
+        String sql = "UPDATE student_course_results " +
+                     "SET grade = ?, grade_point = ?, status = ? " +
+                     "WHERE student_id = ? AND course_id = ? AND attempt_number = ?";
+        String status = "F".equalsIgnoreCase(newGrade) ? "FAILED" : "PASSED";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newGrade);
+            ps.setDouble(2, newGradePoint);
+            ps.setString(3, status);
+            ps.setInt(4, studentId);
+            ps.setInt(5, courseId);
+            ps.setInt(6, attemptNumber);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("ResultDAO.updateGrade failed", e);
+        }
+    }
+
+    /**
+     * Returns failed components for a specific student and course.
+     * Used by RecoveryBean to show component selection when creating a recovery plan.
+     */
+    public List<FailedComponent> getFailedComponentsByStudentAndCourse(int studentId, int courseId) {
+        String sql = "SELECT fc.component_id, fc.result_id, fc.component_name, " +
+                     "       fc.component_score, fc.pass_required " +
+                     "FROM   failed_components fc " +
+                     "JOIN   student_course_results scr ON fc.result_id = scr.result_id " +
+                     "WHERE  scr.student_id = ? AND scr.course_id = ? " +
+                     "AND    (scr.grade = 'F' OR scr.grade_point = 0.0) " +
+                     "ORDER BY fc.component_name";
+        List<FailedComponent> list = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, studentId);
+            ps.setInt(2, courseId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    FailedComponent fc = new FailedComponent();
+                    fc.setComponentId(rs.getInt("component_id"));
+                    fc.setResultId(rs.getInt("result_id"));
+                    fc.setComponentName(rs.getString("component_name"));
+                    fc.setComponentScore(rs.getDouble("component_score"));
+                    fc.setPassRequired(rs.getDouble("pass_required"));
+                    list.add(fc);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("ResultDAO.getFailedComponentsByStudentAndCourse failed", e);
         }
         return list;
     }

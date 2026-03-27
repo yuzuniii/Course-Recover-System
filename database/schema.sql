@@ -197,3 +197,17 @@ CREATE TABLE email_notifications (
     status    VARCHAR(20) DEFAULT 'SENT',
     sent_at   TIMESTAMP   DEFAULT CURRENT_TIMESTAMP
 );
+
+-- =========================
+-- RECOVERY PLAN COMPONENTS
+-- =========================
+CREATE TABLE IF NOT EXISTS recovery_plan_components (
+    rpc_id       INT AUTO_INCREMENT PRIMARY KEY,
+    plan_id      INT NOT NULL,
+    component_id INT NOT NULL,
+    status       VARCHAR(20) DEFAULT 'PENDING',
+    new_marks    DECIMAL(5,2),
+    updated_at   TIMESTAMP,
+    FOREIGN KEY (plan_id)      REFERENCES recovery_plans(plan_id)      ON DELETE CASCADE,
+    FOREIGN KEY (component_id) REFERENCES failed_components(component_id) ON DELETE CASCADE
+);

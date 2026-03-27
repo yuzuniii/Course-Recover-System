@@ -8,9 +8,7 @@ import java.util.Optional;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
+import org.mindrot.jbcrypt.BCrypt;
 
 @Stateless
 public class AuthService {
@@ -29,7 +27,7 @@ public class AuthService {
         }
 
         User user = userOptional.get();
-        if (!verifyPassword(password, user.getPassword())) {
+        if (!BCrypt.checkpw(password, user.getPassword())) {
             auditLogService.logAction(username, "LOGIN_FAILED", "User", user.getId(), "Invalid credentials");
             throw new AuthenticationException("Invalid username or password.");
         }
@@ -47,37 +45,6 @@ public class AuthService {
     }
 
     public static String hashPassword(String password) {
-        try {
-            byte[] salt = new byte[16];
-            new java.security.SecureRandom().nextBytes(salt);
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(salt);
-            byte[] hashedPassword = md.digest(password.getBytes());
-            byte[] combined = new byte[salt.length + hashedPassword.length];
-            System.arraycopy(salt, 0, combined, 0, salt.length);
-            System.arraycopy(hashedPassword, 0, combined, salt.length, hashedPassword.length);
-            return Base64.getEncoder().encodeToString(combined);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Failed to hash password", e);
-        }
-    }
-
-    private boolean verifyPassword(String plainPassword, String hashedPassword) {
-        try {
-            byte[] combined = Base64.getDecoder().decode(hashedPassword);
-            byte[] salt = new byte[16];
-            System.arraycopy(combined, 0, salt, 0, 16);
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(salt);
-            byte[] hash = md.digest(plainPassword.getBytes());
-            for (int i = 0; i < hash.length; i++) {
-                if (hash[i] != combined[i + 16]) {
-                    return false;
-                }
-            }
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+        return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 }

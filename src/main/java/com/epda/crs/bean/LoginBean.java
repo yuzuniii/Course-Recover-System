@@ -1,23 +1,25 @@
 package com.epda.crs.bean;
 
-import com.epda.crs.exception.AuthenticationException;
 import com.epda.crs.model.User;
-import com.epda.crs.enums.UserRole;
-import com.epda.crs.service.AuthService;
+import com.epda.crs.service.UserService;
+import com.epda.crs.service.AuditLogService;
 import java.io.IOException;
 import java.io.Serializable;
-import jakarta.ejb.EJB;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 @Named
 @SessionScoped
 public class LoginBean implements Serializable {
     
-    @EJB
-    private AuthService authService;
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private AuditLogService auditLogService;
     
     private String username;
     private String password;
@@ -25,58 +27,61 @@ public class LoginBean implements Serializable {
 
     public String login() {
         try {
-            currentUser = authService.login(username, password);
+            System.out.println("[LOGIN BEAN] Attempting login for: " + username);
+            currentUser = userService.authenticate(username, password);
             
-            // 1. Establish Session
-            FacesContext.getCurrentInstance().getExternalContext()
-                .getSessionMap().put("currentUser", currentUser);
-            
-            // 2. Role-Based Redirect
-            if (currentUser.getRole() == UserRole.COURSE_ADMINISTRATOR) {
-                return "/pages/users.xhtml?faces-redirect=true";
-            } else if (currentUser.getRole() == UserRole.ACADEMIC_OFFICER) {
+            if (currentUser != null) {
+                System.out.println("[LOGIN BEAN] Success! Setting session...");
+                FacesContext.getCurrentInstance().getExternalContext()
+                    .getSessionMap().put("currentUser", currentUser);
+                
+                // SAFETY NET: If the Audit Log crashes, DO NOT break the login!
+                try {
+                    auditLogService.logAction(currentUser.getUsername(), "LOGIN_SUCCESS", "SYSTEM", currentUser.getId(), "User logged in successfully");
+                } catch (Exception auditEx) {
+                    System.err.println("[LOGIN BEAN] Audit Log Failed, but letting login proceed: " + auditEx.getMessage());
+                }
+                
                 return "/pages/dashboard.xhtml?faces-redirect=true";
+            } else {
+                System.out.println("[LOGIN BEAN] Authentication failed (returned null).");
+                try {
+                    auditLogService.logAction(username, "LOGIN_FAILED", "SYSTEM", null, "Failed login attempt");
+                } catch (Exception auditEx) {}
+
+                FacesContext.getCurrentInstance().addMessage(null, 
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Invalid credentials or disabled account", null));
+                return null;
             }
-            
-            // Default fallback
-            return "/pages/dashboard.xhtml?faces-redirect=true";
-            
-        } catch (AuthenticationException exception) {
-            // Catches normal login errors (e.g., wrong password)
-            FacesContext.getCurrentInstance().addMessage(null, 
-                new FacesMessage(FacesMessage.SEVERITY_ERROR, exception.getMessage(), null));
-            return null; 
             
         } catch (Exception e) {
-            // Catches severe system/database crashes
-            Throwable rootCause = e;
-            while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
-                rootCause = rootCause.getCause();
-            }
+            // CRITICAL FIX: Print the actual system error to the console and the screen!
+            System.err.println("[LOGIN BEAN] CRITICAL EXCEPTION: " + e.getMessage());
+            e.printStackTrace(); 
             
-            String errorMessage = "System Error: " + rootCause.getMessage();
             FacesContext.getCurrentInstance().addMessage(null, 
-                new FacesMessage(FacesMessage.SEVERITY_FATAL, errorMessage, null));
-                
+                new FacesMessage(FacesMessage.SEVERITY_FATAL, "System Error: " + e.getMessage(), "Check server console."));
+            
             return null; 
         }
     }
 
     public void logout() throws IOException {
         FacesContext context = FacesContext.getCurrentInstance();
+        if (currentUser != null) {
+            try {
+                auditLogService.logAction(currentUser.getUsername(), "LOGOUT", "SYSTEM", currentUser.getId(), "User logged out");
+            } catch(Exception e) {}
+        }
         context.getExternalContext().invalidateSession();
         currentUser = null;
         context.getExternalContext().redirect(context.getExternalContext().getRequestContextPath() + "/pages/login.xhtml");
     }
 
-    // ==========================================
-    // GETTERS AND SETTERS (Required by JSF)
-    // ==========================================
+    // Getters and Setters
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
-    
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
-    
     public User getCurrentUser() { return currentUser; }
 }

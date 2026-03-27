@@ -7,7 +7,7 @@ USE crs_system;
 -- Roles
 -- --------------------------------------------------------
 INSERT IGNORE INTO roles (role_name)
-VALUES ('ADMIN'), ('ACADEMIC_OFFICER');
+VALUES ('ADMIN'), ('COURSE_ADMINISTRATOR'), ('ACADEMIC_OFFICER');
 
 -- --------------------------------------------------------
 -- Users  (passwords are jBCrypt hashes)
@@ -17,14 +17,17 @@ VALUES ('ADMIN'), ('ACADEMIC_OFFICER');
 INSERT IGNORE INTO users (user_id, username, password, full_name, email, status)
 VALUES
 (1, 'admin',
-    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
+    'admin123',
     'Course Administrator', 'admin@crs.local',   'ACTIVE'),
 (2, 'officer',
-    '$2a$10$8K1p/a0dR1xqM4K3e5v2AeqkBvY8.nMj5g1t2OeP3s7u0yHmKlXQi',
+    'officer123',
     'Academic Officer',    'officer@crs.local',  'ACTIVE');
 
 INSERT IGNORE INTO user_roles (user_id, role_id)
-VALUES (1, 1), (2, 2);
+SELECT 1, role_id FROM roles WHERE role_name IN ('COURSE_ADMINISTRATOR', 'ADMIN') ORDER BY FIELD(role_name, 'COURSE_ADMINISTRATOR', 'ADMIN') LIMIT 1;
+
+INSERT IGNORE INTO user_roles (user_id, role_id)
+SELECT 2, role_id FROM roles WHERE role_name = 'ACADEMIC_OFFICER' LIMIT 1;
 
 -- --------------------------------------------------------
 -- Students  (5 students, mix of Year 1 and Year 2)
@@ -169,3 +172,78 @@ VALUES
     'CGPA below minimum requirement of 2.0. Exceeded maximum of 3 failed courses.', 1),
 (105, 1, 1, 2.00, 1, TRUE,
     'Meets all progression requirements', 1);
+
+-- --------------------------------------------------------
+-- Failed components (linked via subquery to result_id)
+-- --------------------------------------------------------
+-- Alex Tan (101) failed CS201 (course_id=201)
+INSERT INTO failed_components (result_id, component_name, component_score, pass_required)
+SELECT result_id, 'Assignment 1', 32.0, 50.0
+FROM student_course_results WHERE student_id=101 AND course_id=201 AND grade='F' LIMIT 1;
+
+INSERT INTO failed_components (result_id, component_name, component_score, pass_required)
+SELECT result_id, 'Mid-Term Exam', 28.0, 40.0
+FROM student_course_results WHERE student_id=101 AND course_id=201 AND grade='F' LIMIT 1;
+
+INSERT INTO failed_components (result_id, component_name, component_score, pass_required)
+SELECT result_id, 'Final Exam', 35.0, 60.0
+FROM student_course_results WHERE student_id=101 AND course_id=201 AND grade='F' LIMIT 1;
+
+-- Chris Wong (103) failed course_id=202
+INSERT INTO failed_components (result_id, component_name, component_score, pass_required)
+SELECT result_id, 'Assignment 1', 15.0, 40.0
+FROM student_course_results WHERE student_id=103 AND course_id=202 AND grade='F' LIMIT 1;
+
+INSERT INTO failed_components (result_id, component_name, component_score, pass_required)
+SELECT result_id, 'Final Exam', 20.0, 60.0
+FROM student_course_results WHERE student_id=103 AND course_id=202 AND grade='F' LIMIT 1;
+
+-- Chris Wong (103) failed course_id=203 (CS210)
+INSERT INTO failed_components (result_id, component_name, component_score, pass_required)
+SELECT result_id, 'Assignment 2', 18.0, 40.0
+FROM student_course_results WHERE student_id=103 AND course_id=203 AND grade='F' LIMIT 1;
+
+INSERT INTO failed_components (result_id, component_name, component_score, pass_required)
+SELECT result_id, 'Final Exam', 25.0, 60.0
+FROM student_course_results WHERE student_id=103 AND course_id=203 AND grade='F' LIMIT 1;
+
+-- Diana Lee (104) failed course_id=201
+INSERT INTO failed_components (result_id, component_name, component_score, pass_required)
+SELECT result_id, 'Assignment 1', 10.0, 40.0
+FROM student_course_results WHERE student_id=104 AND course_id=201 AND grade='F' LIMIT 1;
+
+INSERT INTO failed_components (result_id, component_name, component_score, pass_required)
+SELECT result_id, 'Final Exam', 20.0, 60.0
+FROM student_course_results WHERE student_id=104 AND course_id=201 AND grade='F' LIMIT 1;
+
+-- Diana Lee (104) failed course_id=202
+INSERT INTO failed_components (result_id, component_name, component_score, pass_required)
+SELECT result_id, 'Mid-Term Exam', 12.0, 40.0
+FROM student_course_results WHERE student_id=104 AND course_id=202 AND grade='F' LIMIT 1;
+
+INSERT INTO failed_components (result_id, component_name, component_score, pass_required)
+SELECT result_id, 'Final Exam', 15.0, 60.0
+FROM student_course_results WHERE student_id=104 AND course_id=202 AND grade='F' LIMIT 1;
+
+-- Diana Lee (104) failed course_id=203
+INSERT INTO failed_components (result_id, component_name, component_score, pass_required)
+SELECT result_id, 'Assignment 1', 20.0, 40.0
+FROM student_course_results WHERE student_id=104 AND course_id=203 AND grade='F' LIMIT 1;
+
+INSERT INTO failed_components (result_id, component_name, component_score, pass_required)
+SELECT result_id, 'Final Exam', 18.0, 60.0
+FROM student_course_results WHERE student_id=104 AND course_id=203 AND grade='F' LIMIT 1;
+
+-- Diana Lee (104) failed course_id=204
+INSERT INTO failed_components (result_id, component_name, component_score, pass_required)
+SELECT result_id, 'Assignment 2', 22.0, 40.0
+FROM student_course_results WHERE student_id=104 AND course_id=204 AND grade='F' LIMIT 1;
+
+INSERT INTO failed_components (result_id, component_name, component_score, pass_required)
+SELECT result_id, 'Final Exam', 23.0, 60.0
+FROM student_course_results WHERE student_id=104 AND course_id=204 AND grade='F' LIMIT 1;
+
+-- --------------------------------------------------------
+-- Imported CSV students and courses
+-- --------------------------------------------------------
+source database/csv-import-data.sql

@@ -1,0 +1,71 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-title">CRS</div>
+            <div class="logo-sub">Course Recovery System</div>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-label">Main</div>
+            <a href="#{request.contextPath}/pages/dashboard.xhtml"
+               class="nav-item #{activePage eq 'dashboard' ? 'active' : ''}">
+                Dashboard
+            </a>
+            <a href="#{request.contextPath}/pages/directory.xhtml"
+               class="nav-item #{activePage eq 'directory' ? 'active' : ''}">
+                Directory
+            </a>
+
+            <div class="nav-label nav-label-spaced">Academic</div>
+            <a href="#{request.contextPath}/pages/eligibility.xhtml"
+               class="nav-item #{activePage eq 'eligibility' ? 'active' : ''}">
+                Eligibility
+            </a>
+            <a href="#{request.contextPath}/pages/recovery.xhtml"
+               class="nav-item #{activePage eq 'recovery' ? 'active' : ''}">
+                Recovery
+            </a>
+            <a href="#{request.contextPath}/pages/reports.xhtml"
+               class="nav-item #{activePage eq 'reports' ? 'active' : ''}">
+                Reports
+            </a>
+
+            <h:panelGroup rendered="#{loginBean.currentUser ne null and loginBean.currentUser.role == 'COURSE_ADMINISTRATOR'}">
+                <div class="nav-label nav-label-spaced">System</div>
+                <a href="#{request.contextPath}/pages/audit-log.xhtml"
+                   class="nav-item #{activePage eq 'audit-log' ? 'active' : ''}">
+                    Audit Log
+                </a>
+                <a href="#{request.contextPath}/pages/email-log.xhtml"
+                   class="nav-item #{activePage eq 'email-log' ? 'active' : ''}">
+                    Email Log
+                </a>
+            </h:panelGroup>
+        </div>
+
+        <div class="sidebar-footer">
+            <h:form id="sidebarLogoutForm">
+                <div class="user-pill sidebar-user-pill">
+                    <div class="avatar">
+                        #{loginBean.currentUser != null ? loginBean.currentUser.fullName.substring(0,2).toUpperCase() : 'US'}
+                    </div>
+                    <div class="sidebar-user-copy">
+                        <div class="user-name">
+                            #{loginBean.currentUser != null ? loginBean.currentUser.fullName : 'User'}
+                        </div>
+                        <div class="user-role">
+                            #{loginBean.currentUser != null ? loginBean.currentUser.role : ''}
+                        </div>
+                    </div>
+                </div>
+                <p:commandLink action="#{loginBean.logout}" styleClass="logout-link">
+                    <i class="pi pi-sign-out"></i>
+                    <span>Sign Out</span>
+                </p:commandLink>
+            </h:form>
+        </div>
+    </nav>
+</ui:composition>

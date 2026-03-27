@@ -57,6 +57,10 @@
                class="nav-item">
                 &#9632; Audit Log
             </a>
+            <a href="#{request.contextPath}/pages/email-log.xhtml"
+               class="nav-item">
+                &#9632; Email Log
+            </a>
         </div>
 
         <div class="sidebar-footer">
@@ -247,14 +251,21 @@
                             </div>
                         </div>
 
-                        <!-- View Printable Report -->
-                        <div style="padding-top:14px;border-top:1px solid #e5e7eb;">
+                        <!-- View Printable Report + Send Notification -->
+                        <div style="padding-top:14px;border-top:1px solid #e5e7eb;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                             <a href="#{request.contextPath}/pages/report-view.jsp?studentId=#{reportBean.currentReport.studentId}&amp;semester=#{reportBean.currentReport.semester}&amp;year=#{reportBean.currentReport.yearOfStudy}"
                                target="_blank"
                                class="btn btn-primary btn-sm"
                                style="display:inline-flex;align-items:center;gap:6px;">
                                 &#128438; View Printable Report
                             </a>
+                            <h:form id="sendReportEmailForm" style="margin:0;">
+                                <p:commandButton value="&#9993; Send Report to Student"
+                                                 action="#{reportBean.sendReportEmail}"
+                                                 styleClass="btn btn-outline btn-sm"
+                                                 update="globalMessages"
+                                                 process="@none" />
+                            </h:form>
                         </div>
                     </div>
                 </div>

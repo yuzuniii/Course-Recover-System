@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <title>Email Log — CRS</title>
+    <link rel="stylesheet" type="text/css" href="#{request.contextPath}/css/styles.css" />
+</h:head>
+<h:body>
+<div class="layout-shell">
+
+    <!-- ── Sidebar ─────────────────────────────────────── -->
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-title">CRS</div>
+            <div class="logo-sub">Course Recovery System</div>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-label">Main</div>
+            <a href="#{request.contextPath}/pages/dashboard.xhtml" class="nav-item">
+                &#9632; Dashboard
+            </a>
+            <a href="#{request.contextPath}/pages/students.xhtml" class="nav-item">
+                &#9632; Students
+            </a>
+
+            <div class="nav-label" style="margin-top:12px;">Academic</div>
+            <a href="#{request.contextPath}/pages/eligibility.xhtml" class="nav-item">
+                &#9632; Eligibility
+            </a>
+            <a href="#{request.contextPath}/pages/recovery.xhtml" class="nav-item">
+                &#9632; Recovery
+            </a>
+            <a href="#{request.contextPath}/pages/reports.xhtml" class="nav-item">
+                &#9632; Reports
+            </a>
+
+            <div class="nav-label" style="margin-top:12px;">System</div>
+            <a href="#{request.contextPath}/pages/users.xhtml" class="nav-item">
+                &#9632; Users
+            </a>
+            <a href="#{request.contextPath}/pages/audit-log.xhtml" class="nav-item">
+                &#9632; Audit Log
+            </a>
+            <a href="#{request.contextPath}/pages/email-log.xhtml" class="nav-item active">
+                &#10003; Email Log
+            </a>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="user-pill">
+                <div class="avatar">
+                    #{loginBean.currentUser != null ? loginBean.currentUser.fullName.substring(0,2).toUpperCase() : 'US'}
+                </div>
+                <div>
+                    <div class="user-name">
+                        #{loginBean.currentUser != null ? loginBean.currentUser.fullName : 'User'}
+                    </div>
+                    <div class="user-role">
+                        #{loginBean.currentUser != null ? loginBean.currentUser.role : ''}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ── Main ────────────────────────────────────────── -->
+    <div class="main-content">
+
+        <!-- Topbar -->
+        <div class="topbar">
+            <div class="topbar-left">
+                <div class="page-title">Email Notifications Log</div>
+                <div class="breadcrumb">System / Email Log</div>
+            </div>
+            <div class="topbar-actions">
+                <h:form id="refreshForm" style="margin:0;">
+                    <h:commandButton value="&#8635; Refresh"
+                                     action="#{emailLogBean.loadLogs}"
+                                     styleClass="btn btn-outline" />
+                </h:form>
+            </div>
+        </div>
+
+        <div class="page-content">
+
+            <!-- Messages -->
+            <div class="messages-area">
+                <p:messages id="globalMessages" globalOnly="true" showDetail="true" />
+            </div>
+
+            <!-- Stats row -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-label">Total Emails</div>
+                    <div class="stat-value blue">#{emailLogBean.totalCount}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Sent Successfully</div>
+                    <div class="stat-value green">#{emailLogBean.sentCount}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Failed</div>
+                    <div class="stat-value red">#{emailLogBean.failedCount}</div>
+                </div>
+            </div>
+
+            <!-- Filter + Table card -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Email Notifications</span>
+                    <h:form id="filterForm" style="margin:0;display:flex;gap:8px;align-items:center;">
+                        <p:selectOneMenu id="statusFilter"
+                                         value="#{emailLogBean.filterStatus}"
+                                         style="width:140px;">
+                            <f:selectItem itemValue="ALL"    itemLabel="All Statuses" />
+                            <f:selectItem itemValue="SENT"   itemLabel="Sent" />
+                            <f:selectItem itemValue="FAILED" itemLabel="Failed" />
+                        </p:selectOneMenu>
+                        <p:commandButton value="Filter"
+                                         action="#{emailLogBean.filterByStatus}"
+                                         styleClass="btn btn-outline btn-sm"
+                                         update="emailTable globalMessages" />
+                    </h:form>
+                </div>
+
+                <p:dataTable id="emailTable"
+                             value="#{emailLogBean.emailLogs}" var="log"
+                             emptyMessage="No email notifications found"
+                             paginator="true" rows="20"
+                             paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+
+                    <p:column headerText="Sent At" style="width:160px;">
+                        <h:outputText value="#{log.sentAt}">
+                            <f:convertDateTime pattern="dd-MM-yyyy HH:mm" type="localDateTime" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column headerText="Recipient">
+                        <span class="cell-primary">#{log.recipient}</span>
+                    </p:column>
+
+                    <p:column headerText="Subject">
+                        #{log.subject}
+                    </p:column>
+
+                    <p:column headerText="Status" style="width:100px;">
+                        <h:outputText value="SENT"
+                                      styleClass="badge badge-green"
+                                      rendered="#{log.status eq 'SENT'}" />
+                        <h:outputText value="FAILED"
+                                      styleClass="badge badge-red"
+                                      rendered="#{log.status eq 'FAILED'}" />
+                        <h:outputText value="PENDING"
+                                      styleClass="badge badge-amber"
+                                      rendered="#{log.status eq 'PENDING'}" />
+                        <h:outputText value="#{log.status}"
+                                      styleClass="badge badge-gray"
+                                      rendered="#{log.status ne 'SENT' and log.status ne 'FAILED' and log.status ne 'PENDING'}" />
+                    </p:column>
+
+                    <p:column headerText="Actions" style="width:90px;">
+                        <h:form>
+                            <p:commandButton value="View"
+                                             action="#{emailLogBean.viewBody(log)}"
+                                             styleClass="btn btn-outline btn-sm"
+                                             update=":bodyDialogContent"
+                                             oncomplete="PF('bodyDialog').show()"
+                                             process="@this" />
+                        </h:form>
+                    </p:column>
+                </p:dataTable>
+            </div>
+
+        </div><!-- /page-content -->
+    </div><!-- /main-content -->
+</div><!-- /layout-shell -->
+
+<!-- Email body dialog -->
+<p:dialog id="emailBodyDialog" widgetVar="bodyDialog"
+          header="Email Body" modal="true"
+          width="600" responsive="true">
+    <h:panelGroup id="bodyDialogContent" layout="block" style="padding:8px;">
+        <p:outputPanel rendered="#{emailLogBean.selectedLog ne null}">
+            <div style="margin-bottom:10px;">
+                <strong>To:</strong> #{emailLogBean.selectedLog.recipient}
+            </div>
+            <div style="margin-bottom:10px;">
+                <strong>Subject:</strong> #{emailLogBean.selectedLog.subject}
+            </div>
+            <div style="border-top:1px solid #e5e7eb;padding-top:10px;white-space:pre-wrap;font-size:13px;line-height:1.6;color:#374151;">
+                #{emailLogBean.selectedLog.body}
+            </div>
+        </p:outputPanel>
+        <p:outputPanel rendered="#{emailLogBean.selectedLog eq null}">
+            <span style="color:#9ca3af;">No email selected.</span>
+        </p:outputPanel>
+    </h:panelGroup>
+</p:dialog>
+
+</h:body>
+</html>

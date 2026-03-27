@@ -6,14 +6,11 @@ import com.epda.crs.dto.AcademicReportDTO;
 import com.epda.crs.exception.ValidationException;
 import com.epda.crs.model.Student;
 import com.epda.crs.util.CGPACalculator;
-import com.epda.crs.util.EmailUtil;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import jakarta.inject.Inject;
 
 @Stateless
 public class ReportService {
@@ -44,14 +41,6 @@ public class ReportService {
                 .orElseThrow(() -> new ValidationException("Student not found"));
 
         AcademicReportDTO report = buildReport(student, semester, yearOfStudy);
-
-        // Email notification
-        EmailUtil.sendEmail(
-                student.getStudentNumber() + "@student.crs.local",
-                "Academic Report — Semester " + semester + " Year " + yearOfStudy,
-                "Dear " + student.getFullName() + ",\n\n" +
-                "Your academic report for semester " + semester + " of year " + yearOfStudy +
-                " has been generated. CGPA: " + String.format("%.2f", report.getCgpa()));
 
         // Audit log
         if (auditLogService != null) {

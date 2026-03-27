@@ -13,6 +13,8 @@
         .failed-ok { color: #16a34a; font-weight: 600; }
         .failed-lo { color: #d97706; font-weight: 700; }   /* > 0          */
         .failed-hi { color: #dc2626; font-weight: 700; }   /* > 3 (danger) */
+        .grade-f   { color: #dc2626; font-weight: 700; }
+        .grade-ok  { color: #16a34a; font-weight: 600; }
 
         /* ── Ajax status ── */
         .ajax-status-bar {
@@ -133,6 +135,9 @@
             <a href="#{request.contextPath}/pages/audit-log.xhtml" class="nav-item">
                 &#9632; Audit Log
             </a>
+            <a href="#{request.contextPath}/pages/email-log.xhtml" class="nav-item">
+                &#9632; Email Log
+            </a>
         </div>
 
         <div class="sidebar-footer">
@@ -249,29 +254,30 @@
                                     <f:selectItems value="#{eligibilityBean.allStudentDtos}" var="dto"
                                                    itemValue="#{dto.studentId}"
                                                    itemLabel="#{dto.studentCode} — #{dto.studentName}" />
+                                    <p:ajax event="change"
+                                            listener="#{eligibilityBean.onStudentChange}"
+                                            update="semesterDropdown yearDropdown"
+                                            process="@this" />
                                 </p:selectOneMenu>
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Semester</label>
-                                <h:selectOneMenu id="semester" value="#{eligibilityBean.selectedSemester}"
+                                <h:selectOneMenu id="semesterDropdown" value="#{eligibilityBean.selectedSemester}"
                                                  styleClass="form-control">
                                     <f:selectItem itemValue="0" itemLabel="— Select Semester —" />
-                                    <f:selectItem itemValue="1" itemLabel="Semester 1" />
-                                    <f:selectItem itemValue="2" itemLabel="Semester 2" />
-                                    <f:selectItem itemValue="3" itemLabel="Semester 3" />
+                                    <f:selectItems value="#{eligibilityBean.availableSemesters}" var="s"
+                                                   itemValue="#{s}" itemLabel="Semester #{s}" />
                                 </h:selectOneMenu>
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Year of Study</label>
-                                <h:selectOneMenu id="year" value="#{eligibilityBean.selectedYear}"
+                                <h:selectOneMenu id="yearDropdown" value="#{eligibilityBean.selectedYear}"
                                                  styleClass="form-control">
                                     <f:selectItem itemValue="0" itemLabel="— Select Year —" />
-                                    <f:selectItem itemValue="1" itemLabel="Year 1" />
-                                    <f:selectItem itemValue="2" itemLabel="Year 2" />
-                                    <f:selectItem itemValue="3" itemLabel="Year 3" />
-                                    <f:selectItem itemValue="4" itemLabel="Year 4" />
+                                    <f:selectItems value="#{eligibilityBean.availableYears}" var="y"
+                                                   itemValue="#{y}" itemLabel="Year #{y}" />
                                 </h:selectOneMenu>
                             </div>
 
@@ -305,6 +311,17 @@
                             &#10007; Not eligible &#8212; action required
                         </div>
                     </h:panelGroup>
+
+                    <!-- Send eligibility email -->
+                    <div style="margin:10px 20px 0;">
+                        <h:form id="sendEligEmailForm" style="margin:0;">
+                            <p:commandButton value="&#9993; Send Eligibility Result to Student"
+                                             action="#{eligibilityBean.sendEligibilityEmail}"
+                                             styleClass="btn btn-outline btn-sm"
+                                             update="globalMessages"
+                                             process="@none" />
+                        </h:form>
+                    </div>
 
                     <!-- Header: name + overall badge -->
                     <div class="result-header">
@@ -396,6 +413,42 @@
                             </span>
                         </div>
                     </div>
+
+                    <!-- Failed Components Breakdown -->
+                    <h:panelGroup rendered="#{eligibilityBean.failedComponents ne null and not empty eligibilityBean.failedComponents}"
+                                  layout="block">
+                        <div class="rule-breakdown" style="margin-top:0;">
+                            <div class="rule-breakdown-title">Failed Component Breakdown</div>
+                            <p:dataTable value="#{eligibilityBean.failedComponents}" var="fc"
+                                         emptyMessage="No component data available">
+                                <p:column headerText="Component">
+                                    <span class="cell-primary">#{fc.componentName}</span>
+                                </p:column>
+                                <p:column headerText="Type">
+                                    <span class="badge badge-gray" style="font-size:11px;">#{fc.componentType}</span>
+                                </p:column>
+                                <p:column headerText="Score">
+                                    <span class="#{fc.componentScore lt fc.passRequired ? 'grade-f' : 'grade-ok'}">
+                                        <h:outputText value="#{fc.componentScore}">
+                                            <f:convertNumber maxFractionDigits="1" minFractionDigits="1" />
+                                        </h:outputText>
+                                    </span>
+                                </p:column>
+                                <p:column headerText="Pass Mark">
+                                    <h:outputText value="#{fc.passRequired}">
+                                        <f:convertNumber maxFractionDigits="1" minFractionDigits="1" />
+                                    </h:outputText>
+                                </p:column>
+                                <p:column headerText="Deficit">
+                                    <span class="#{fc.marksDifference lt 0 ? 'grade-f' : 'grade-ok'}">
+                                        <h:outputText value="#{fc.marksDifference}">
+                                            <f:convertNumber maxFractionDigits="1" minFractionDigits="1" />
+                                        </h:outputText>
+                                    </span>
+                                </p:column>
+                            </p:dataTable>
+                        </div>
+                    </h:panelGroup>
 
                     <!-- [4] Recommended action -->
                     <div class="recommended-action">

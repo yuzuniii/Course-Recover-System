@@ -4,6 +4,7 @@ import com.epda.crs.bean.MilestoneBean;
 import com.epda.crs.dao.CourseDAO;
 import com.epda.crs.dao.ResultDAO;
 import com.epda.crs.dao.StudentDAO;
+import com.epda.crs.dto.EligibilityDTO;
 import com.epda.crs.enums.RecoveryStatus;
 import com.epda.crs.exception.ValidationException;
 import com.epda.crs.model.Course;
@@ -11,6 +12,7 @@ import com.epda.crs.model.RecoveryPlan;
 import com.epda.crs.model.RecoveryRecommendation;
 import com.epda.crs.model.Student;
 import com.epda.crs.service.RecoveryService;
+import com.epda.crs.util.EmailUtil;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
 import jakarta.faces.application.FacesMessage;
@@ -19,7 +21,9 @@ import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import jakarta.inject.Inject;
+import com.epda.crs.model.Milestone;
 
 @Named
 @ViewScoped
@@ -50,6 +54,12 @@ public class RecoveryBean implements Serializable {
     private java.util.List<Course> failedCourses;
     private RecoveryRecommendation newRecommendation = new RecoveryRecommendation();
     private java.util.List<RecoveryRecommendation> recommendations = new ArrayList<>();
+    private RecoveryRecommendation editingRecommendation;
+    private Milestone newMilestone = new Milestone();
+    private String newGrade;
+    private double newGradePoint;
+    private int gradingPlanId;
+    private RecoveryPlan gradingPlan;
 
     // -----------------------------------------------------------------------
     // Lifecycle
@@ -58,7 +68,7 @@ public class RecoveryBean implements Serializable {
     @PostConstruct
     public void init() {
         try {
-            students = studentDAO.findAll();
+            students = studentDAO.findStudentsWithFailures();
         } catch (Exception e) {
             students = new ArrayList<>();
         }
@@ -118,9 +128,9 @@ public class RecoveryBean implements Serializable {
             int actorId = (loginBean.getCurrentUser() != null) ? loginBean.getCurrentUser().getId().intValue() : 0;
             RecoveryPlan newPlan = recoveryService.createPlan(selectedStudentId, selectedCourseId, actorId);
             selectedPlanId = newPlan.getId().intValue();
-            loadAllPlans();
+            loadPlansByStudent();
             onPlanSelect();
-            addInfo("Recovery Plan", "Recovery plan created successfully");
+            addInfo("Recovery Plan", "Recovery plan created. Select the plan and add milestones to track the student's progress.");
         } catch (ValidationException e) {
             addError("Recovery Plan", e.getMessage());
         } catch (Exception e) {
@@ -130,6 +140,29 @@ public class RecoveryBean implements Serializable {
 
     public void updatePlanStatus(int planId, RecoveryStatus status) {
         try {
+            // FIX 6: Block completion if any milestones are still pending
+            if (status == RecoveryStatus.COMPLETED && !allMilestonesCompleted(planId)) {
+                int pending = 0;
+                if (recoveryPlans != null) {
+                    for (RecoveryPlan p : recoveryPlans) {
+                        if (p.getId() != null && p.getId().intValue() == planId) {
+                            List<com.epda.crs.model.Milestone> ms = p.getMilestones();
+                            if (ms != null) {
+                                for (com.epda.crs.model.Milestone m : ms) {
+                                    if (m.getStatus() == null) { pending++; }
+                                    else {
+                                        String s = m.getStatus().name();
+                                        if (!s.equals("DONE") && !s.equals("COMPLETED")) pending++;
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+                addError("Recovery Plan", "Cannot complete plan. " + pending + " milestone(s) are still pending.");
+                return;
+            }
             String actor = (loginBean.getCurrentUser() != null) ? loginBean.getCurrentUser().getUsername() : "system";
             recoveryService.updateStatus(planId, status, actor);
             loadAllPlans();
@@ -171,9 +204,221 @@ public class RecoveryBean implements Serializable {
         }
     }
 
+    public void sendPlanEmail(int planId) {
+        try {
+            recoveryService.findById(planId).ifPresent(plan -> {
+                EmailUtil.sendEmail(
+                        plan.getStudent().getStudentNumber() + "@student.crs.local",
+                        "Recovery Plan Created — " + plan.getCourse().getCourseName(),
+                        "Dear " + plan.getStudent().getFullName() + ",\n\n" +
+                        "A recovery plan has been created for " + plan.getCourse().getCourseName() +
+                        " (attempt " + plan.getAttemptNumber() + ").\nStart date: " + plan.getStartDate());
+                addInfo("Email", "Plan notification sent to student.");
+            });
+        } catch (ValidationException e) {
+            addError("Email", e.getMessage());
+        } catch (Exception e) {
+            addError("Email", "Failed to send email: " + e.getMessage());
+        }
+    }
+
+    public void prepareEditRecommendation(RecoveryRecommendation rec) {
+        editingRecommendation = rec;
+        newRecommendation = new RecoveryRecommendation();
+        newRecommendation.setRecommendation(rec.getRecommendation());
+    }
+
+    public void updateRecommendation() {
+        if (editingRecommendation == null) return;
+        try {
+            String actor = (loginBean.getCurrentUser() != null) ? loginBean.getCurrentUser().getUsername() : "system";
+            editingRecommendation.setRecommendation(newRecommendation.getRecommendation());
+            recoveryService.updateRecommendation(editingRecommendation, actor);
+            editingRecommendation = null;
+            newRecommendation = new RecoveryRecommendation();
+            refreshRecommendations();
+            addInfo("Recommendation", "Recommendation updated successfully");
+        } catch (ValidationException e) {
+            addError("Recommendation", e.getMessage());
+        } catch (Exception e) {
+            addError("Recommendation", "An unexpected error occurred");
+        }
+    }
+
+    public void cancelEditRecommendation() {
+        editingRecommendation = null;
+        newRecommendation = new RecoveryRecommendation();
+    }
+
+    // -----------------------------------------------------------------------
+    // Milestone management (FIX 1)
+    // -----------------------------------------------------------------------
+
+    /** Adds a milestone to the currently selected plan (ViewScoped — selectedPlanId is retained). */
+    public void addMilestone() {
+        if (selectedPlanId <= 0) {
+            addError("Milestone", "Please select a recovery plan first");
+            return;
+        }
+        try {
+            String actor = (loginBean.getCurrentUser() != null) ? loginBean.getCurrentUser().getUsername() : "system";
+            newMilestone.setRecoveryPlanId((long) selectedPlanId);
+            recoveryService.addMilestone(newMilestone, actor);
+            newMilestone = new Milestone();
+            // Reload milestones in the RequestScoped MilestoneBean
+            MilestoneBean mb = FacesContext.getCurrentInstance().getApplication()
+                    .evaluateExpressionGet(FacesContext.getCurrentInstance(), "#{milestoneBean}", MilestoneBean.class);
+            if (mb != null) {
+                mb.setSelectedPlanId(selectedPlanId);
+                mb.loadMilestones();
+            }
+            addInfo("Milestone", "Milestone added. Keep adding milestones to track the student's progress.");
+        } catch (ValidationException e) {
+            addError("Milestone", e.getMessage());
+        } catch (Exception e) {
+            addError("Milestone", "An unexpected error occurred");
+        }
+    }
+
+    /**
+     * FIX 2: Returns true only if the plan has at least one milestone
+     * and all milestones are in DONE or COMPLETED status.
+     * Uses the already-loaded recoveryPlans list to avoid extra DB calls.
+     */
+    public boolean allMilestonesCompleted(int planId) {
+        if (recoveryPlans == null) return false;
+        for (RecoveryPlan p : recoveryPlans) {
+            if (p.getId() != null && p.getId().intValue() == planId) {
+                List<Milestone> ms = p.getMilestones();
+                if (ms == null || ms.isEmpty()) return false;
+                for (Milestone m : ms) {
+                    if (m.getStatus() == null) return false;
+                    String s = m.getStatus().name();
+                    if (!s.equals("DONE") && !s.equals("COMPLETED")) return false;
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * FIX 3: Selects a plan globally from the plans table row button.
+     * Sets selectedPlanId and selectedPlan, loads recommendations and milestones.
+     */
+    public void selectPlan(int planId) {
+        selectedPlanId = planId;
+        selectedPlan = null;
+        if (recoveryPlans != null) {
+            for (RecoveryPlan p : recoveryPlans) {
+                if (p.getId() != null && p.getId().intValue() == planId) {
+                    selectedPlan = p;
+                    break;
+                }
+            }
+        }
+        refreshRecommendations();
+        MilestoneBean mb = FacesContext.getCurrentInstance().getApplication()
+                .evaluateExpressionGet(FacesContext.getCurrentInstance(), "#{milestoneBean}", MilestoneBean.class);
+        if (mb != null) {
+            mb.setSelectedPlanId(selectedPlanId);
+            mb.loadMilestones();
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Grade update
+    // -----------------------------------------------------------------------
+
+    /** Opens the grade update dialog for the given plan. */
+    public void prepareGradeUpdate(RecoveryPlan plan) {
+        gradingPlan   = plan;
+        gradingPlanId = plan.getId().intValue();
+        newGrade      = "";
+        newGradePoint = 0.0;
+    }
+
+    /**
+     * Computes grade point from the grade string.
+     * A=4.0, A-=3.7, B+=3.3, B=3.0, B-=2.7, C+=2.3, C=2.0, C-=1.7, F=0.0
+     */
+    private double gradeToPoint(String grade) {
+        return switch (grade) {
+            case "A"  -> 4.0;
+            case "A-" -> 3.7;
+            case "B+" -> 3.3;
+            case "B"  -> 3.0;
+            case "B-" -> 2.7;
+            case "C+" -> 2.3;
+            case "C"  -> 2.0;
+            case "C-" -> 1.7;
+            default   -> 0.0;
+        };
+    }
+
+    /** Validates the selected grade, calls the service to persist it, and shows the result. */
+    public void submitGradeUpdate() {
+        if (gradingPlan == null) {
+            addError("Grade Update", "No plan selected");
+            return;
+        }
+        if (newGrade == null || newGrade.isBlank()) {
+            addError("Grade Update", "Please select a grade");
+            return;
+        }
+        try {
+            newGradePoint = gradeToPoint(newGrade);
+            int actorId = (loginBean.getCurrentUser() != null)
+                    ? loginBean.getCurrentUser().getId().intValue() : 0;
+
+            EligibilityDTO eligibility = recoveryService.updateStudentGrade(
+                    gradingPlanId, newGrade, newGradePoint, actorId);
+
+            boolean passed = !"F".equalsIgnoreCase(newGrade);
+            if (passed) {
+                addInfo("Grade Updated",
+                        "Grade updated. Student has passed this course on Attempt " +
+                        gradingPlan.getAttemptNumber() + ".");
+                if (eligibility != null) {
+                    if (eligibility.isEligible()) {
+                        addInfo("Eligibility", "Student is now eligible for progression.");
+                    } else {
+                        FacesContext.getCurrentInstance().addMessage(null,
+                                new FacesMessage(FacesMessage.SEVERITY_WARN, "Eligibility",
+                                "Student is not yet fully eligible: " + eligibility.getReason()));
+                    }
+                }
+            } else {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_WARN, "Grade Updated",
+                        "Grade updated. Student still needs recovery. Consider creating Attempt " +
+                        (gradingPlan.getAttemptNumber() + 1) + "."));
+            }
+            gradingPlan   = null;
+            gradingPlanId = 0;
+            loadAllPlans();
+        } catch (ValidationException e) {
+            addError("Grade Update", e.getMessage());
+        } catch (Exception e) {
+            addError("Grade Update", "An unexpected error occurred");
+        }
+    }
+
     /** Called by p:ajax when the plan dropdown in the milestone section changes. */
     public void onPlanSelect() {
         System.out.println("[RecoveryBean.onPlanSelect] selectedPlanId=" + selectedPlanId);
+        // Find and set the selectedPlan object so recommendations section becomes visible
+        selectedPlan = null;
+        if (recoveryPlans != null) {
+            for (RecoveryPlan plan : recoveryPlans) {
+                if (plan.getId() != null && plan.getId().intValue() == selectedPlanId) {
+                    selectedPlan = plan;
+                    break;
+                }
+            }
+        }
+        refreshRecommendations();
+        // Also load milestones via MilestoneBean (RequestScoped — looked up via EL)
         MilestoneBean mb = FacesContext.getCurrentInstance()
                 .getApplication()
                 .evaluateExpressionGet(
@@ -275,6 +520,24 @@ public class RecoveryBean implements Serializable {
 
     public java.util.List<RecoveryRecommendation> getRecommendations() { return recommendations; }
     public void setRecommendations(java.util.List<RecoveryRecommendation> recommendations) { this.recommendations = recommendations; }
+
+    public RecoveryRecommendation getEditingRecommendation() { return editingRecommendation; }
+    public void setEditingRecommendation(RecoveryRecommendation r) { this.editingRecommendation = r; }
+
+    public Milestone getNewMilestone() { return newMilestone; }
+    public void setNewMilestone(Milestone newMilestone) { this.newMilestone = newMilestone; }
+
+    public String getNewGrade() { return newGrade; }
+    public void setNewGrade(String newGrade) { this.newGrade = newGrade; }
+
+    public double getNewGradePoint() { return newGradePoint; }
+    public void setNewGradePoint(double newGradePoint) { this.newGradePoint = newGradePoint; }
+
+    public int getGradingPlanId() { return gradingPlanId; }
+    public void setGradingPlanId(int gradingPlanId) { this.gradingPlanId = gradingPlanId; }
+
+    public RecoveryPlan getGradingPlan() { return gradingPlan; }
+    public void setGradingPlan(RecoveryPlan gradingPlan) { this.gradingPlan = gradingPlan; }
 
     // -----------------------------------------------------------------------
     // Private helpers

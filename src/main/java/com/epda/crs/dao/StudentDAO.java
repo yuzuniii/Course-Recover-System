@@ -45,6 +45,22 @@ public class StudentDAO implements Serializable {
         return list;
     }
 
+    public List<Student> findStudentsWithFailures() {
+        String sql = "SELECT DISTINCT s.* FROM students s " +
+                     "JOIN student_course_results scr ON s.student_id = scr.student_id " +
+                     "WHERE scr.grade = 'F' " +
+                     "ORDER BY s.name";
+        List<Student> list = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) list.add(mapRow(rs));
+        } catch (SQLException e) {
+            throw new RuntimeException("StudentDAO.findStudentsWithFailures failed", e);
+        }
+        return list;
+    }
+
     public Optional<Student> findById(Long id) {
         String sql = "SELECT * FROM students WHERE student_id = ?";
         try (Connection conn = DBConnection.getConnection();

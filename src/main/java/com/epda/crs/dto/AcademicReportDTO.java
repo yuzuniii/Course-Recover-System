@@ -1,9 +1,12 @@
 package com.epda.crs.dto;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AcademicReportDTO {
+public class AcademicReportDTO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private int studentId;
     private String studentCode;
@@ -61,7 +64,9 @@ public class AcademicReportDTO {
     }
 
     // One row per student_course_results entry (joined with courses)
-    public static class CourseResultRow {
+    public static class CourseResultRow implements Serializable {
+
+        private static final long serialVersionUID = 1L;
 
         private String courseCode;
         private String courseName;

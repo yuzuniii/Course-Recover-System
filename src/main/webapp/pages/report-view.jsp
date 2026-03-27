@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="c"   uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -19,8 +19,17 @@
         .results-table tr:nth-child(even) { background-color: #f9f9f9; }
         .fail { color: red; font-weight: bold; }
         .cgpa-row { margin-top: 16px; font-size: 1.05em; font-weight: bold; }
+        .standing-badge { display: inline-block; margin-top: 8px; padding: 4px 12px;
+                          border-radius: 4px; font-size: 0.95em; font-weight: 600; }
+        .standing-excellent { background: #dcfce7; color: #166534; }
+        .standing-good      { background: #dcfce7; color: #166534; }
+        .standing-satisfactory { background: #fef9c3; color: #854d0e; }
+        .standing-risk      { background: #fee2e2; color: #991b1b; }
         .print-btn { margin-top: 20px; padding: 8px 20px; cursor: pointer; }
-        @media print { .print-btn { display: none; } }
+        @media print {
+            .no-print { display: none; }
+            .print-btn { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -35,7 +44,7 @@
 <c:choose>
     <c:when test="${not empty studentId and studentId != '0'}">
 
-        <%-- Load report via session attribute set by ReportBean on the previous request --%>
+        <%-- Load report from session attribute set by ReportBean.generateReport() --%>
         <c:set var="report" value="${sessionScope.currentReport}" />
 
         <c:choose>
@@ -66,7 +75,8 @@
                     <tr>
                         <td>CGPA:</td>
                         <td>
-                            <fmt:formatNumber value="${report.cgpa}" minFractionDigits="2" maxFractionDigits="2" />
+                            <fmt:formatNumber value="${report.cgpa}"
+                                             minFractionDigits="2" maxFractionDigits="2" />
                         </td>
                     </tr>
                 </table>
@@ -102,7 +112,10 @@
                                                 </c:otherwise>
                                             </c:choose>
                                         </td>
-                                        <td><fmt:formatNumber value="${row.gradePoint}" minFractionDigits="2" maxFractionDigits="2" /></td>
+                                        <td>
+                                            <fmt:formatNumber value="${row.gradePoint}"
+                                                             minFractionDigits="2" maxFractionDigits="2" />
+                                        </td>
                                         <td><c:out value="${row.attemptNumber}" /></td>
                                         <td><c:out value="${row.status}" /></td>
                                     </tr>
@@ -112,8 +125,36 @@
 
                         <div class="cgpa-row">
                             Cumulative GPA:
-                            <fmt:formatNumber value="${report.cgpa}" minFractionDigits="2" maxFractionDigits="2" />
+                            <fmt:formatNumber value="${report.cgpa}"
+                                             minFractionDigits="2" maxFractionDigits="2" />
                         </div>
+
+                        <%-- Academic standing label --%>
+                        <div>
+                            <c:choose>
+                                <c:when test="${report.cgpa >= 3.5}">
+                                    <span class="standing-badge standing-excellent">
+                                        &#9733; Excellent Standing
+                                    </span>
+                                </c:when>
+                                <c:when test="${report.cgpa >= 3.0}">
+                                    <span class="standing-badge standing-good">
+                                        &#10003; Good Standing
+                                    </span>
+                                </c:when>
+                                <c:when test="${report.cgpa >= 2.0}">
+                                    <span class="standing-badge standing-satisfactory">
+                                        &#8212; Satisfactory Standing
+                                    </span>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="standing-badge standing-risk">
+                                        &#9888; At Risk
+                                    </span>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+
                     </c:when>
                     <c:otherwise>
                         <p>No course results available for this semester.</p>
@@ -135,7 +176,9 @@
     </c:otherwise>
 </c:choose>
 
-<button class="print-btn" onclick="window.print()">Print Report</button>
+<div class="no-print">
+    <button class="print-btn" onclick="window.print()">Print Report</button>
+</div>
 
 </body>
 </html>

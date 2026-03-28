@@ -245,6 +245,14 @@ auditLogService.logAction(actorUsername, "ADD_RECOMMENDATION", "RECOVERY_RECOMME
     // Legacy alias (used by RecoveryBean and DashboardService)
     // -----------------------------------------------------------------------
 
+    /** Returns plan by ID directly (null if not found). Used by sendPlanEmail. */
+    public RecoveryPlan findPlanById(int planId) {
+        if (planId <= 0) return null;
+        Optional<RecoveryPlan> opt = recoveryDAO.findById((long) planId);
+        opt.ifPresent(p -> p.setMilestones(milestoneDAO.findByRecoveryPlanId(p.getId())));
+        return opt.orElse(null);
+    }
+
     /** Alias for findAll() — preserved for backward compatibility. */
     public List<RecoveryPlan> getRecoveryPlans() {
         return findAll();

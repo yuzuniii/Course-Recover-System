@@ -11,6 +11,7 @@ public class AcademicReportDTO implements Serializable {
     private int studentId;
     private String studentCode;
     private String studentName;
+    private String studentEmail;
     private String programme;
     private int semester;
     private int yearOfStudy;
@@ -41,6 +42,9 @@ public class AcademicReportDTO implements Serializable {
 
     public String getStudentName() { return studentName; }
     public void setStudentName(String studentName) { this.studentName = studentName; }
+
+    public String getStudentEmail() { return studentEmail; }
+    public void setStudentEmail(String studentEmail) { this.studentEmail = studentEmail; }
 
     public String getProgramme() { return programme; }
     public void setProgramme(String programme) { this.programme = programme; }

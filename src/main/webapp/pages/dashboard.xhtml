@@ -48,22 +48,42 @@
 
         <div class="page-content">
             <!-- Quick Stats -->
-            <div class="dashboard-grid">
-                <div class="dashboard-widget">
-                    <div class="widget-title">Total Activated Accounts</div>
-                    <div class="widget-value">#{dashboardBean.analytics.totalActivatedAccounts}</div>
+            <div class="overview-stats-grid">
+                <div class="overview-card blue">
+                    <div class="overview-card-top">
+                        <span class="overview-icon pi pi-users"></span>
+                        <span class="overview-kicker">System Access</span>
+                    </div>
+                    <div class="overview-label">Total Activated Accounts</div>
+                    <div class="overview-value">#{dashboardBean.analytics.totalActivatedAccounts}</div>
+                    <div class="overview-meta">Active administrator and officer accounts ready to use the system.</div>
                 </div>
-                <div class="dashboard-widget">
-                    <div class="widget-title">Total Enrolled Students</div>
-                    <div class="widget-value">#{dashboardBean.analytics.totalEnrolledStudents}</div>
+                <div class="overview-card green">
+                    <div class="overview-card-top">
+                        <span class="overview-icon pi pi-id-card"></span>
+                        <span class="overview-kicker">Students</span>
+                    </div>
+                    <div class="overview-label">Total Enrolled Students</div>
+                    <div class="overview-value">#{dashboardBean.analytics.totalEnrolledStudents}</div>
+                    <div class="overview-meta">Student records currently tracked for progression and recovery monitoring.</div>
                 </div>
-                <div class="dashboard-widget">
-                    <div class="widget-title">Active Recovery Plans</div>
-                    <div class="widget-value">#{dashboardBean.analytics.activeRecoveryPlans}</div>
+                <div class="overview-card amber">
+                    <div class="overview-card-top">
+                        <span class="overview-icon pi pi-briefcase"></span>
+                        <span class="overview-kicker">Recovery Flow</span>
+                    </div>
+                    <div class="overview-label">Active Recovery Plans</div>
+                    <div class="overview-value">#{dashboardBean.analytics.activeRecoveryPlans}</div>
+                    <div class="overview-meta">Open intervention plans that still need milestone follow-through.</div>
                 </div>
-                <div class="dashboard-widget">
-                    <div class="widget-title">Overdue Milestones</div>
-                    <div class="widget-value">#{dashboardBean.analytics.overdueMilestones}</div>
+                <div class="overview-card red">
+                    <div class="overview-card-top">
+                        <span class="overview-icon pi pi-exclamation-circle"></span>
+                        <span class="overview-kicker">Attention</span>
+                    </div>
+                    <div class="overview-label">Overdue Milestones</div>
+                    <div class="overview-value">#{dashboardBean.analytics.overdueMilestones}</div>
+                    <div class="overview-meta">Pending checkpoints that have already slipped past their expected due dates.</div>
                 </div>
             </div>
 
@@ -148,9 +168,15 @@
             </div>
 
             <div class="dashboard-grid" style="margin-bottom: 20px;">
-                <div class="dashboard-widget" style="width: 100%;">
-                    <div class="widget-title">Average CGPA by Programme</div>
-                    <div class="chart-container">
+                <div class="dashboard-widget chart-widget chart-widget-cgpa" style="width: 100%;">
+                    <div class="chart-widget-header">
+                        <div>
+                            <div class="widget-title">Average CGPA by Programme</div>
+                            <div class="widget-subtitle">A taller vertical comparison on the 0.0 to 4.0 scale, with weaker programmes still called out through color.</div>
+                        </div>
+                        <div class="chart-scale-pill">CGPA Scale 0.0 - 4.0</div>
+                    </div>
+                    <div class="chart-container chart-container-cgpa">
                         <p:barChart model="#{dashboardBean.cgpaChartModel}" />
                     </div>
                 </div>

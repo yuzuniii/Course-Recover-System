@@ -107,6 +107,7 @@ public class ReportService {
         report.setStudentId(studentId);
         report.setStudentCode(student.getStudentNumber());
         report.setStudentName(student.getFullName());
+        report.setStudentEmail(student.getEmail());
         report.setProgramme(student.getProgramName());
         report.setSemester(semester);
         report.setYearOfStudy(yearOfStudy);

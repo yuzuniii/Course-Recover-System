@@ -21,27 +21,27 @@
                 <div class="breadcrumb">Main / Directory</div>
             </div>
             <div class="topbar-actions">
-                <h:form id="directoryToggleForm">
-                    <p:selectOneButton value="#{directoryBean.viewType}" rendered="#{loginBean.currentUser.role == 'COURSE_ADMINISTRATOR'}">
+                <h:form id="directoryToggleForm" styleClass="toolbar-actions-form">
+                    <p:selectOneButton value="#{directoryBean.viewType}" rendered="#{loginBean.currentUser.role == 'COURSE_ADMINISTRATOR'}" styleClass="action-segmented">
                         <f:selectItem itemLabel="Enrolled Students" itemValue="STUDENTS" />
                         <f:selectItem itemLabel="System Users" itemValue="USERS" />
                         <p:ajax update=":directoryContent :topbarActionsForm" />
                     </p:selectOneButton>
                 </h:form>
-                <h:form id="topbarActionsForm">
+                <h:form id="topbarActionsForm" styleClass="toolbar-actions-form">
                     <p:commandButton value="+ Add New User"
                                      rendered="#{directoryBean.viewType == 'USERS' and loginBean.currentUser.role == 'COURSE_ADMINISTRATOR'}"
                                      actionListener="#{userBean.prepareNewUser}"
                                      update=":userDialogForm:user-detail"
                                      oncomplete="PF('userDialog').show()"
-                                     styleClass="btn btn-primary" />
+                                     styleClass="btn btn-primary btn-cta" />
                     
                     <p:commandButton value="+ Add New Student"
                                      rendered="#{directoryBean.viewType == 'STUDENTS'}"
                                      actionListener="#{studentBean.prepareNewStudent}"
                                      update=":studentDialogForm:student-detail"
                                      oncomplete="PF('studentDialog').show()"
-                                     styleClass="btn btn-primary" />
+                                     styleClass="btn btn-primary btn-cta" />
                 </h:form>
             </div>
         </div>
@@ -118,7 +118,9 @@
 
                             <p:column headerText="Program" filterBy="#{student.programName}" filterMatchMode="exact">
                                 <f:facet name="filter">
-                                    <p:selectOneMenu onchange="PF('dtStudents').filter()" styleClass="ui-custom-filter">
+                                    <p:selectOneMenu onchange="PF('dtStudents').filter()"
+                                                     styleClass="ui-custom-filter filter-select filter-select-table"
+                                                     panelStyleClass="filter-select-panel">
                                         <f:selectItem itemLabel="All Programs" itemValue="#{null}" noSelectionOption="true" />
                                         <f:selectItem itemLabel="Computer Science" itemValue="Computer Science" />
                                         <f:selectItem itemLabel="Literature" itemValue="Literature" />
@@ -165,38 +167,47 @@
                                 <div class="nested-table">
                                     <div class="nested-table-header">
                                         <span class="nested-table-title">Failed Academic Components</span>
-                                        <p:commandButton value="Add Component" 
-                                                         icon="pi pi-plus"
-                                                         actionListener="#{studentBean.prepareAddComponent(student)}"
-                                                         update=":failedComponentDialogForm"
-                                                         oncomplete="PF('failedComponentDialog').show()"
-                                                         styleClass="ui-button-sm ui-button-outlined" />
-                                    </div>
-                                    <p:dataTable var="comp" value="#{student.failedComponents}" styleClass="ui-datatable-sm" rowKey="#{comp.componentId}">
-                                        <p:column headerText="Fail Component">
-                                            #{comp.componentName}
-                                        </p:column>
-                                        <p:column headerText="Score">
-                                            #{comp.componentScore}
-                                        </p:column>
-                                        <p:column headerText="Required Score to Pass">
-                                            #{comp.passRequired}
-                                        </p:column>
-                                        <p:column headerText="Course Name / Result">
-                                            <h:outputText value="#{dashboardBean.getCourseName(comp.resultId)}" />
-                                        </p:column>
-                                        <p:column headerText="Action" style="width:100px; text-align:center;">
-                                            <p:commandButton icon="pi pi-pencil" 
-                                                             actionListener="#{studentBean.editComponent(comp)}"
+                                        <div class="nested-table-header-actions">
+                                            <span class="nested-table-note">Component, score, pass mark, linked course, and actions</span>
+                                            <p:commandButton value="Add Component" 
+                                                             icon="pi pi-plus"
+                                                             actionListener="#{studentBean.prepareAddComponent(student)}"
                                                              update=":failedComponentDialogForm"
                                                              oncomplete="PF('failedComponentDialog').show()"
-                                                             styleClass="ui-button-rounded ui-button-text" />
-                                            <p:commandButton icon="pi pi-trash" 
-                                                             actionListener="#{studentBean.deleteComponent(comp)}"
-                                                             update=":directoryContent :globalMessages"
-                                                             styleClass="ui-button-rounded ui-button-text ui-button-danger">
-                                                <p:confirm header="Confirmation" message="Delete this component?" icon="pi pi-exclamation-triangle" />
-                                            </p:commandButton>
+                                                             styleClass="btn btn-outline btn-sm" />
+                                        </div>
+                                    </div>
+                                    <p:dataTable var="comp" value="#{student.failedComponents}" styleClass="ui-datatable-sm nested-components-table" rowKey="#{comp.componentId}">
+                                        <p:column headerText="Component">
+                                            <span class="component-name">#{comp.componentName}</span>
+                                        </p:column>
+                                        <p:column headerText="Score">
+                                            <span class="component-score">#{comp.componentScore}</span>
+                                        </p:column>
+                                        <p:column headerText="Pass Mark">
+                                            <span class="component-pass">#{comp.passRequired}</span>
+                                        </p:column>
+                                        <p:column headerText="Linked Course">
+                                            <span class="component-course">
+                                                <h:outputText value="#{dashboardBean.getCourseName(comp.resultId)}" />
+                                            </span>
+                                        </p:column>
+                                        <p:column headerText="Actions" style="width:120px; text-align:center;">
+                                            <span class="component-actions">
+                                                <p:commandButton icon="pi pi-pencil" 
+                                                                 actionListener="#{studentBean.editComponent(comp)}"
+                                                                 update=":failedComponentDialogForm"
+                                                                 oncomplete="PF('failedComponentDialog').show()"
+                                                                 styleClass="btn btn-primary btn-sm component-btn"
+                                                                 title="Edit component" />
+                                                <p:commandButton icon="pi pi-trash" 
+                                                                 actionListener="#{studentBean.deleteComponent(comp)}"
+                                                                 update=":directoryContent :globalMessages"
+                                                                 styleClass="btn btn-danger btn-sm component-btn"
+                                                                 title="Delete component">
+                                                    <p:confirm header="Confirmation" message="Delete this component?" icon="pi pi-exclamation-triangle" />
+                                                </p:commandButton>
+                                            </span>
                                         </p:column>
                                     </p:dataTable>
                                 </div>

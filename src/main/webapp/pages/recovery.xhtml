@@ -91,15 +91,17 @@
             <div class="card">
                 <div class="card-header">
                     <span class="card-title">All Recovery Plans</span>
-                    <h:form id="planFilterForm" style="margin:0;display:flex;gap:8px;">
+                    <h:form id="planFilterForm" styleClass="segmented-actions-form">
+                        <div class="segmented-actions">
                         <p:commandButton value="Load By Student"
                                          action="#{recoveryBean.loadPlansByStudent}"
-                                         styleClass="btn btn-outline btn-sm"
+                                         styleClass="btn btn-quiet btn-sm"
                                          update=":plansTableForm:plansTable :managingDivider :milestonesCard :recsOuter :globalMessages" />
                         <p:commandButton value="Show All Plans"
                                          action="#{recoveryBean.loadAllPlans}"
-                                         styleClass="btn btn-outline btn-sm"
+                                         styleClass="btn btn-quiet btn-sm"
                                          update=":plansTableForm:plansTable :managingDivider :milestonesCard :recsOuter :globalMessages" />
+                        </div>
                     </h:form>
                 </div>
                 <div style="font-size:13px;color:#6b7280;margin:0 0 8px 2px;">
@@ -144,21 +146,22 @@
                         <p:column headerText="Start">#{plan.startDate}</p:column>
                         <p:column headerText="End">#{plan.endDate}</p:column>
                         <p:column headerText="Actions" onclick="event.stopPropagation();">
-                            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start;">
+                            <div class="table-action-stack">
                                 <p:commandButton value="Notify Student"
                                                  action="#{recoveryBean.sendPlanEmail(plan.id.intValue())}"
-                                                 styleClass="btn btn-outline btn-sm"
+                                                 styleClass="btn btn-outline btn-table"
                                                  update=":globalMessages"
-                                                 process="@none" />
+                                                 process="@this"
+                                                 ajax="true" />
                                 <p:commandButton value="Update Grade"
                                                  rendered="#{recoveryBean.canUpdateGrade(plan)}"
                                                  action="#{recoveryBean.prepareGradeUpdate(plan)}"
-                                                 styleClass="btn btn-primary btn-sm"
+                                                 styleClass="btn btn-primary btn-table"
                                                  update=":gradeDialog :globalMessages"
                                                  oncomplete="PF('gradeDialogWidget').show()"
                                                  process="@this" />
                                 <h:panelGroup rendered="#{plan.status ne null and plan.status.name() eq 'ACTIVE' and not recoveryBean.canUpdateGrade(plan)}">
-                                    <span style="font-size:12px;color:#6b7280;">
+                                    <span class="action-meta">
                                         Complete all milestones to enable grade update.
                                     </span>
                                 </h:panelGroup>

@@ -267,8 +267,9 @@
                             <p:commandButton value="&#9993; Send Eligibility Result to Student"
                                              action="#{eligibilityBean.sendEligibilityEmail}"
                                              styleClass="btn btn-outline btn-sm"
-                                             update="globalMessages"
-                                             process="@none" />
+                                             update=":globalMessages"
+                                             process="@this"
+                                             ajax="true" />
                         </h:form>
                     </div>
 

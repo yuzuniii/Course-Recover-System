@@ -191,20 +191,32 @@ public class RecoveryBean implements Serializable {
     }
 
     public void sendPlanEmail(int planId) {
+        System.err.println("[RecoveryBean] sendPlanEmail called for planId: " + planId);
         try {
-            recoveryService.findById(planId).ifPresent(plan -> {
-                EmailUtil.sendEmail(
-                        plan.getStudent().getStudentNumber() + "@student.crs.local",
-                        "Recovery Plan Created - " + plan.getCourse().getCourseName(),
-                        "Dear " + plan.getStudent().getFullName() + ",\n\n"
-                        + "A recovery plan has been created for " + plan.getCourse().getCourseName()
-                        + " (attempt " + plan.getAttemptNumber() + ").\nStart date: " + plan.getStartDate());
-                addInfo("Email", "Plan notification sent to student.");
-            });
-        } catch (ValidationException e) {
-            addError("Email", e.getMessage());
+            RecoveryPlan plan = recoveryService.findPlanById(planId);
+            if (plan == null) {
+                System.err.println("[RecoveryBean] sendPlanEmail: plan not found for id " + planId);
+                addError("Email", "Recovery plan not found: " + planId);
+                return;
+            }
+            String recipient = plan.getStudent() != null ? plan.getStudent().getEmail() : "unknown";
+            String studentName = plan.getStudent() != null ? plan.getStudent().getFullName() : "Student";
+            String courseCode  = plan.getCourse() != null ? plan.getCourse().getCourseCode() : "";
+            String courseTitle = plan.getCourse() != null ? plan.getCourse().getCourseName() : "";
+            String status      = plan.getStatus() != null ? plan.getStatus().name() : "";
+            String startDate   = plan.getStartDate() != null ? plan.getStartDate().toString() : "TBD";
+            String endDate     = plan.getEndDate()   != null ? plan.getEndDate().toString()   : "TBD";
+            String subject = "Recovery Plan Notification \u2014 " + courseCode;
+            String html = EmailUtil.buildRecoveryPlanEmailHtml(
+                    studentName, courseCode, courseTitle,
+                    plan.getAttemptNumber(), status, startDate, endDate);
+            System.err.println("[RecoveryBean] sendPlanEmail: sending to " + recipient);
+            EmailUtil.sendEmailHtml(recipient, subject, html);
+            addInfo("Email", "Notification sent successfully.");
         } catch (Exception e) {
-            addError("Email", "Failed to send email: " + e.getMessage());
+            System.err.println("[RecoveryBean] sendPlanEmail FAILED: " + e.getMessage());
+            e.printStackTrace();
+            addError("Email", "Failed to send notification: " + e.getMessage());
         }
     }
 

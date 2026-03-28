@@ -24,14 +24,16 @@
                 <div class="breadcrumb">System / Audit Log</div>
             </div>
             <div class="topbar-actions">
-                <h:form id="topbarForm">
-                    <p:commandButton value="Export Excel" icon="pi pi-file-excel" styleClass="btn btn-outline" style="margin-right:10px" ajax="false">
+                <h:form id="topbarForm" styleClass="toolbar-actions-form">
+                    <div class="toolbar-actions-group">
+                    <p:commandButton value="Export Excel" icon="pi pi-file-excel" styleClass="btn btn-outline btn-toolbar" ajax="false">
                         <p:dataExporter type="xls" target=":form:dt-logs" fileName="audit-logs" />
                     </p:commandButton>
                     
-                    <p:commandButton value="Export PDF" icon="pi pi-file-pdf" styleClass="btn btn-outline" ajax="false">
+                    <p:commandButton value="Export PDF" icon="pi pi-file-pdf" styleClass="btn btn-outline btn-toolbar" ajax="false">
                         <p:dataExporter type="pdf" target=":form:dt-logs" fileName="audit-logs" />
                     </p:commandButton>
+                    </div>
                 </h:form>
             </div>
         </div>
@@ -59,7 +61,9 @@
 
                         <p:column headerText="Actor" sortBy="#{log.actorUsername}" filterBy="#{log.actorUsername}" filterMatchMode="exact">
                             <f:facet name="filter">
-                                <p:selectOneMenu onchange="PF('dtLogs').filter()" styleClass="ui-custom-filter">
+                                <p:selectOneMenu onchange="PF('dtLogs').filter()"
+                                                 styleClass="ui-custom-filter filter-select filter-select-table"
+                                                 panelStyleClass="filter-select-panel">
                                     <f:selectItem itemLabel="All Actors" itemValue="#{null}" noSelectionOption="true" />
                                     <f:selectItems value="#{auditLogBean.actors}" />
                                 </p:selectOneMenu>
@@ -69,7 +73,9 @@
 
                         <p:column headerText="Action Type" sortBy="#{log.actionType}" filterBy="#{log.actionType}" filterMatchMode="exact">
                             <f:facet name="filter">
-                                <p:selectOneMenu onchange="PF('dtLogs').filter()" styleClass="ui-custom-filter">
+                                <p:selectOneMenu onchange="PF('dtLogs').filter()"
+                                                 styleClass="ui-custom-filter filter-select filter-select-table"
+                                                 panelStyleClass="filter-select-panel">
                                     <f:selectItem itemLabel="All Actions" itemValue="#{null}" noSelectionOption="true" />
                                     <f:selectItems value="#{auditLogBean.actionTypes}" />
                                 </p:selectOneMenu>

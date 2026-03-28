@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,11 +29,16 @@ import org.primefaces.model.ScheduleModel;
 import org.primefaces.model.charts.bar.BarChartModel;
 import org.primefaces.model.charts.bar.BarChartDataSet;
 import org.primefaces.model.charts.bar.BarChartOptions;
+import org.primefaces.model.charts.axes.AxesGridLines;
 import org.primefaces.model.charts.axes.cartesian.CartesianScales;
+import org.primefaces.model.charts.axes.cartesian.category.CartesianCategoryAxes;
+import org.primefaces.model.charts.axes.cartesian.category.CartesianCategoryTicks;
 import org.primefaces.model.charts.axes.cartesian.linear.CartesianLinearAxes;
+import org.primefaces.model.charts.axes.cartesian.linear.CartesianLinearTicks;
 import org.primefaces.model.charts.line.LineChartModel;
 import org.primefaces.model.charts.line.LineChartDataSet;
 import org.primefaces.model.charts.line.LineChartOptions;
+import org.primefaces.model.charts.optionconfig.tooltip.Tooltip;
 
 @Named
 @SessionScoped
@@ -211,30 +217,136 @@ public class DashboardBean implements Serializable {
         cgpaChartModel = new BarChartModel();
         ChartData data = new ChartData();
         BarChartDataSet dataSet = new BarChartDataSet();
-        dataSet.setLabel("Average CGPA");
 
-        Map<String, Double> cgpaData = dashboardService.getAverageCgpaByMajor();
-        // FIX: BarChartDataSet in PF14 uses List<Object>
-        List<Object> values = new ArrayList<Object>(cgpaData.values());
-        List<String> labels = new ArrayList<>(cgpaData.keySet());
+        Map<String, Double> sortedCgpaData = new LinkedHashMap<>();
+        dashboardService.getAverageCgpaByMajor().entrySet().stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .forEachOrdered(entry -> sortedCgpaData.put(entry.getKey(), entry.getValue()));
+
+        List<Object> values = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        List<String> backgroundColors = new ArrayList<>();
+        List<String> borderColors = new ArrayList<>();
+
+        for (Map.Entry<String, Double> entry : sortedCgpaData.entrySet()) {
+            double cgpa = entry.getValue() == null ? 0.0 : entry.getValue();
+            labels.add(formatProgrammeLabel(entry.getKey()));
+            values.add(cgpa);
+            backgroundColors.add(getCgpaBarColor(cgpa));
+            borderColors.add(getCgpaBorderColor(cgpa));
+        }
 
         dataSet.setData(values);
-        dataSet.setBackgroundColor("rgba(59, 130, 246, 0.8)");
+        dataSet.setBackgroundColor(backgroundColors);
+        dataSet.setBorderColor(borderColors);
+        dataSet.setBorderWidth(1);
+        dataSet.setBorderRadius(10);
+        dataSet.setHoverBorderWidth(1);
         data.addChartDataSet(dataSet);
         data.setLabels(labels);
         cgpaChartModel.setData(data);
 
         BarChartOptions options = new BarChartOptions();
         options.setMaintainAspectRatio(false);
-        CartesianScales cScales = new CartesianScales();
-        CartesianLinearAxes linearAxes = new CartesianLinearAxes();
-        
-        // FIX: Min/Max directly on Axes in PF14
-        linearAxes.setMin(0);
-        linearAxes.setMax(4.0);
-        
-        cScales.addYAxesData(linearAxes);
-        options.setScales(cScales);
+        options.setBarThickness(28);
+        options.setMaxBarThickness(34);
+        options.setCategoryPercentage(0.68);
+        options.setBarPercentage(0.78);
+
+        Legend legend = new Legend();
+        legend.setDisplay(false);
+        options.setLegend(legend);
+
+        Tooltip tooltip = new Tooltip();
+        tooltip.setEnabled(true);
+        tooltip.setDisplayColors(false);
+        tooltip.setBackgroundColor("rgba(15, 23, 42, 0.92)");
+        tooltip.setTitleFontColor("#f8fafc");
+        tooltip.setBodyFontColor("#e2e8f0");
+        tooltip.setCornerRadius(10);
+        tooltip.setXpadding(12);
+        tooltip.setYpadding(10);
+        options.setTooltip(tooltip);
+
+        CartesianScales scales = new CartesianScales();
+
+        CartesianCategoryAxes xAxis = new CartesianCategoryAxes();
+        AxesGridLines xGrid = new AxesGridLines();
+        xGrid.setDisplay(false);
+        xGrid.setDrawBorder(false);
+        xGrid.setDrawTicks(false);
+        xAxis.setGrid(xGrid);
+
+        CartesianCategoryTicks xTicks = new CartesianCategoryTicks();
+        xTicks.setPadding(10);
+        xTicks.setAutoSkip(false);
+        xTicks.setMirror(false);
+        xTicks.setMinRotation(18);
+        xTicks.setMaxRotation(18);
+        xAxis.setTicks(xTicks);
+
+        CartesianLinearAxes yAxis = new CartesianLinearAxes();
+        yAxis.setMin(0);
+        yAxis.setMax(4.0);
+        yAxis.setOffset(false);
+        AxesGridLines yGrid = new AxesGridLines();
+        yGrid.setDisplay(true);
+        yGrid.setColor("rgba(148, 163, 184, 0.18)");
+        yGrid.setDrawBorder(false);
+        yGrid.setDrawTicks(false);
+        yGrid.setZeroLineColor("rgba(59, 130, 246, 0.25)");
+        yGrid.setZeroLineWidth(1);
+        yAxis.setGrid(yGrid);
+
+        CartesianLinearTicks yTicks = new CartesianLinearTicks();
+        yTicks.setStepSize(1);
+        yTicks.setPrecision(1);
+        yTicks.setPadding(8);
+        yTicks.setMaxTicksLimit(5);
+        yAxis.setTicks(yTicks);
+
+        scales.addXAxesData(xAxis);
+        scales.addYAxesData(yAxis);
+        options.setScales(scales);
         cgpaChartModel.setOptions(options);
+    }
+
+    private String formatProgrammeLabel(String programmeName) {
+        if (programmeName == null || programmeName.isBlank()) {
+            return "Unknown Programme";
+        }
+
+        String normalized = programmeName
+                .replace("Bachelor of Information Technology", "Bachelor of IT")
+                .replace("Bachelor of Computer Science", "Bachelor of Computer Science")
+                .replace("Bachelor of ", "B. ");
+
+        return normalized.length() > 30 ? normalized.substring(0, 27) + "..." : normalized;
+    }
+
+    private String getCgpaBarColor(double cgpa) {
+        if (cgpa < 2.0) {
+            return "rgba(239, 68, 68, 0.82)";
+        }
+        if (cgpa < 2.5) {
+            return "rgba(245, 158, 11, 0.82)";
+        }
+        if (cgpa < 3.0) {
+            return "rgba(59, 130, 246, 0.82)";
+        }
+        return "rgba(34, 197, 94, 0.82)";
+    }
+
+    private String getCgpaBorderColor(double cgpa) {
+        if (cgpa < 2.0) {
+            return "#dc2626";
+        }
+        if (cgpa < 2.5) {
+            return "#d97706";
+        }
+        if (cgpa < 3.0) {
+            return "#2563eb";
+        }
+        return "#16a34a";
     }
 }

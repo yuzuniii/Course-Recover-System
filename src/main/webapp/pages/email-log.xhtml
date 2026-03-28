@@ -59,17 +59,18 @@
             <div class="card">
                 <div class="card-header">
                     <span class="card-title">Email Notifications</span>
-                    <h:form id="filterForm" style="margin:0;display:flex;gap:8px;align-items:center;">
+                    <h:form id="filterForm" styleClass="toolbar-actions-form">
                         <p:selectOneMenu id="statusFilter"
                                          value="#{emailLogBean.filterStatus}"
-                                         style="width:140px;">
+                                         styleClass="filter-select filter-select-toolbar"
+                                         panelStyleClass="filter-select-panel">
                             <f:selectItem itemValue="ALL"    itemLabel="All Statuses" />
                             <f:selectItem itemValue="SENT"   itemLabel="Sent" />
                             <f:selectItem itemValue="FAILED" itemLabel="Failed" />
                         </p:selectOneMenu>
                         <p:commandButton value="Filter"
                                          action="#{emailLogBean.filterByStatus}"
-                                         styleClass="btn btn-outline btn-sm"
+                                         styleClass="btn btn-quiet btn-sm"
                                          update="emailTable globalMessages" />
                     </h:form>
                 </div>

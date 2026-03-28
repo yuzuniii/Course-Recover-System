@@ -113,20 +113,24 @@ public class EligibilityBean implements Serializable {
     }
 
     public void sendEligibilityEmail() {
+        System.err.println("[EligibilityBean] sendEligibilityEmail called");
         if (eligibilityResult == null) {
             addError("Email", "No eligibility result to send. Run the check first.");
             return;
         }
         try {
-            EmailUtil.sendEmail(
-                    eligibilityResult.getStudentCode() + "@student.crs.local",
-                    "Eligibility Check Result — " + eligibilityResult.getStudentName(),
-                    "Dear " + eligibilityResult.getStudentName() + ",\n\n" +
-                    "Your eligibility check result for Semester " + eligibilityResult.getSemester() +
-                    ", Year " + eligibilityResult.getYearOfStudy() + " has been determined.\n\n" +
-                    "Result: " + (eligibilityResult.isEligible() ? "ELIGIBLE" : "NOT ELIGIBLE") + "\n" +
-                    "CGPA: " + String.format("%.2f", eligibilityResult.getCgpa()) + "\n" +
-                    "Reason: " + eligibilityResult.getReason());
+            String recipient = eligibilityResult.getStudentCode() + "@student.crs.local";
+            System.err.println("[EligibilityBean] sendEligibilityEmail: sending to " + recipient);
+            String subject = "Eligibility Check Result \u2014 " + eligibilityResult.getStudentName();
+            String html = EmailUtil.buildEligibilityEmailHtml(
+                    eligibilityResult.getStudentName(),
+                    eligibilityResult.isEligible(),
+                    eligibilityResult.getCgpa(),
+                    eligibilityResult.getFailedCourseCount(),
+                    eligibilityResult.getSemester(),
+                    eligibilityResult.getYearOfStudy(),
+                    eligibilityResult.getReason());
+            EmailUtil.sendEmailHtml(recipient, subject, html);
             addMessage(FacesMessage.SEVERITY_INFO, "Email", "Eligibility result sent to student.");
         } catch (Exception e) {
             addError("Email", "Failed to send email: " + e.getMessage());

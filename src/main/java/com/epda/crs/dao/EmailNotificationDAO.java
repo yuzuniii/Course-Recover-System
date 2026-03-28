@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,13 +54,16 @@ public class EmailNotificationDAO {
     }
 
     public void save(EmailNotification n) {
-        String sql = "INSERT INTO email_notifications (recipient, subject, message, status) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO email_notifications "
+                + "(recipient, subject, message, status, sent_at) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, n.getRecipient());
             ps.setString(2, n.getSubject());
             ps.setString(3, n.getBody());
             ps.setString(4, n.getStatus());
+            LocalDateTime sentAt = n.getSentAt() != null ? n.getSentAt() : LocalDateTime.now();
+            ps.setTimestamp(5, Timestamp.valueOf(sentAt));
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("EmailNotificationDAO.save failed", e);

@@ -79,16 +79,16 @@
                             </div>
                             <div class="form-group" style="justify-content:flex-end;">
                                 <label class="form-label">&#160;</label>
-                                <div>
-                                    <div style="display:flex;gap:8px;">
+                                <div class="cta-stack">
+                                    <div class="cta-buttons">
                                         <h:commandButton value="Generate Report"
                                                          action="#{reportBean.generateReport}"
-                                                         styleClass="btn btn-primary" />
+                                                         styleClass="btn btn-primary btn-cta" />
                                         <h:commandButton value="Clear"
                                                          action="#{reportBean.clearReport}"
-                                                         styleClass="btn btn-outline" />
+                                                         styleClass="btn btn-quiet" />
                                     </div>
-                                    <div style="font-size:12px;color:#6b7280;margin-top:6px;">
+                                    <div class="action-support-text">
                                         Select a student, semester, and year to generate their academic report.
                                     </div>
                                 </div>
@@ -209,7 +209,8 @@
                                                  action="#{reportBean.sendReportEmail}"
                                                  styleClass="btn btn-outline btn-sm"
                                                  update=":reportMessagesForm:globalMessages"
-                                                 process="@none" />
+                                                 process="@this"
+                                                 ajax="true" />
                             </h:form>
                         </div>
                     </div>
